@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+set -e
+
+BATS_TEST_FILENAME="$1"
+if [ -z "$BATS_TEST_FILENAME" ]; then
+  echo "usage: bats-exec <filename>" >&2
+  exit 1
+elif [ ! -f "$BATS_TEST_FILENAME" ]; then
+  echo "bats: $BATS_TEST_FILENAME does not exist"
+  exit 1
+else
+  shift
+fi
+
+BATS_TEST_DIRNAME="$(dirname "$BATS_TEST_FILENAME")"
+BATS_TEST_NAMES=()
+
+load() {
+  source "$BATS_TEST_DIRNAME/$1.bash"
+}
+
+abort() {
+  [ "$#" -eq 0 ] || echo error: "$@" >&2
+  exit 1
+}
+
+setup() {
+  true
+}
+
+teardown() {
+  true
+}
+
+bats_test_info() {
+  BATS_TEST_DESCRIPTION="$1"
+  BATS_LINE_NUMBER="$2"
+}
+
+bats_test_function() {
+  local test_name="$1"
+  BATS_TEST_NAMES["${#BATS_TEST_NAMES[@]}"]="$test_name"
+}
+
+bats_exit_trap() {
+  if [ -z "$BATS_TEST_COMPLETED" ]; then
+    echo "not ok $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION"
+    exit 1
+  else
+    echo "ok $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION"
+    exit 0
+  fi
+}
+
+bats_perform_tests() {
+  echo "1..$#"
+  test_number=1
+  for test_name in "$@"; do
+    "$0" "$BATS_TEST_FILENAME" "$test_name" "$test_number" || true
+    test_number=$(($test_number + 1))
+  done
+}
+
+bats_perform_test() {
+  BATS_TEST_NAME="$1"
+  if [ "$(type -t "$BATS_TEST_NAME" || true)" = "function" ]; then
+    BATS_TEST_NUMBER="$2"
+    if [ -z "$BATS_TEST_NUMBER" ]; then
+      echo "1..1"
+      BATS_TEST_NUMBER="1"
+    fi
+
+    BATS_TEST_COMPLETED=""
+    trap bats_exit_trap err exit
+    setup
+    "$BATS_TEST_NAME"
+    BATS_TEST_COMPLETED=1
+
+  else
+    echo "bats: unknown test name \`$BATS_TEST_NAME'" >&2
+    exit 1
+  fi
+}
+
+eval "$(bats-preprocess < "$BATS_TEST_FILENAME")"
+
+if [ "$#" -eq 0 ]; then
+  bats_perform_tests "${BATS_TEST_NAMES[@]}"
+else
+  bats_perform_test "$@"
+fi
