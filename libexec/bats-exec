@@ -19,6 +19,15 @@ load() {
   source "$BATS_TEST_DIRNAME/$1.bash"
 }
 
+run() {
+  local e
+  [[ ! "$-" =~ e ]] || e=1
+  set +e
+  output="$("$@" 2>&1)"
+  status="$?"
+  [ -z "$e" ] || set -e
+}
+
 abort() {
   [ "$#" -eq 0 ] || echo error: "$@" >&2
   exit 1
@@ -43,6 +52,7 @@ bats_test_function() {
 }
 
 bats_exit_trap() {
+  trap - err exit
   if [ -z "$BATS_TEST_COMPLETED" ]; then
     echo "not ok $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION"
     exit 1
