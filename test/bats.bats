@@ -41,3 +41,8 @@ FIXTURE_ROOT="$BATS_TEST_DIRNAME/fixtures"
   [ ${lines[1]} = "not ok 1 a failing test" ]
   [ ${lines[2]} = "ok 2 a passing test" ]
 }
+
+@test "test environments are isolated" {
+  run bats "$FIXTURE_ROOT/environment.bats"
+  [ $status -eq 0 ]
+}
