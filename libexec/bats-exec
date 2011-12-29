@@ -24,8 +24,8 @@ run() {
   [[ ! "$-" =~ e ]] || e=1
   set +e
   output="$("$@" 2>&1)"
-  IFS=$'\n' lines=($output)
   status="$?"
+  IFS=$'\n' lines=($output)
   [ -z "$e" ] || set -e
 }
 
