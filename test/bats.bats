@@ -26,3 +26,10 @@ FIXTURE_ROOT="$BATS_TEST_DIRNAME/fixtures"
   [ ${lines[0]} = "1..1" ]
   [ ${lines[1]} = "ok 1 a passing test" ]
 }
+
+@test "one failing test" {
+  run bats "$FIXTURE_ROOT/one_failing.bats"
+  [ $status -eq 1 ]
+  [ ${lines[0]} = "1..1" ]
+  [ ${lines[1]} = "not ok 1 a failing test" ]
+}

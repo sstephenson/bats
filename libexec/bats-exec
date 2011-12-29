@@ -66,10 +66,12 @@ bats_exit_trap() {
 bats_perform_tests() {
   echo "1..$#"
   test_number=1
+  status=0
   for test_name in "$@"; do
-    "$0" "$BATS_TEST_FILENAME" "$test_name" "$test_number" || true
+    "$0" "$BATS_TEST_FILENAME" "$test_name" "$test_number" || status=1
     test_number=$(($test_number + 1))
   done
+  exit "$status"
 }
 
 bats_perform_test() {
