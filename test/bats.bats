@@ -1,6 +1,11 @@
 #!/usr/bin/env bats
 
 FIXTURE_ROOT="$BATS_TEST_DIRNAME/fixtures"
+TMP="$BATS_TEST_DIRNAME/tmp"
+
+teardown() {
+  rm -f "$TMP"/*
+}
 
 @test "no arguments prints usage instructions" {
   run bats
@@ -45,4 +50,11 @@ FIXTURE_ROOT="$BATS_TEST_DIRNAME/fixtures"
 @test "test environments are isolated" {
   run bats "$FIXTURE_ROOT/environment.bats"
   [ $status -eq 0 ]
+}
+
+@test "setup is run once before each test" {
+  rm -f "$TMP/setup.log"
+  run bats "$FIXTURE_ROOT/setup.bats"
+  run cat "$TMP/setup.log"
+  [ ${#lines[@]} -eq 3 ]
 }
