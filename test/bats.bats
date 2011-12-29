@@ -55,6 +55,15 @@ teardown() {
 @test "setup is run once before each test" {
   rm -f "$TMP/setup.log"
   run bats "$FIXTURE_ROOT/setup.bats"
+  [ $status -eq 0 ]
   run cat "$TMP/setup.log"
+  [ ${#lines[@]} -eq 3 ]
+}
+
+@test "teardown is run once after each test, even if it fails" {
+  rm -f "$TMP/teardown.log"
+  run bats "$FIXTURE_ROOT/teardown.bats"
+  [ $status -eq 1 ]
+  run cat "$TMP/teardown.log"
   [ ${#lines[@]} -eq 3 ]
 }

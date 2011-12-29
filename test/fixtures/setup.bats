@@ -1,15 +1,17 @@
+LOG="$TMP/setup.log"
+
 setup() {
-  echo "$BATS_TEST_NAME" >> "$TMP/setup.log"
+  echo "$BATS_TEST_NAME" >> "$LOG"
 }
 
 @test "one" {
-  true
+  [ "$(tail -n 1 "$LOG")" = "test_one" ]
 }
 
 @test "two" {
-  true
+  [ "$(tail -n 1 "$LOG")" = "test_two" ]
 }
 
 @test "three" {
-  true
+  [ "$(tail -n 1 "$LOG")" = "test_three" ]
 }

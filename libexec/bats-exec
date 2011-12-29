@@ -52,6 +52,12 @@ bats_test_function() {
   BATS_TEST_NAMES["${#BATS_TEST_NAMES[@]}"]="$test_name"
 }
 
+bats_teardown_trap() {
+  trap bats_exit_trap err exit
+  teardown
+  bats_exit_trap
+}
+
 bats_exit_trap() {
   trap - err exit
   if [ -z "$BATS_TEST_COMPLETED" ]; then
@@ -84,7 +90,7 @@ bats_perform_test() {
     fi
 
     BATS_TEST_COMPLETED=""
-    trap bats_exit_trap err exit
+    trap bats_teardown_trap err exit
     setup
     "$BATS_TEST_NAME"
     BATS_TEST_COMPLETED=1
