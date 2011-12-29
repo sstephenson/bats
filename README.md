@@ -48,12 +48,12 @@ fixtures, set up your environment, and clean up when you're done.
 Bats is most useful when testing software written in Bash, but you can
 use it to test any UNIX program.
 
-### The `run` helper
+### The _run_ helper
 
 You're probably most interested in testing a command's exit status and
 output. Bats includes a `run` helper that invokes its arguments as a
 command, saves the exit status and output into special global
-variables, and then returns with a `0` exit status so you can continue
+variables, and then returns with a `0` status code so you can continue
 to make assertions in your test case.
 
 For example, let's say you're testing that the `foo` command, when
@@ -84,3 +84,18 @@ the first line:
   [ "${lines[0]}" = "usage: foo <filename>" ]
 }
 ```
+
+### The _load_ command
+
+You may want to share common code across multiple test files. Bats
+includes a convenient `load` command for sourcing a Bash source file
+relative to the location of the current test file. For example, if you
+have a Bats test in `test/foo.bats`, the command
+
+```bash
+load test_helper
+```
+
+will source the script `test/test_helper.bash` in your test file. This
+can be useful for sharing functions to set up your environment or load
+fixtures.
