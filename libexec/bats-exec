@@ -29,11 +29,6 @@ run() {
   [ -z "$e" ] || set -e
 }
 
-abort() {
-  [ "$#" -eq 0 ] || echo error: "$@" >&2
-  exit 1
-}
-
 setup() {
   true
 }
@@ -54,19 +49,25 @@ bats_test_function() {
 
 bats_teardown_trap() {
   trap bats_exit_trap err exit
-  teardown
+  teardown >>"$BATS_OUT" 2>&1
   bats_exit_trap
 }
 
 bats_exit_trap() {
+  local status
   trap - err exit
+
   if [ -z "$BATS_TEST_COMPLETED" ]; then
-    echo "not ok $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION"
-    exit 1
+    echo "not ok $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION" >&3
+    sed -e "s/^/    /" < "$BATS_OUT" >&3
+    status=1
   else
-    echo "ok $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION"
-    exit 0
+    echo "ok $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION" >&3
+    status=0
   fi
+
+  rm -f "$BATS_OUT"
+  exit "$status"
 }
 
 bats_perform_tests() {
@@ -91,8 +92,9 @@ bats_perform_test() {
 
     BATS_TEST_COMPLETED=""
     trap bats_teardown_trap err exit
-    setup
-    "$BATS_TEST_NAME"
+    { setup
+      "$BATS_TEST_NAME"
+    } >>"$BATS_OUT" 2>&1
     BATS_TEST_COMPLETED=1
 
   else
@@ -100,6 +102,15 @@ bats_perform_test() {
     exit 1
   fi
 }
+
+if [ -z "$TMPDIR" ]; then
+  BATS_TMPDIR="/tmp"
+else
+  BATS_TMPDIR="${TMPDIR%/}"
+fi
+BATS_OUT="$BATS_TMPDIR/bats.$(date "+%Y%m%d%H%M%S").$$"
+
+exec 3<&1
 
 eval "$(bats-preprocess < "$BATS_TEST_FILENAME")"
 

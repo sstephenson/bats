@@ -72,3 +72,11 @@ teardown() {
   run bats "$FIXTURE_ROOT/load.bats"
   [ $status -eq 0 ]
 }
+
+@test "output is discarded for passing tests and printed for failing tests" {
+  run bats "$FIXTURE_ROOT/output.bats"
+  [ $status -eq 1 ]
+  [ "${lines[4]}" = "    failure stdout 1" ]
+  [ "${lines[5]}" = "    failure stdout 2" ]
+  [ "${lines[7]}" = "    failure stderr" ]
+}
