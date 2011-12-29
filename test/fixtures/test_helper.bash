@@ -1,0 +1,3 @@
+help_me() {
+  true
+}

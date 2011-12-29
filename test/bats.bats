@@ -67,3 +67,8 @@ teardown() {
   run cat "$TMP/teardown.log"
   [ ${#lines[@]} -eq 3 ]
 }
+
+@test "load sources scripts relative to the current test file" {
+  run bats "$FIXTURE_ROOT/load.bats"
+  [ $status -eq 0 ]
+}
