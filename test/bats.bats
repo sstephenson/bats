@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
 
 FIXTURE_ROOT="$BATS_TEST_DIRNAME/fixtures"
-TMP="$BATS_TEST_DIRNAME/tmp"
+export TMP="$BATS_TEST_DIRNAME/tmp"
 
 teardown() {
   rm -f "$TMP"/*

@@ -1,5 +1,3 @@
-TMP="$BATS_TEST_DIRNAME/../tmp"
-
 setup() {
   echo "$BATS_TEST_NAME" >> "$TMP/setup.log"
 }
