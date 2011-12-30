@@ -133,6 +133,16 @@ Bats. For example, to install Bats into `/usr/local`,
 Note that you may need to run `install.sh` with `sudo` if you do not
 have permission to write to the installation prefix.
 
+### Contributing
+
+The Bats source code repository is [hosted on
+GitHub](https://github.com/sstephenson/bats). There you can file bugs
+on the issue tracker or submit tested pull requests for review.
+
+See the [Bats
+test suite](https://github.com/sstephenson/bats/tree/master/test) for
+examples.
+
 ---
 
 © 2011 Sam Stephenson. Bats is released under an MIT-style license;
