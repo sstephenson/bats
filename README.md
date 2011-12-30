@@ -48,13 +48,15 @@ fixtures, set up your environment, and clean up when you're done.
 Bats is most useful when testing software written in Bash, but you can
 use it to test any UNIX program.
 
+## Writing Bats tests
+
 ### The _run_ helper
 
-You're probably most interested in testing a command's exit status and
-output. Bats includes a `run` helper that invokes its arguments as a
-command, saves the exit status and output into special global
-variables, and then returns with a `0` status code so you can continue
-to make assertions in your test case.
+If you're using Bats, you're probably most interested in testing a
+command's exit status and output. Bats includes a `run` helper that
+invokes its arguments as a command, saves the exit status and output
+into special global variables, and then returns with a `0` status code
+so you can continue to make assertions in your test case.
 
 For example, let's say you're testing that the `foo` command, when
 passed a nonexistent filename, exits with a `1` status code and prints
@@ -119,7 +121,7 @@ in the test file.
 * `$BATS_TMPDIR` is the location to a directory that may be used to
 store temporary files.
 
-### Installing Bats
+## Installing Bats
 
 Check out a copy of the Bats repository. Then, either add the Bats
 `bin` directory to your `$PATH`, or run the provided `install.sh`
@@ -133,7 +135,7 @@ Bats. For example, to install Bats into `/usr/local`,
 Note that you may need to run `install.sh` with `sudo` if you do not
 have permission to write to the installation prefix.
 
-### Contributing
+## Contributing
 
 The Bats source code repository is [hosted on
 GitHub](https://github.com/sstephenson/bats). There you can file bugs
