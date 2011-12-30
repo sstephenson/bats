@@ -133,3 +133,7 @@ Bats. For example, to install Bats into `/usr/local`,
 Note that you may need to run `install.sh` with `sudo` if you do not
 have permission to write to the installation prefix.
 
+---
+
+© 2011 Sam Stephenson. Bats is released under an MIT-style license;
+see `LICENSE` for details.
