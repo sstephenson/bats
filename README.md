@@ -99,3 +99,23 @@ load test_helper
 will source the script `test/test_helper.bash` in your test file. This
 can be useful for sharing functions to set up your environment or load
 fixtures.
+
+### Special variables
+
+There are several global variables you can use to introspect on Bats
+tests:
+
+* `$BATS_TEST_FILENAME` is the fully expanded path to the Bats test
+file.
+* `$BATS_TEST_DIRNAME` is the directory in which the Bats test file is
+located.
+* `$BATS_TEST_NAMES` is an array of function names for each test case.
+* `$BATS_TEST_NAME` is the name of the function containing the current
+test case.
+* `$BATS_TEST_DESCRIPTION` is the description of the current test
+case.
+* `$BATS_TEST_NUMBER` is the (1-based) index of the current test case
+in the test file.
+* `$BATS_TMPDIR` is the location to a directory that may be used to
+store temporary files.
+
