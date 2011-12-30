@@ -119,3 +119,17 @@ in the test file.
 * `$BATS_TMPDIR` is the location to a directory that may be used to
 store temporary files.
 
+### Installing Bats
+
+Check out a copy of the Bats repository. Then, either add the Bats
+`bin` directory to your `$PATH`, or run the provided `install.sh`
+command with the location to the prefix in which you want to install
+Bats. For example, to install Bats into `/usr/local`,
+
+    $ git clone https://github.com/sstephenson/bats.git
+    $ cd bats
+    $ ./install.sh /usr/local
+
+Note that you may need to run `install.sh` with `sudo` if you do not
+have permission to write to the installation prefix.
+
