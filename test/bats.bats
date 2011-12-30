@@ -10,7 +10,13 @@ teardown() {
 @test "no arguments prints usage instructions" {
   run bats
   [ $status -eq 1 ]
-  [ $(expr "$output" : "usage:") -ne 0 ]
+  [ $(expr "${lines[1]}" : "usage:") -ne 0 ]
+}
+
+@test "-v and --version print version number" {
+  run bats -v
+  [ $status -eq 0 ]
+  [ $(expr "$output" : "Bats [0-9][0-9.]*") -ne 0 ]
 }
 
 @test "invalid filename prints an error" {

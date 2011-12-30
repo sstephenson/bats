@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
+version() {
+  echo "Bats 0.1.0"
+}
+
 resolve_link() {
   $(type -p greadlink readlink | head -1) "$1"
 }
@@ -31,9 +35,16 @@ BATS_LIBEXEC="$(abs_dirname "$0")"
 export BATS_PREFIX="$(abs_dirname "$BATS_LIBEXEC")"
 export PATH="$BATS_LIBEXEC:$PATH"
 
+if [ "$1" = "-v" ] || [ "$1" = "--version" ]; then
+  version
+  exit 0
+fi
+
 filename="$1"
 if [ -z "$filename" ]; then
-  echo "usage: $0 <filename>" >&2
+  { version
+    echo "usage: $0 <filename>"
+  } >&2
   exit 1
 else
   shift
