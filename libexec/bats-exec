@@ -78,7 +78,6 @@ bats_perform_tests() {
     "$0" "$BATS_TEST_FILENAME" "$test_name" "$test_number" || status=1
     test_number=$(($test_number + 1))
   done
-  rm -f "$BATS_TEST_SOURCE"
   exit "$status"
 }
 
@@ -114,19 +113,31 @@ BATS_TMPNAME="$BATS_TMPDIR/bats.$$"
 BATS_PARENT_TMPNAME="$BATS_TMPDIR/bats.$PPID"
 BATS_OUT="${BATS_TMPNAME}.out"
 
-exec 3<&1
-
-if [ -r "${BATS_PARENT_TMPNAME}.src" ]; then
-  BATS_TEST_SOURCE="${BATS_PARENT_TMPNAME}.src"
-else
+bats_preprocess_source() {
   BATS_TEST_SOURCE="${BATS_TMPNAME}.src"
   bats-preprocess < "$BATS_TEST_FILENAME" > "$BATS_TEST_SOURCE"
-fi
+  trap bats_cleanup_preprocessed_source err exit
+  trap "bats_cleanup_preprocessed_source; exit 1" int
+}
 
-source "$BATS_TEST_SOURCE"
+bats_cleanup_preprocessed_source() {
+  rm -f "$BATS_TEST_SOURCE"
+}
+
+bats_evaluate_preprocessed_source() {
+  if [ -z "$BATS_TEST_SOURCE" ]; then
+    BATS_TEST_SOURCE="${BATS_PARENT_TMPNAME}.src"
+  fi
+  source "$BATS_TEST_SOURCE"
+}
+
+exec 3<&1
 
 if [ "$#" -eq 0 ]; then
+  bats_preprocess_source
+  bats_evaluate_preprocessed_source
   bats_perform_tests "${BATS_TEST_NAMES[@]}"
 else
+  bats_evaluate_preprocessed_source
   bats_perform_test "$@"
 fi
