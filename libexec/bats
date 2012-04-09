@@ -56,4 +56,4 @@ else
   shift
 fi
 
-exec bats-exec $count_only "$(expand_path "$filename")" "$@"
+exec bats-exec-test $count_only "$(expand_path "$filename")" "$@"
