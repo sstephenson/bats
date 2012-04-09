@@ -40,14 +40,20 @@ if [ "$1" = "-v" ] || [ "$1" = "--version" ]; then
   exit 0
 fi
 
+count_only=""
+if [ "$1" = "-c" ]; then
+  count_only="-c"
+  shift
+fi
+
 filename="$1"
 if [ -z "$filename" ]; then
   { version
-    echo "usage: $0 <filename>"
+    echo "usage: $0 [-c] <filename>"
   } >&2
   exit 1
 else
   shift
 fi
 
-exec bats-exec "$(expand_path "$filename")" "$@"
+exec bats-exec $count_only "$(expand_path "$filename")" "$@"

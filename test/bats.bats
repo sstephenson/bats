@@ -86,3 +86,13 @@ teardown() {
   [ "${lines[5]}" = "    failure stdout 2" ]
   [ "${lines[7]}" = "    failure stderr" ]
 }
+
+@test "-c prints the number of tests" {
+  run bats -c "$FIXTURE_ROOT/empty.bats"
+  [ $status -eq 0 ]
+  [ "$output" = "0" ]
+
+  run bats -c "$FIXTURE_ROOT/output.bats"
+  [ $status -eq 0 ]
+  [ "$output" = "4" ]
+}

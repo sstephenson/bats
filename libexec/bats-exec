@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -e
 
+BATS_COUNT_ONLY=""
+if [ "$1" = "-c" ]; then
+  BATS_COUNT_ONLY=1
+  shift
+fi
+
 BATS_TEST_FILENAME="$1"
 if [ -z "$BATS_TEST_FILENAME" ]; then
   echo "usage: bats-exec <filename>" >&2
@@ -136,7 +142,12 @@ exec 3<&1
 if [ "$#" -eq 0 ]; then
   bats_preprocess_source
   bats_evaluate_preprocessed_source
-  bats_perform_tests "${BATS_TEST_NAMES[@]}"
+
+  if [ -n "$BATS_COUNT_ONLY" ]; then
+    echo "${#BATS_TEST_NAMES[@]}"
+  else
+    bats_perform_tests "${BATS_TEST_NAMES[@]}"
+  fi
 else
   bats_evaluate_preprocessed_source
   bats_perform_test "$@"
