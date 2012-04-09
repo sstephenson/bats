@@ -78,6 +78,7 @@ bats_perform_tests() {
     "$0" "$BATS_TEST_FILENAME" "$test_name" "$test_number" || status=1
     test_number=$(($test_number + 1))
   done
+  rm -f "$BATS_TEST_SOURCE"
   exit "$status"
 }
 
@@ -108,11 +109,21 @@ if [ -z "$TMPDIR" ]; then
 else
   BATS_TMPDIR="${TMPDIR%/}"
 fi
-BATS_OUT="$BATS_TMPDIR/bats.$(date "+%Y%m%d%H%M%S").$$"
+
+BATS_TMPNAME="$BATS_TMPDIR/bats.$$"
+BATS_PARENT_TMPNAME="$BATS_TMPDIR/bats.$PPID"
+BATS_OUT="${BATS_TMPNAME}.out"
 
 exec 3<&1
 
-eval "$(bats-preprocess < "$BATS_TEST_FILENAME")"
+if [ -r "${BATS_PARENT_TMPNAME}.src" ]; then
+  BATS_TEST_SOURCE="${BATS_PARENT_TMPNAME}.src"
+else
+  BATS_TEST_SOURCE="${BATS_TMPNAME}.src"
+  bats-preprocess < "$BATS_TEST_FILENAME" > "$BATS_TEST_SOURCE"
+fi
+
+source "$BATS_TEST_SOURCE"
 
 if [ "$#" -eq 0 ]; then
   bats_perform_tests "${BATS_TEST_NAMES[@]}"
