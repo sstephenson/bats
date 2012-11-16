@@ -57,7 +57,7 @@ containing multiple `.bats` files. Bats will run each test file
 individually and aggregate the results. If any test case fails, `bats`
 exits with a `1` status code.
 
-## Writing Bats tests
+## Helpers and introspection
 
 ### The _run_ helper
 
