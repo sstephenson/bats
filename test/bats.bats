@@ -1,11 +1,7 @@
 #!/usr/bin/env bats
 
-FIXTURE_ROOT="$BATS_TEST_DIRNAME/fixtures"
-export TMP="$BATS_TEST_DIRNAME/tmp"
-
-teardown() {
-  rm -f "$TMP"/*
-}
+load test_helper
+fixtures bats
 
 @test "no arguments prints usage instructions" {
   run bats

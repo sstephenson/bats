@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -e
+
+count_only=""
+if [ "$1" = "-c" ]; then
+  count_only=1
+  shift
+fi
+
+trap "kill 0; exit 1" int
+
+count=0
+for filename in "$@"; do
+  count=$(($count + $(bats-exec-test -c "$filename")))
+done
+
+if [ -n "$count_only" ]; then
+  echo "$count"
+  exit
+fi
+
+echo "1..$count"
+status=0
+offset=0
+for filename in "$@"; do
+  index=0
+  {
+    IFS= read -r # 1..n
+    while IFS= read -r line; do
+      case "$line" in
+      "ok "* | "not ok "* )
+        index=$(($index + 1))
+        echo "${line/ $index / $(($offset + $index)) }"
+        [ "${line:0:6}" != "not ok" ] || status=1
+        ;;
+      * )
+        echo "$line"
+        ;;
+      esac
+    done
+  } < <( bats-exec-test "$filename" )
+  offset=$(($offset + $index))
+done
+
+exit "$status"

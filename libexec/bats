@@ -56,4 +56,9 @@ else
   shift
 fi
 
-exec bats-exec-test $count_only "$(expand_path "$filename")" "$@"
+if [ -d "$filename" ]; then
+  shopt -s nullglob
+  exec bats-exec-suite $count_only "$(expand_path "$filename")"/*.bats
+else
+  exec bats-exec-test $count_only "$(expand_path "$filename")" "$@"
+fi
