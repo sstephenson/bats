@@ -12,7 +12,7 @@ if [ -z "$BATS_TEST_FILENAME" ]; then
   echo "usage: bats-exec <filename>" >&2
   exit 1
 elif [ ! -f "$BATS_TEST_FILENAME" ]; then
-  echo "bats: $BATS_TEST_FILENAME does not exist"
+  echo "bats: $BATS_TEST_FILENAME does not exist" >&2
   exit 1
 else
   shift
@@ -22,6 +22,12 @@ BATS_TEST_DIRNAME="$(dirname "$BATS_TEST_FILENAME")"
 BATS_TEST_NAMES=()
 
 load() {
+  local filename="$BATS_TEST_DIRNAME/$1.bash"
+  [ -f "$filename" ] || {
+    echo "bats: $filename does not exist" >&2
+    exit 1
+  }
+
   source "$BATS_TEST_DIRNAME/$1.bash"
 }
 

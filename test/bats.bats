@@ -75,6 +75,11 @@ fixtures bats
   [ $status -eq 0 ]
 }
 
+@test "load aborts if the specified script does not exist" {
+  HELPER_NAME="nonexistent" run bats "$FIXTURE_ROOT/load.bats"
+  [ $status -eq 1 ]
+}
+
 @test "output is discarded for passing tests and printed for failing tests" {
   run bats "$FIXTURE_ROOT/output.bats"
   [ $status -eq 1 ]
