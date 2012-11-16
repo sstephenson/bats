@@ -22,10 +22,15 @@ description.
 }
 ```
 
+Bats is most useful when testing software written in Bash, but you can
+use it to test any UNIX program.
+
 Test cases consist of standard shell commands. Bats makes use of
 Bash's `errexit` (`set -e`) option when running test cases. If every
 command in the test case exits with a `0` status code (success), the
 test passes. In this way, each line is an assertion of truth.
+
+## Running tests
 
 To run your tests, invoke the `bats` interpreter with a path to a test
 file. The file's test cases are run sequentially and in isolation, and
@@ -45,8 +50,12 @@ You can also define special `setup` and `teardown` functions which run
 before and after each test case, respectively. Use these to load
 fixtures, set up your environment, and clean up when you're done.
 
-Bats is most useful when testing software written in Bash, but you can
-use it to test any UNIX program.
+### Test suites
+
+You can also invoke the `bats` interpreter with a path to a directory
+containing multiple `.bats` files. Bats will run each test file
+individually and aggregate the results. If any test case fails, `bats`
+exits with a `1` status code.
 
 ## Writing Bats tests
 
