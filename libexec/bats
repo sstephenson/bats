@@ -2,7 +2,7 @@
 set -e
 
 version() {
-  echo "Bats 0.1.0"
+  echo "Bats 0.2.0"
 }
 
 resolve_link() {

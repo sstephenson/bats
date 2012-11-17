@@ -156,6 +156,15 @@ examples.
 
 ### Version history
 
+*0.2.0* (November 16, 2012)
+
+* Added test suite support. The `bats` command accepts a directory
+  name containing multiple test files to be run in aggregate.
+* Added the ability to count the number of test cases in a file or
+  suite by passing the `-c` flag to `bats`.
+* Preprocessed sources are cached between test case runs in the same
+  file for better performance.
+
 *0.1.0* (December 30, 2011)
 
 * Initial public release.
