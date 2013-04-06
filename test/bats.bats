@@ -97,3 +97,9 @@ fixtures bats
   [ $status -eq 0 ]
   [ "$output" = "4" ]
 }
+
+@test "dash-e is not mangled on beginning of line" {
+  run bats "$FIXTURE_ROOT/intact.bats"
+  [ $status -eq 0 ]
+  [ "${lines[1]}" = "ok 1 dash-e on beginning of line" ]
+}
