@@ -42,7 +42,7 @@ while IFS= read -r line; do
     tests["${#tests[@]}"]="$encoded_name"
     echo "${encoded_name}() { bats_test_info ${quoted_name} ${index}"
   else
-    echo "$line"
+    printf "%s\n" "$line"
   fi
 done
 
