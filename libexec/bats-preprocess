@@ -34,7 +34,7 @@ index=0
 
 while IFS= read -r line; do
   index=$(($index + 1))
-  quoted_name="$(expr "$line" : '^ *@test  *\([^ ].*\)  *{ *$' || true)"
+  quoted_name="$(expr "$line" : ' *@test  *\([^ ].*\)  *{ *$' || true)"
 
   if [ -n "$quoted_name" ]; then
     name="$(eval echo "$quoted_name")"
