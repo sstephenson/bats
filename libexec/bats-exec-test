@@ -37,6 +37,7 @@ run() {
   set +e
   output="$("$@" 2>&1)"
   status="$?"
+  echo "$output" | sed -e 's/^/  #output#/' > "$BATS_OUT"
   IFS=$'\n' lines=($output)
   [ -z "$e" ] || set -e
 }
