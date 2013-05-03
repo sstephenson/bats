@@ -144,6 +144,11 @@ Bats. For example, to install Bats into `/usr/local`,
 Note that you may need to run `install.sh` with `sudo` if you do not
 have permission to write to the installation prefix.
 
+## Syntax Highlighting
+
+* [Bats.tmbundle](https://github.com/drnic/Bats.tmbundle) from Dr Nic 
+Williams adds Bats syntax highlighting support for TextMate.
+
 ## Development
 
 The Bats source code repository is [hosted on
