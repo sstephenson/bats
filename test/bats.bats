@@ -39,6 +39,7 @@ fixtures bats
   [ $status -eq 1 ]
   [ ${lines[0]} = "1..1" ]
   [ ${lines[1]} = "not ok 1 a failing test" ]
+  [ ${lines[2]} = "# $FIXTURE_ROOT/failing.bats:4" ]
 }
 
 @test "one failing and one passing test" {
@@ -46,7 +47,8 @@ fixtures bats
   [ $status -eq 1 ]
   [ ${lines[0]} = "1..2" ]
   [ ${lines[1]} = "not ok 1 a failing test" ]
-  [ ${lines[2]} = "ok 2 a passing test" ]
+  [ ${lines[2]} = "# $FIXTURE_ROOT/failing_and_passing.bats:2" ]
+  [ ${lines[3]} = "ok 2 a passing test" ]
 }
 
 @test "test environments are isolated" {
@@ -83,9 +85,9 @@ fixtures bats
 @test "output is discarded for passing tests and printed for failing tests" {
   run bats "$FIXTURE_ROOT/output.bats"
   [ $status -eq 1 ]
-  [ "${lines[4]}" = "    failure stdout 1" ]
-  [ "${lines[5]}" = "    failure stdout 2" ]
-  [ "${lines[7]}" = "    failure stderr" ]
+  [ "${lines[5]}" = "#    failure stdout 1" ]
+  [ "${lines[6]}" = "#    failure stdout 2" ]
+  [ "${lines[9]}" = "#    failure stderr" ]
 }
 
 @test "-c prints the number of tests" {
