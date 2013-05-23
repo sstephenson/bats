@@ -103,3 +103,8 @@ fixtures bats
   [ $status -eq 0 ]
   [ "${lines[1]}" = "ok 1 dash-e on beginning of line" ]
 }
+
+@test "dos line endings are stripped before testing" {
+  run bats "$FIXTURE_ROOT/dos_line.bats"
+  [ $status -eq 0 ]
+}
