@@ -92,8 +92,11 @@ bats_exit_trap() {
     echo "# $BATS_TEST_FILENAME:$BATS_LINE_NUMBER" >&3
     sed -e "s/^/#    /" < "$BATS_OUT" >&3
     status=1
-  else
+  elif [ -z "$BATS_TEST_SKIPPED" ]; then
     echo "ok $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION" >&3
+    status=0
+  else
+    echo "ok $BATS_TEST_NUMBER # skip $BATS_TEST_DESCRIPTION" >&3
     status=0
   fi
 
@@ -122,7 +125,16 @@ bats_perform_test() {
     fi
 
     BATS_TEST_COMPLETED=""
+    BATS_TEST_SKIPPED=""
     BATS_ERROR_LINE=""
+
+    directive="$(expr "$BATS_TEST_NAME" : '\([^_]*\)' || true)"
+    if [ "skip" = "$directive" ]; then
+      BATS_TEST_SKIPPED=1
+      BATS_TEST_COMPLETED=1
+      trap "bats_teardown_trap" exit
+    fi
+
     trap "bats_debug_trap \"\$BASH_SOURCE\" \$LINENO" debug
     trap "bats_error_trap" err
     trap "bats_teardown_trap" exit

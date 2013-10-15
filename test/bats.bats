@@ -110,3 +110,8 @@ fixtures bats
   run bats "$FIXTURE_ROOT/dos_line.bats"
   [ $status -eq 0 ]
 }
+
+@skip "A skipped test" {
+  run bats
+  [ $status -eq 0 ]
+}
