@@ -23,6 +23,13 @@ fi
 BATS_TEST_DIRNAME="$(dirname "$BATS_TEST_FILENAME")"
 BATS_TEST_NAMES=()
 
+# if DEBUG is set, write the given string to the console.
+decho() {
+  if [[ -n "$DEBUG" ]]; then
+    echo "# DEBUG: " $@ >&3
+  fi
+}
+
 load() {
   local filename="$BATS_TEST_DIRNAME/$1.bash"
   [ -f "$filename" ] || {

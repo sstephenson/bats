@@ -110,3 +110,20 @@ fixtures bats
   run bats "$FIXTURE_ROOT/dos_line.bats"
   [ $status -eq 0 ]
 }
+
+@test "test should not output DEBUG line if DEBUG is not set" {
+  run bats "$FIXTURE_ROOT/debug.bats"
+  [ $status -eq 0 ]
+
+  echo $output | {
+    run grep DEBUG
+    [[ $status -ne 0 ]]
+  }
+}
+
+@test "test should output DEBUG line if DEBUG is set" {
+  export DEBUG=1
+  run bats "$FIXTURE_ROOT/debug.bats"
+  [ $status -eq 0 ]
+  echo $output | grep DEBUG
+}
