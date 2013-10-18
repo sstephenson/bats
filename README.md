@@ -111,6 +111,43 @@ will source the script `test/test_helper.bash` in your test file. This
 can be useful for sharing functions to set up your environment or load
 fixtures.
 
+### The _skip_ directive
+
+Tests can be skipped over by using the `skip` directive at the point in
+a test you wish to skip.
+
+```bash
+@test "A test I don't want to execute for now" {
+  skip
+  run foo
+  [ "$status" -eq 0 ]
+}
+```
+
+Optionally, a reason for skipping can be included:
+
+```bash
+@test "A test I don't want to execute for now" {
+  skip "This command will return zero soon, but not now"
+  run foo
+  [ "$status" -eq 0 ]
+}
+```
+
+Or you can skip conditionally:
+
+```bash
+@test "A test which should run" {
+
+  if [ foo != bar ]; then
+    skip "foo isn't bar"
+  fi
+
+  run foo
+  [ "$status" -eq 0 ]
+}
+```
+
 ### Special variables
 
 There are several global variables you can use to introspect on Bats

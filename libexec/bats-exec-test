@@ -57,6 +57,12 @@ teardown() {
   true
 }
 
+skip() {
+  BATS_TEST_SKIPPED=${1:-1}
+  BATS_TEST_COMPLETED=1
+  exit 0
+}
+
 bats_test_info() {
   BATS_TEST_DESCRIPTION="$1"
 }
@@ -85,7 +91,16 @@ bats_teardown_trap() {
 
 bats_exit_trap() {
   local status
+  local skipped
   trap - err exit
+
+  skipped=""
+  if [ -n "$BATS_TEST_SKIPPED" ]; then
+    skipped=" # skip"
+    if [ "1" != "$BATS_TEST_SKIPPED" ]; then
+      skipped+=" ($BATS_TEST_SKIPPED)"
+    fi
+  fi
 
   if [ -z "$BATS_TEST_COMPLETED" ]; then
     echo "not ok $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION" >&3
@@ -93,7 +108,7 @@ bats_exit_trap() {
     sed -e "s/^/#    /" < "$BATS_OUT" >&3
     status=1
   else
-    echo "ok $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION" >&3
+    echo "ok ${BATS_TEST_NUMBER}${skipped} ${BATS_TEST_DESCRIPTION}" >&3
     status=0
   fi
 
