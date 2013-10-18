@@ -46,19 +46,28 @@ if [ "$1" = "-c" ]; then
   shift
 fi
 
-filename="$1"
-if [ -z "$filename" ]; then
+if [ -z "$1" ]; then
   { version
-    echo "usage: $0 [-c] <filename>"
+    echo "usage: $0 [-c] <filename> [<filename> ...]"
   } >&2
   exit 1
-else
-  shift
 fi
 
-if [ -d "$filename" ]; then
-  shopt -s nullglob
-  exec bats-exec-suite $count_only "$(expand_path "$filename")"/*.bats
+filenames=()
+for filename in "$@"; do
+  if [ -d "$filename" ]; then
+    shopt -s nullglob
+    for suite_filename in "$(expand_path "$filename")"/*.bats; do
+      filenames["${#filenames[@]}"]="$suite_filename"
+    done
+    shopt -u nullglob
+  else
+    filenames["${#filenames[@]}"]="$(expand_path "$filename")"
+  fi
+done
+
+if [ "${#filenames[@]}" -eq 1 ]; then
+  exec bats-exec-test $count_only "${filenames[0]}"
 else
-  exec bats-exec-test $count_only "$(expand_path "$filename")" "$@"
+  exec bats-exec-suite $count_only "${filenames[@]}"
 fi

@@ -41,3 +41,12 @@ fixtures suite
   [ ${lines[0]} = "1..3" ]
   echo "$output" | grep "^not ok . quasi-truth"
 }
+
+@test "running an ad-hoc suite by specifying multiple test files" {
+  run bats "$FIXTURE_ROOT/multiple/a.bats" "$FIXTURE_ROOT/multiple/b.bats"
+  [ $status -eq 0 ]
+  [ ${lines[0]} = "1..3" ]
+  echo "$output" | grep "^ok . truth"
+  echo "$output" | grep "^ok . more truth"
+  echo "$output" | grep "^ok . quasi-truth"
+}
