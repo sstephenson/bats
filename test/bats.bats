@@ -39,7 +39,7 @@ fixtures bats
   [ $status -eq 1 ]
   [ ${lines[0]} = "1..1" ]
   [ ${lines[1]} = "not ok 1 a failing test" ]
-  [ ${lines[2]} = "# $FIXTURE_ROOT/failing.bats:4" ]
+  [ ${lines[2]} = "# (in test file $FIXTURE_ROOT/failing.bats, line 4)" ]
 }
 
 @test "one failing and one passing test" {
@@ -47,7 +47,7 @@ fixtures bats
   [ $status -eq 1 ]
   [ ${lines[0]} = "1..2" ]
   [ ${lines[1]} = "not ok 1 a failing test" ]
-  [ ${lines[2]} = "# $FIXTURE_ROOT/failing_and_passing.bats:2" ]
+  [ ${lines[2]} = "# (in test file $FIXTURE_ROOT/failing_and_passing.bats, line 2)" ]
   [ ${lines[3]} = "ok 2 a passing test" ]
 }
 

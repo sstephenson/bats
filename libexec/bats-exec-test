@@ -104,7 +104,7 @@ bats_exit_trap() {
 
   if [ -z "$BATS_TEST_COMPLETED" ]; then
     echo "not ok $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION" >&3
-    echo "# $BATS_TEST_FILENAME:$BATS_LINE_NUMBER" >&3
+    echo "# (in test file $BATS_TEST_FILENAME, line $BATS_LINE_NUMBER)" >&3
     sed -e "s/^/#    /" < "$BATS_OUT" >&3
     status=1
   else
