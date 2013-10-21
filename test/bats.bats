@@ -129,3 +129,12 @@ fixtures bats
   [ "${lines[1]}" = "ok 1 # skip a skipped test" ]
   [ "${lines[2]}" = "ok 2 # skip (a reason) a skipped test with a reason" ]
 }
+
+@test "extended syntax" {
+  run bats-exec-test -x "$FIXTURE_ROOT/failing_and_passing.bats"
+  [ $status -eq 1 ]
+  [ "${lines[1]}" = "begin 1 a failing test" ]
+  [ "${lines[2]}" = "not ok 1 a failing test" ]
+  [ "${lines[4]}" = "begin 2 a passing test" ]
+  [ "${lines[5]}" = "ok 2 a passing test" ]
+}

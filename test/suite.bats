@@ -50,3 +50,15 @@ fixtures suite
   echo "$output" | grep "^ok . more truth"
   echo "$output" | grep "^ok . quasi-truth"
 }
+
+@test "extended syntax in suite" {
+  FLUNK=1 run bats-exec-suite -x "$FIXTURE_ROOT/multiple/"*.bats
+  [ $status -eq 1 ]
+  [ "${lines[0]}" = "1..3" ]
+  [ "${lines[1]}" = "begin 1 truth" ]
+  [ "${lines[2]}" = "ok 1 truth" ]
+  [ "${lines[3]}" = "begin 2 more truth" ]
+  [ "${lines[4]}" = "ok 2 more truth" ]
+  [ "${lines[5]}" = "begin 3 quasi-truth" ]
+  [ "${lines[6]}" = "not ok 3 quasi-truth" ]
+}

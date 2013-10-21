@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
 set -e
 
-count_only=""
+count_only_flag=""
 if [ "$1" = "-c" ]; then
-  count_only=1
+  count_only_flag=1
+  shift
+fi
+
+extended_syntax_flag=""
+if [ "$1" = "-x" ]; then
+  extended_syntax_flag="-x"
   shift
 fi
 
@@ -14,7 +20,7 @@ for filename in "$@"; do
   count=$(($count + $(bats-exec-test -c "$filename")))
 done
 
-if [ -n "$count_only" ]; then
+if [ -n "$count_only_flag" ]; then
   echo "$count"
   exit
 fi
@@ -28,8 +34,12 @@ for filename in "$@"; do
     IFS= read -r # 1..n
     while IFS= read -r line; do
       case "$line" in
-      "ok "* | "not ok "* )
+      "begin "* )
         index=$(($index + 1))
+        echo "${line/ $index / $(($offset + $index)) }"
+        ;;
+      "ok "* | "not ok "* )
+        [ -n "$extended_syntax_flag" ] || index=$(($index + 1))
         echo "${line/ $index / $(($offset + $index)) }"
         [ "${line:0:6}" != "not ok" ] || status=1
         ;;
@@ -38,7 +48,7 @@ for filename in "$@"; do
         ;;
       esac
     done
-  } < <( bats-exec-test "$filename" )
+  } < <( bats-exec-test $extended_syntax_flag "$filename" )
   offset=$(($offset + $index))
 done
 
