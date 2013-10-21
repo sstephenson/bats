@@ -1,0 +1,154 @@
+#!/usr/bin/env bash
+set -e
+
+# Just stream the TAP output (sans extended syntax) if tput is missing
+command -v tput >/dev/null || exec grep -v "^begin "
+
+IFS= read -r header # 1..n
+count="${header:3}"
+index=0
+failures=0
+name=""
+count_column_width=$(( ${#count} * 2 + 2 ))
+
+update_screen_width() {
+  screen_width="$(tput cols)"
+  count_column_left=$(( $screen_width - $count_column_width ))
+}
+
+trap update_screen_width WINCH
+update_screen_width
+
+begin() {
+  go_to_column 0
+  printf_with_truncation $(( $count_column_left - 1 )) "   %s" "$name"
+  clear_to_end_of_line
+  go_to_column $count_column_left
+  printf "%${#count}s/${count}" "$index"
+  go_to_column 1
+}
+
+pass() {
+  go_to_column 0
+  printf " ✓ %s" "$name"
+  advance
+}
+
+skip() {
+  local reason="$1"
+  [ -z "$reason" ] || reason=": $reason"
+  go_to_column 0
+  printf " - %s (skipped%s)" "$name" "$reason"
+  advance
+}
+
+fail() {
+  go_to_column 0
+  set_color 1 bold
+  printf " ✗ %s" "$name"
+  advance
+}
+
+log() {
+  set_color 1
+  printf "   %s\n" "$1"
+  clear_color
+}
+
+summary() {
+  printf "\n%d test%s, %d failure%s\n" \
+    "$count" "$(plural "$count")" \
+    "$failures" "$(plural "$failures")"
+}
+
+printf_with_truncation() {
+  local width="$1"
+  shift
+  local string="$(printf "$@")"
+
+  if [ "${#string}" -gt "$width" ]; then
+    printf "%s..." "${string:0:$(( $width - 4 ))}"
+  else
+    printf "%s" "$string"
+  fi
+}
+
+go_to_column() {
+  local column="$1"
+  tput hpa "$column"
+}
+
+clear_to_end_of_line() {
+  tput el
+}
+
+advance() {
+  clear_to_end_of_line
+  echo
+  clear_color
+}
+
+set_color() {
+  local color="$1"
+  local weight="$2"
+  tput setaf "$color"
+  [ -z "$weight" ] || tput "$weight"
+}
+
+clear_color() {
+  tput sgr0
+}
+
+plural() {
+  [ "$1" -eq 1 ] || echo "s"
+}
+
+_buffer=""
+
+buffer() {
+  _buffer="${_buffer}$("$@")"
+}
+
+flush() {
+  printf "%s" "$_buffer"
+  _buffer=""
+}
+
+finish() {
+  flush
+  printf "\n"
+}
+
+trap finish EXIT
+
+while IFS= read -r line; do
+  case "$line" in
+  "begin "* )
+    index=$(( $index + 1 ))
+    name="${line#* $index }"
+    buffer begin
+    flush
+    ;;
+  "ok "* )
+    skip_expr="ok $index # skip (\(([^)]*)\))?"
+    if [[ "$line" =~ $skip_expr ]]; then
+      buffer skip "${BASH_REMATCH[2]}"
+    else
+      buffer pass
+    fi
+    ;;
+  "not ok "* )
+    failures=$(( $failures + 1 ))
+    buffer fail
+    ;;
+  "#    "* )
+    buffer log "${line:5}"
+    ;;
+  "# "* )
+
+    buffer log "${line:2}"
+    ;;
+  esac
+done
+
+buffer summary

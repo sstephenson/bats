@@ -33,39 +33,48 @@ test passes. In this way, each line is an assertion of truth.
 ## Running tests
 
 To run your tests, invoke the `bats` interpreter with a path to a test
-file. The file's test cases are run sequentially and in isolation, and
-the results are written to standard output in human-readable [TAP
-format](http://testanything.org/wiki/index.php/TAP_specification#THE_TAP_FORMAT).
-If all the test cases pass, `bats` exits with a `0` status code. If
-there are any failures, `bats` exits with a `1` status code.
+file. The file's test cases are run sequentially and in isolation. If
+all the test cases pass, `bats` exits with a `0` status code. If there
+are any failures, `bats` exits with a `1` status code.
+
+When you run Bats from a terminal, you'll see output as each test is
+performed, with a check-mark next to the test's name if it passes or
+an "X" if it fails.
 
     $ bats addition.bats
+     ✓ addition using bc
+     ✓ addition using dc
+
+    2 tests, 0 failures
+
+If Bats is not connected to a terminal—in other words, if you
+run it from a continuous integration system or redirect its output to
+a file—the results are displayed in human-readable, machine-parsable
+[TAP format](http://testanything.org/wiki/index.php/TAP_specification#THE_TAP_FORMAT).
+You can force TAP output from a terminal by invoking Bats with the
+`--tap` option.
+
+    $ bats --tap addition.bats
     1..2
     ok 1 addition using bc
     ok 2 addition using dc
-    $ echo $?
-    0
-
-You can also define special `setup` and `teardown` functions which run
-before and after each test case, respectively. Use these to load
-fixtures, set up your environment, and clean up when you're done.
 
 ### Test suites
 
-You can also invoke the `bats` interpreter with a path to a directory
-containing multiple `.bats` files. Bats will run each test file
-individually and aggregate the results. If any test case fails, `bats`
-exits with a `1` status code.
+You can invoke the `bats` interpreter with multiple test file
+arguments, or with a path to a directory containing multiple `.bats`
+files. Bats will run each test file individually and aggregate the
+results. If any test case fails, `bats` exits with a `1` status code.
 
 ## Helpers and introspection
 
 ### The _run_ helper
 
-If you're using Bats, you're probably most interested in testing a
-command's exit status and output. Bats includes a `run` helper that
-invokes its arguments as a command, saves the exit status and output
-into special global variables, and then returns with a `0` status code
-so you can continue to make assertions in your test case.
+Many Bats tests need to run a command and then make assertions about
+its exit status and output. Bats includes a `run` helper that invokes
+its arguments as a command, saves the exit status and output into
+special global variables, and then returns with a `0` status code so
+you can continue to make assertions in your test case.
 
 For example, let's say you're testing that the `foo` command, when
 passed a nonexistent filename, exits with a `1` status code and prints
@@ -138,7 +147,6 @@ Or you can skip conditionally:
 
 ```bash
 @test "A test which should run" {
-
   if [ foo != bar ]; then
     skip "foo isn't bar"
   fi
@@ -147,6 +155,12 @@ Or you can skip conditionally:
   [ "$status" -eq 0 ]
 }
 ```
+
+### Setup and teardown
+
+You can define special `setup` and `teardown` functions which run
+before and after each test case, respectively. Use these to load
+fixtures, set up your environment, and clean up when you're done.
 
 ### Special variables
 
@@ -183,7 +197,7 @@ have permission to write to the installation prefix.
 
 ## Syntax Highlighting
 
-* [Bats.tmbundle](https://github.com/drnic/Bats.tmbundle) from Dr Nic 
+* [Bats.tmbundle](https://github.com/drnic/Bats.tmbundle) from Dr Nic
 Williams adds Bats syntax highlighting support for TextMate.
 
 ## Development

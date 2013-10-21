@@ -6,13 +6,19 @@ fixtures bats
 @test "no arguments prints usage instructions" {
   run bats
   [ $status -eq 1 ]
-  [ $(expr "${lines[1]}" : "usage:") -ne 0 ]
+  [ $(expr "${lines[1]}" : "Usage:") -ne 0 ]
 }
 
 @test "-v and --version print version number" {
   run bats -v
   [ $status -eq 0 ]
   [ $(expr "$output" : "Bats [0-9][0-9.]*") -ne 0 ]
+}
+
+@test "-h and --help print help" {
+  run bats -h
+  [ $status -eq 0 ]
+  [ "${#lines[@]}" -gt 3 ]
 }
 
 @test "invalid filename prints an error" {
@@ -125,4 +131,16 @@ fixtures bats
   [ "${lines[2]}" = "not ok 1 a failing test" ]
   [ "${lines[4]}" = "begin 2 a passing test" ]
   [ "${lines[5]}" = "ok 2 a passing test" ]
+}
+
+@test "pretty and tap formats" {
+  run bats --tap "$FIXTURE_ROOT/passing.bats"
+  tap_output="$output"
+  [ $status -eq 0 ]
+
+  run bats --pretty "$FIXTURE_ROOT/passing.bats"
+  pretty_output="$output"
+  [ $status -eq 0 ]
+
+  [ "$tap_output" != "$pretty_output" ]
 }
