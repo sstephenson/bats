@@ -117,6 +117,12 @@ fixtures bats
   [ $status -eq 0 ]
 }
 
+@test "test file without trailing newline" {
+  run bats "$FIXTURE_ROOT/without_trailing_newline.bats"
+  [ $status -eq 0 ]
+  [ "${lines[1]}" = "ok 1 truth" ]
+}
+
 @test "skipped tests" {
   run bats "$FIXTURE_ROOT/skipped.bats"
   [ $status -eq 0 ]
