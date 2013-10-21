@@ -63,8 +63,9 @@ skip() {
   exit 0
 }
 
-bats_test_info() {
+bats_test_begin() {
   BATS_TEST_DESCRIPTION="$1"
+  setup
 }
 
 bats_test_function() {
@@ -141,9 +142,7 @@ bats_perform_test() {
     trap "bats_debug_trap \"\$BASH_SOURCE\" \$LINENO" debug
     trap "bats_error_trap" err
     trap "bats_teardown_trap" exit
-    { setup
-      "$BATS_TEST_NAME"
-    } >>"$BATS_OUT" 2>&1
+    "$BATS_TEST_NAME" >>"$BATS_OUT" 2>&1
     BATS_TEST_COMPLETED=1
 
   else

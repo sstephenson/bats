@@ -40,7 +40,7 @@ while IFS= read -r line; do
     name="$(eval echo "$quoted_name")"
     encoded_name="$(encode_name "$name")"
     tests["${#tests[@]}"]="$encoded_name"
-    echo "${encoded_name}() { bats_test_info ${quoted_name} ${index}"
+    echo "${encoded_name}() { bats_test_begin ${quoted_name} ${index}"
   else
     printf "%s\n" "$line"
   fi
