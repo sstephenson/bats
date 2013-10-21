@@ -1,4 +1,4 @@
-# Bats: the Bash Automated Testing System
+# Bats: Bash Automated Testing System
 
 Bats is a [TAP](http://testanything.org/)-compliant testing framework
 for Bash. It provides a simple way to verify that the UNIX programs
@@ -181,7 +181,7 @@ in the test file.
 * `$BATS_TMPDIR` is the location to a directory that may be used to
 store temporary files.
 
-## Installing Bats
+## Installing Bats from Source
 
 Check out a copy of the Bats repository. Then, either add the Bats
 `bin` directory to your `$PATH`, or run the provided `install.sh`
@@ -195,20 +195,19 @@ Bats. For example, to install Bats into `/usr/local`,
 Note that you may need to run `install.sh` with `sudo` if you do not
 have permission to write to the installation prefix.
 
-## Syntax Highlighting
-
-* [Bats.tmbundle](https://github.com/drnic/Bats.tmbundle) from Dr Nic
-Williams adds Bats syntax highlighting support for TextMate.
-
-## Development
+## Support
 
 The Bats source code repository is [hosted on
 GitHub](https://github.com/sstephenson/bats). There you can file bugs
 on the issue tracker or submit tested pull requests for review.
 
-See the [Bats
-test suite](https://github.com/sstephenson/bats/tree/master/test) for
-examples.
+For real-world examples from open-source projects using Bats, see
+[Projects Using Bats](https://github.com/sstephenson/bats/wiki/Projects-Using-Bats)
+on the wiki.
+
+To learn how to set up your editor for Bats syntax highlighting, see
+[Syntax Highlighting](https://github.com/sstephenson/bats/wiki/Syntax-Highlighting)
+on the wiki.
 
 ### Version history
 
