@@ -85,9 +85,9 @@ fixtures bats
 @test "output is discarded for passing tests and printed for failing tests" {
   run bats "$FIXTURE_ROOT/output.bats"
   [ $status -eq 1 ]
-  [ "${lines[5]}" = "#    failure stdout 1" ]
-  [ "${lines[6]}" = "#    failure stdout 2" ]
-  [ "${lines[9]}" = "#    failure stderr" ]
+  [ "${lines[5]}" = "# failure stdout 1" ]
+  [ "${lines[6]}" = "# failure stdout 2" ]
+  [ "${lines[9]}" = "# failure stderr" ]
 }
 
 @test "-c prints the number of tests" {
