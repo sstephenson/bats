@@ -111,19 +111,7 @@ fixtures bats
   [ $status -eq 0 ]
 }
 
-@test "a skipped test" {
-  skip
-  run bats
-  [ $status -eq 0 ]
-}
-
-@test "a skipped test with a reason" {
-  skip "a reason for skipping"
-  run bats
-  [ $status -eq 0 ]
-}
-
-@test "skipped test output" {
+@test "skipped tests" {
   run bats "$FIXTURE_ROOT/skipped.bats"
   [ $status -eq 0 ]
   [ "${lines[1]}" = "ok 1 # skip a skipped test" ]
