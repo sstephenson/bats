@@ -120,10 +120,10 @@ will source the script `test/test_helper.bash` in your test file. This
 can be useful for sharing functions to set up your environment or load
 fixtures.
 
-### The _skip_ directive
+### The _skip_ command
 
-Tests can be skipped over by using the `skip` directive at the point in
-a test you wish to skip.
+Tests can be skipped by using the `skip` command at the point in a
+test you wish to skip.
 
 ```bash
 @test "A test I don't want to execute for now" {
@@ -133,7 +133,7 @@ a test you wish to skip.
 }
 ```
 
-Optionally, a reason for skipping can be included:
+Optionally, you may include a reason for skipping:
 
 ```bash
 @test "A test I don't want to execute for now" {
@@ -211,6 +211,23 @@ on the wiki.
 
 ### Version history
 
+*0.3.0* (October 21, 2013)
+
+* Improved formatting for tests run from a terminal. Failing tests
+  are now colored in red, and the total number of failing tests is
+  displayed at the end of the test run. When Bats is not connected to
+  a terminal (e.g. in CI runs), or when invoked with the `--tap` flag,
+  output is displayed in standard TAP format.
+* Added the ability to skip tests using the `skip` command.
+* Added a message to failing test case output indicating the file and
+  line number of the statement that caused the test to fail.
+* Added "ad-hoc" test suite support. You can now invoke `bats` with
+  multiple filename or directory arguments to run all the specified
+  tests in aggregate.
+* Added support for test files with Windows line endings.
+* Fixed regular expression warnings from certain versions of Bash.
+* Fixed a bug running tests containing lines that begin with `-e`.
+
 *0.2.0* (November 16, 2012)
 
 * Added test suite support. The `bats` command accepts a directory
@@ -226,5 +243,5 @@ on the wiki.
 
 ---
 
-© 2011 Sam Stephenson. Bats is released under an MIT-style license;
+© 2013 Sam Stephenson. Bats is released under an MIT-style license;
 see `LICENSE` for details.

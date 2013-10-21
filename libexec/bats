@@ -2,7 +2,7 @@
 set -e
 
 version() {
-  echo "Bats 0.2.0"
+  echo "Bats 0.3.0"
 }
 
 usage() {
