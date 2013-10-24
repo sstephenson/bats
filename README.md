@@ -25,16 +25,6 @@ description.
 Bats is most useful when testing software written in Bash, but you can
 use it to test any UNIX program.
 
-**NB**: You can include code in your test file outside of `@test` functions.
-For example, this may be useful if you want to check for dependencies and
-fail immediately if they're not present. However, any output that you print
-in code outside of `@test`, `setup` or `teardown` functions must be
-redirected to `stderr`. Otherwise, the output will cause Bats to fail by
-polluting the TAP stream on `stdout`. (For more details about exactly how
-Bats evaluates test files, see [the wiki][eval].)
-
-[eval]: https://github.com/sstephenson/bats/wiki/Bats-Evaluation-Process
-
 Test cases consist of standard shell commands. Bats makes use of
 Bash's `errexit` (`set -e`) option when running test cases. If every
 command in the test case exits with a `0` status code (success), the
@@ -76,7 +66,16 @@ arguments, or with a path to a directory containing multiple `.bats`
 files. Bats will run each test file individually and aggregate the
 results. If any test case fails, `bats` exits with a `1` status code.
 
-## Helpers and introspection
+## Writing tests
+
+Each Bats test file is evaulated n+1 times, where _n_ is the number of
+test cases in the file. The first run counts the number of test cases,
+then iterates over the test cases and executes each one in its own
+process.
+
+For details about exactly how Bats evaluates test files, see [Bats
+Evaluation Process](https://github.com/sstephenson/bats/wiki/Bats-Evaluation-Process)
+on the wiki.
 
 ### The _run_ helper
 
@@ -166,11 +165,20 @@ Or you can skip conditionally:
 }
 ```
 
-### Setup and teardown
+### Setup and teardown functions
 
 You can define special `setup` and `teardown` functions which run
 before and after each test case, respectively. Use these to load
 fixtures, set up your environment, and clean up when you're done.
+
+### Code outside of test cases
+
+You can include code in your test file outside of `@test` functions.
+For example, this may be useful if you want to check for dependencies
+and fail immediately if they're not present. However, any output that
+you print in code outside of `@test`, `setup` or `teardown` functions
+must be redirected to `stderr` (`>&2`). Otherwise, the output may
+cause Bats to fail by polluting the TAP stream on `stdout`.
 
 ### Special variables
 
@@ -191,7 +199,7 @@ in the test file.
 * `$BATS_TMPDIR` is the location to a directory that may be used to
 store temporary files.
 
-## Installing Bats from Source
+## Installing Bats from source
 
 Check out a copy of the Bats repository. Then, either add the Bats
 `bin` directory to your `$PATH`, or run the provided `install.sh`
