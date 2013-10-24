@@ -25,6 +25,16 @@ description.
 Bats is most useful when testing software written in Bash, but you can
 use it to test any UNIX program.
 
+**NB**: You can include code in your test file outside of `@test` functions.
+For example, this may be useful if you want to check for dependencies and
+fail immediately if they're not present. However, any output that you print
+in code outside of `@test`, `setup` or `teardown` functions must be
+redirected to `stderr`. Otherwise, the output will cause Bats to fail by
+polluting the TAP stream on `stdout`. (For more details about exactly how
+Bats evaluates test files, see [the wiki][eval].)
+
+[eval]: https://github.com/sstephenson/bats/wiki/Bats-Evaluation-Process
+
 Test cases consist of standard shell commands. Bats makes use of
 Bash's `errexit` (`set -e`) option when running test cases. If every
 command in the test case exits with a `0` status code (success), the
