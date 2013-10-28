@@ -229,6 +229,13 @@ on the wiki.
 
 ### Version history
 
+*0.3.1* (October 28, 2013)
+
+* Fixed an incompatibility with the pretty formatter in certain
+  environments such as tmux.
+* Fixed a bug where the pretty formatter would crash if the first line
+  of a test file's output was invalid TAP.
+
 *0.3.0* (October 21, 2013)
 
 * Improved formatting for tests run from a terminal. Failing tests
