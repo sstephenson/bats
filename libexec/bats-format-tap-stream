@@ -75,11 +75,11 @@ printf_with_truncation() {
 
 go_to_column() {
   local column="$1"
-  tput hpa "$column"
+  printf "\x1B[%dG" $(( $column + 1 ))
 }
 
 clear_to_end_of_line() {
-  tput el
+  printf "\x1B[K"
 }
 
 advance() {
@@ -91,12 +91,11 @@ advance() {
 set_color() {
   local color="$1"
   local weight="$2"
-  tput setaf "$color"
-  [ -z "$weight" ] || tput "$weight"
+  printf "\x1B[%d;%dm" $(( 30 + $color )) "$( [ "$weight" = "bold" ] && echo 1 || echo 22 )"
 }
 
 clear_color() {
-  tput sgr0
+  printf "\x1B[0m"
 }
 
 plural() {
