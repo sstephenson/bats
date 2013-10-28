@@ -140,9 +140,6 @@ while IFS= read -r line; do
     failures=$(( $failures + 1 ))
     buffer fail
     ;;
-  "#    "* )
-    buffer log "${line:5}"
-    ;;
   "# "* )
 
     buffer log "${line:2}"
