@@ -150,3 +150,10 @@ fixtures bats
 
   [ "$tap_output" != "$pretty_output" ]
 }
+
+@test "pretty formatter bails on invalid tap" {
+  run bats --tap "$FIXTURE_ROOT/invalid_tap.bats"
+  [ $status -eq 1 ]
+  [ "${lines[0]}" = "This isn't TAP!" ]
+  [ "${lines[1]}" = "Good day to you" ]
+}

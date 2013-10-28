@@ -4,12 +4,20 @@ set -e
 # Just stream the TAP output (sans extended syntax) if tput is missing
 command -v tput >/dev/null || exec grep -v "^begin "
 
-IFS= read -r header # 1..n
-count="${header:3}"
-index=0
-failures=0
-name=""
-count_column_width=$(( ${#count} * 2 + 2 ))
+header_pattern='[0-9]+\.\.[0-9]+'
+IFS= read -r header
+
+if [[ "$header" =~ $header_pattern ]]; then
+  count="${header:3}"
+  index=0
+  failures=0
+  name=""
+  count_column_width=$(( ${#count} * 2 + 2 ))
+else
+  # If the first line isn't a TAP plan, print it and pass the rest through
+  printf "%s\n" "$header"
+  exec cat
+fi
 
 update_screen_width() {
   screen_width="$(tput cols)"
