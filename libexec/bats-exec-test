@@ -82,10 +82,75 @@ bats_test_function() {
   BATS_TEST_NAMES["${#BATS_TEST_NAMES[@]}"]="$test_name"
 }
 
-bats_debug_trap() {
+bats_capture_stack_trace() {
   if [ "$BASH_SOURCE" != "$1" ]; then
+    BATS_STACK_TRACE=()
     BATS_LINE_NUMBER="$BATS_LINE_NUMBER_"
     BATS_LINE_NUMBER_="$2"
+
+    local test_pattern=" $BATS_TEST_NAME $BATS_TEST_SOURCE"
+    local index=0
+    local frame
+
+    while frame="$(caller "$index")"; do
+      BATS_STACK_TRACE[$index]="$frame"
+      if [[ "$frame" = *"$test_pattern" ]]; then
+        break
+      else
+        ((index++))
+      fi
+    done
+  fi
+}
+
+bats_print_stack_trace() {
+  local index=1
+  local count="${#BATS_STACK_TRACE[@]}"
+  local line
+
+  for frame in "${BATS_STACK_TRACE[@]}"; do
+    if [ $index -eq 1 ]; then
+      line="$BATS_LINE_NUMBER"
+      echo -n "# ("
+    else
+      line="$(bats_frame_line "$frame")"
+      echo -n "#  "
+    fi
+
+    if [ $index -eq $count ]; then
+      echo "in test file $BATS_TEST_FILENAME, line $line)"
+    else
+      local fn="$(bats_frame_function "$frame")"
+      local filename="$(bats_frame_filename "$frame")"
+      echo "from function \`$fn' in file $filename, line $line,"
+    fi
+
+    ((index++))
+  done
+}
+
+bats_frame_line() {
+  local frame="$1"
+  local line="${frame%% *}"
+  echo "$line"
+}
+
+bats_frame_function() {
+  local frame="$1"
+  local rest="${frame#* }"
+  local fn="${rest%% *}"
+  echo "$fn"
+}
+
+bats_frame_filename() {
+  local frame="$1"
+  local rest="${frame#* }"
+  local filename="${rest#* }"
+
+  if [ "$filename" = "$BATS_TEST_SOURCE" ]; then
+    echo "$BATS_TEST_FILENAME"
+  else
+    echo "$filename"
   fi
 }
 
@@ -114,7 +179,7 @@ bats_exit_trap() {
 
   if [ -z "$BATS_TEST_COMPLETED" ]; then
     echo "not ok $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION" >&3
-    echo "# (in test file $BATS_TEST_FILENAME, line $BATS_LINE_NUMBER)" >&3
+    bats_print_stack_trace >&3
     sed -e "s/^/# /" < "$BATS_OUT" >&3
     status=1
   else
@@ -148,7 +213,7 @@ bats_perform_test() {
 
     BATS_TEST_COMPLETED=""
     BATS_ERROR_LINE=""
-    trap "bats_debug_trap \"\$BASH_SOURCE\" \$LINENO" debug
+    trap "bats_capture_stack_trace \"\$BASH_SOURCE\" \$LINENO" debug
     trap "bats_error_trap" err
     trap "bats_teardown_trap" exit
     "$BATS_TEST_NAME" >>"$BATS_OUT" 2>&1
