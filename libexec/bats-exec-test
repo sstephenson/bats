@@ -97,7 +97,7 @@ bats_capture_stack_trace() {
       if [[ "$frame" = *"$test_pattern" ]]; then
         break
       else
-        ((index++))
+        index=$((index+1))
       fi
     done
   fi
