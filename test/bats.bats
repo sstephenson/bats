@@ -157,3 +157,11 @@ fixtures bats
   [ "${lines[0]}" = "This isn't TAP!" ]
   [ "${lines[1]}" = "Good day to you" ]
 }
+
+@test "failing helper function logs the test case's line number" {
+  run bats "$FIXTURE_ROOT/failing_helper.bats"
+  [ $status -eq 1 ]
+  [ "${lines[1]}" = "not ok 1 failing helper function" ]
+  [ "${lines[2]}" = "# (from function \`failing_helper' in file $FIXTURE_ROOT/test_helper.bash, line 6," ]
+  [ "${lines[3]}" = "#  in test file $FIXTURE_ROOT/failing_helper.bats, line 5)" ]
+}
