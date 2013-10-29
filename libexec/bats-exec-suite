@@ -17,7 +17,7 @@ trap "kill 0; exit 1" int
 
 count=0
 for filename in "$@"; do
-  count=$(($count + $(bats-exec-test -c "$filename")))
+  let count+="$(bats-exec-test -c "$filename")"
 done
 
 if [ -n "$count_only_flag" ]; then
@@ -35,11 +35,11 @@ for filename in "$@"; do
     while IFS= read -r line; do
       case "$line" in
       "begin "* )
-        index=$(($index + 1))
+        let index+=1
         echo "${line/ $index / $(($offset + $index)) }"
         ;;
       "ok "* | "not ok "* )
-        [ -n "$extended_syntax_flag" ] || index=$(($index + 1))
+        [ -n "$extended_syntax_flag" ] || let index+=1
         echo "${line/ $index / $(($offset + $index)) }"
         [ "${line:0:6}" != "not ok" ] || status=1
         ;;

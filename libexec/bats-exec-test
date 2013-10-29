@@ -97,7 +97,7 @@ bats_capture_stack_trace() {
       if [[ "$frame" = *"$test_pattern" ]]; then
         break
       else
-        ((index++))
+        let index+=1
       fi
     done
   fi
@@ -125,7 +125,7 @@ bats_print_stack_trace() {
       echo "from function \`$fn' in file $filename, line $line,"
     fi
 
-    ((index++))
+    let index+=1
   done
 }
 
@@ -197,7 +197,7 @@ bats_perform_tests() {
   status=0
   for test_name in "$@"; do
     "$0" $BATS_EXTENDED_SYNTAX "$BATS_TEST_FILENAME" "$test_name" "$test_number" || status=1
-    test_number=$(($test_number + 1))
+    let test_number+=1
   done
   exit "$status"
 }

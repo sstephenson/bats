@@ -67,7 +67,7 @@ for arg in "$@"; do
       while option="${arg:$index:1}"; do
         [ -n "$option" ] || break
         options[${#options[*]}]="$option"
-        index=$(($index+1))
+        let index+=1
       done
     fi
   else

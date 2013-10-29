@@ -131,7 +131,7 @@ trap finish EXIT
 while IFS= read -r line; do
   case "$line" in
   "begin "* )
-    index=$(( $index + 1 ))
+    let index+=1
     name="${line#* $index }"
     buffer begin
     flush
@@ -145,11 +145,10 @@ while IFS= read -r line; do
     fi
     ;;
   "not ok "* )
-    failures=$(( $failures + 1 ))
+    let failures+=1
     buffer fail
     ;;
   "# "* )
-
     buffer log "${line:2}"
     ;;
   esac
