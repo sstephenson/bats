@@ -226,7 +226,6 @@ bats_perform_test() {
 
     BATS_TEST_COMPLETED=""
     BATS_TEARDOWN_COMPLETED=""
-    BATS_ERROR_LINE=""
     trap "bats_capture_stack_trace \"\$BASH_SOURCE\" \$LINENO" debug
     trap "bats_error_trap" err
     trap "bats_teardown_trap" exit
