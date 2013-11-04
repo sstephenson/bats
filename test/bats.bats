@@ -86,21 +86,21 @@ fixtures bats
   [ ${#lines[@]} -eq 3 ]
 }
 
-@test "setup failure should reuslt in test failure" {
+@test "setup failure" {
   run bats "$FIXTURE_ROOT/failing_setup.bats"
   [ $status -eq 1 ]
   [ "${lines[1]}" = "not ok 1 truth" ]
   [ "${lines[2]}" = "# (from function \`setup' in test file $FIXTURE_ROOT/failing_setup.bats, line 2)" ]
 }
 
-@test "passing test with teardown failure should result in test failure" {
+@test "passing test with teardown failure" {
   PASS=1 run bats "$FIXTURE_ROOT/failing_teardown.bats"
   [ $status -eq 1 ]
   [ "${lines[1]}" = "not ok 1 truth" ]
   [ "${lines[2]}" = "# (from function \`teardown' in test file $FIXTURE_ROOT/failing_teardown.bats, line 2)" ]
 }
 
-@test "failing test with teardown failure should result in test failure" {
+@test "failing test with teardown failure" {
   PASS=0 run bats "$FIXTURE_ROOT/failing_teardown.bats"
   [ $status -eq 1 ]
   [ "${lines[1]}" = "not ok 1 truth" ]
