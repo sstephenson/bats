@@ -89,12 +89,17 @@ bats_capture_stack_trace() {
     BATS_LINE_NUMBER_="$2"
 
     local test_pattern=" $BATS_TEST_NAME $BATS_TEST_SOURCE"
+    local setup_pattern=" setup $BATS_TEST_SOURCE"
+    local teardown_pattern=" teardown $BATS_TEST_SOURCE"
+
     local index=0
     local frame
 
     while frame="$(caller "$index")"; do
       BATS_STACK_TRACE[$index]="$frame"
-      if [[ "$frame" = *"$test_pattern" ]]; then
+      if [[ "$frame" = *"$test_pattern"     || \
+            "$frame" = *"$setup_pattern"    || \
+            "$frame" = *"$teardown_pattern" ]]; then
         break
       else
         let index+=1
@@ -117,12 +122,16 @@ bats_print_stack_trace() {
       echo -n "#  "
     fi
 
+    local fn="$(bats_frame_function "$frame")"
+    if [ "$fn" != "$BATS_TEST_NAME" ]; then
+      echo -n "from function \`$fn' "
+    fi
+
     if [ $index -eq $count ]; then
       echo "in test file $BATS_TEST_FILENAME, line $line)"
     else
-      local fn="$(bats_frame_function "$frame")"
       local filename="$(bats_frame_filename "$frame")"
-      echo "from function \`$fn' in file $filename, line $line,"
+      echo "in file $filename, line $line,"
     fi
 
     let index+=1
@@ -160,7 +169,11 @@ bats_error_trap() {
 
 bats_teardown_trap() {
   trap bats_exit_trap exit
-  teardown >>"$BATS_OUT" 2>&1
+  if teardown >>"$BATS_OUT" 2>&1; then
+    BATS_TEARDOWN_COMPLETED=1
+  elif [ -n "$BATS_TEST_COMPLETED" ]; then
+    BATS_LINE_NUMBER="$BATS_LINE_NUMBER_"
+  fi
   bats_exit_trap
 }
 
@@ -177,7 +190,7 @@ bats_exit_trap() {
     fi
   fi
 
-  if [ -z "$BATS_TEST_COMPLETED" ]; then
+  if [ -z "$BATS_TEST_COMPLETED" ] || [ -z "$BATS_TEARDOWN_COMPLETED" ]; then
     echo "not ok $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION" >&3
     bats_print_stack_trace >&3
     sed -e "s/^/# /" < "$BATS_OUT" >&3
@@ -212,6 +225,7 @@ bats_perform_test() {
     fi
 
     BATS_TEST_COMPLETED=""
+    BATS_TEARDOWN_COMPLETED=""
     BATS_ERROR_LINE=""
     trap "bats_capture_stack_trace \"\$BASH_SOURCE\" \$LINENO" debug
     trap "bats_error_trap" err

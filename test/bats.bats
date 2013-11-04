@@ -57,6 +57,14 @@ fixtures bats
   [ ${lines[3]} = "ok 2 a passing test" ]
 }
 
+@test "failing helper function logs the test case's line number" {
+  run bats "$FIXTURE_ROOT/failing_helper.bats"
+  [ $status -eq 1 ]
+  [ "${lines[1]}" = "not ok 1 failing helper function" ]
+  [ "${lines[2]}" = "# (from function \`failing_helper' in file $FIXTURE_ROOT/test_helper.bash, line 6," ]
+  [ "${lines[3]}" = "#  in test file $FIXTURE_ROOT/failing_helper.bats, line 5)" ]
+}
+
 @test "test environments are isolated" {
   run bats "$FIXTURE_ROOT/environment.bats"
   [ $status -eq 0 ]
@@ -76,6 +84,27 @@ fixtures bats
   [ $status -eq 1 ]
   run cat "$TMP/teardown.log"
   [ ${#lines[@]} -eq 3 ]
+}
+
+@test "setup failure should reuslt in test failure" {
+  run bats "$FIXTURE_ROOT/failing_setup.bats"
+  [ $status -eq 1 ]
+  [ "${lines[1]}" = "not ok 1 truth" ]
+  [ "${lines[2]}" = "# (from function \`setup' in test file $FIXTURE_ROOT/failing_setup.bats, line 2)" ]
+}
+
+@test "passing test with teardown failure should result in test failure" {
+  PASS=1 run bats "$FIXTURE_ROOT/failing_teardown.bats"
+  [ $status -eq 1 ]
+  [ "${lines[1]}" = "not ok 1 truth" ]
+  [ "${lines[2]}" = "# (from function \`teardown' in test file $FIXTURE_ROOT/failing_teardown.bats, line 2)" ]
+}
+
+@test "failing test with teardown failure should result in test failure" {
+  PASS=0 run bats "$FIXTURE_ROOT/failing_teardown.bats"
+  [ $status -eq 1 ]
+  [ "${lines[1]}" = "not ok 1 truth" ]
+  [ "${lines[2]}" = "# (in test file $FIXTURE_ROOT/failing_teardown.bats, line 6)" ]
 }
 
 @test "load sources scripts relative to the current test file" {
@@ -156,12 +185,4 @@ fixtures bats
   [ $status -eq 1 ]
   [ "${lines[0]}" = "This isn't TAP!" ]
   [ "${lines[1]}" = "Good day to you" ]
-}
-
-@test "failing helper function logs the test case's line number" {
-  run bats "$FIXTURE_ROOT/failing_helper.bats"
-  [ $status -eq 1 ]
-  [ "${lines[1]}" = "not ok 1 failing helper function" ]
-  [ "${lines[2]}" = "# (from function \`failing_helper' in file $FIXTURE_ROOT/test_helper.bash, line 6," ]
-  [ "${lines[3]}" = "#  in test file $FIXTURE_ROOT/failing_helper.bats, line 5)" ]
 }
