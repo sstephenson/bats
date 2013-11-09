@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv='content-type' value='text/html;charset=utf8'>
+  <meta name='generator' value='Ronn/v0.7.3 (http://github.com/rtomayko/ronn/tree/0.7.3)'>
+  <title>bats(7) - Bats test file format</title>
+  <style type='text/css' media='all'>
+  /* style: man */
+  body#manpage {margin:0}
+  .mp {max-width:100ex;padding:0 9ex 1ex 4ex}
+  .mp p,.mp pre,.mp ul,.mp ol,.mp dl {margin:0 0 20px 0}
+  .mp h2 {margin:10px 0 0 0}
+  .mp > p,.mp > pre,.mp > ul,.mp > ol,.mp > dl {margin-left:8ex}
+  .mp h3 {margin:0 0 0 4ex}
+  .mp dt {margin:0;clear:left}
+  .mp dt.flush {float:left;width:8ex}
+  .mp dd {margin:0 0 0 9ex}
+  .mp h1,.mp h2,.mp h3,.mp h4 {clear:left}
+  .mp pre {margin-bottom:20px}
+  .mp pre+h2,.mp pre+h3 {margin-top:22px}
+  .mp h2+pre,.mp h3+pre {margin-top:5px}
+  .mp img {display:block;margin:auto}
+  .mp h1.man-title {display:none}
+  .mp,.mp code,.mp pre,.mp tt,.mp kbd,.mp samp,.mp h3,.mp h4 {font-family:monospace;font-size:14px;line-height:1.42857142857143}
+  .mp h2 {font-size:16px;line-height:1.25}
+  .mp h1 {font-size:20px;line-height:2}
+  .mp {text-align:justify;background:#fff}
+  .mp,.mp code,.mp pre,.mp pre code,.mp tt,.mp kbd,.mp samp {color:#131211}
+  .mp h1,.mp h2,.mp h3,.mp h4 {color:#030201}
+  .mp u {text-decoration:underline}
+  .mp code,.mp strong,.mp b {font-weight:bold;color:#131211}
+  .mp em,.mp var {font-style:italic;color:#232221;text-decoration:none}
+  .mp a,.mp a:link,.mp a:hover,.mp a code,.mp a pre,.mp a tt,.mp a kbd,.mp a samp {color:#0000ff}
+  .mp b.man-ref {font-weight:normal;color:#434241}
+  .mp pre {padding:0 4ex}
+  .mp pre code {font-weight:normal;color:#434241}
+  .mp h2+pre,h3+pre {padding-left:0}
+  ol.man-decor,ol.man-decor li {margin:3px 0 10px 0;padding:0;float:left;width:33%;list-style-type:none;text-transform:uppercase;color:#999;letter-spacing:1px}
+  ol.man-decor {width:100%}
+  ol.man-decor li.tl {text-align:left}
+  ol.man-decor li.tc {text-align:center;letter-spacing:4px}
+  ol.man-decor li.tr {text-align:right;float:right}
+  </style>
+</head>
+<!--
+  The following styles are deprecated and will be removed at some point:
+  div#man, div#man ol.man, div#man ol.head, div#man ol.man.
+
+  The .man-page, .man-decor, .man-head, .man-foot, .man-title, and
+  .man-navigation should be used instead.
+-->
+<body id='manpage'>
+  <div class='mp' id='man'>
+
+  <div class='man-navigation' style='display:none'>
+    <a href="#NAME">NAME</a>
+    <a href="#SYNOPSIS">SYNOPSIS</a>
+    <a href="#DESCRIPTION">DESCRIPTION</a>
+    <a href="#THE-_RUN_-HELPER">THE _RUN_ HELPER</a>
+    <a href="#THE-_LOAD_-COMMAND">THE _LOAD_ COMMAND</a>
+    <a href="#THE-_SKIP_-COMMAND">THE _SKIP_ COMMAND</a>
+    <a href="#SETUP-AND-TEARDOWN-FUNCTIONS">SETUP AND TEARDOWN FUNCTIONS</a>
+    <a href="#CODE-OUTSIDE-OF-TEST-CASES">CODE OUTSIDE OF TEST CASES</a>
+    <a href="#SPECIAL-VARIABLES">SPECIAL VARIABLES</a>
+    <a href="#SEE-ALSO">SEE ALSO</a>
+  </div>
+
+  <ol class='man-decor man-head man head'>
+    <li class='tl'>bats(7)</li>
+    <li class='tc'></li>
+    <li class='tr'>bats(7)</li>
+  </ol>
+
+  <h2 id="NAME">NAME</h2>
+<p class="man-name">
+  <code>bats</code> - <span class="man-whatis">Bats test file format</span>
+</p>
+
+<h2 id="SYNOPSIS">SYNOPSIS</h2>
+
+<pre><code>load test_helper
+
+
+setup() {
+  # set up your environment
+  # run before and after each test case
+}
+
+teardown() {
+  # clean up your environment
+  # run before and after each test case
+}
+
+
+code_outside_of_test_cases () {
+  # For example, check for dependencies 
+  # and fail immediatelyif they're not present.
+  # Output must be redirected to `stderr` (`&gt;&amp;2`)
+}
+
+
+@test "test description" {
+    run foo arguments
+    [ "$status" -eq 1 ]
+    [ "$output" = "expected output" ]
+}
+
+@test "test description" {
+  run foo arguments
+  [ "$status" -eq 1 ]
+  [ "${lines[0]}" = "first line of expected output" ]
+}
+
+
+@test "A test I don't want to execute for now" {
+  skip "This command will return zero soon, but not now"
+  run foo
+  [ "$status" -eq 0 ]
+}
+
+@test "A test which should run" {
+  if [ foo != bar ]; then
+    skip "foo isn't bar"
+  fi
+
+  run foo
+  [ "$status" -eq 0 ]
+}
+</code></pre>
+
+<h2 id="DESCRIPTION">DESCRIPTION</h2>
+
+<p>A Bats test file is a Bash script with special syntax for defining
+test cases. Under the hood, each test case is just a function with a
+description.</p>
+
+<pre><code>#!/usr/bin/env bats
+
+@test "addition using bc" {
+  result="$(echo 2+2 | bc)"
+  [ "$result" -eq 4 ]
+}
+
+@test "addition using dc" {
+  result="$(echo 2 2+p | dc)"
+  [ "$result" -eq 4 ]
+}
+</code></pre>
+
+<p>Each Bats test file is evaulated n+1 times, where <em>n</em> is the number of
+test cases in the file. The first run counts the number of test cases,
+then iterates over the test cases and executes each one in its own
+process.</p>
+
+<p>For details about exactly how Bats evaluates test files, see
+Bats Evaluation Process:
+https://github.com/sstephenson/bats/wiki/Bats-Evaluation-Process</p>
+
+<h2 id="THE-_RUN_-HELPER">THE <code>_RUN_</code> HELPER</h2>
+
+<p>Many Bats tests need to run a command and then make assertions about
+its exit status and output. Bats includes a <code>run</code> helper that invokes
+its arguments as a command, saves the exit status and output into
+special global variables, and then returns with a <code>0</code> status code so
+you can continue to make assertions in your test case.</p>
+
+<p>For example, let's say you're testing that the <code>foo</code> command, when
+passed a nonexistent filename, exits with a <code>1</code> status code and prints
+an error message.</p>
+
+<pre><code>@test "invoking foo with a nonexistent file prints an error" {
+  run foo nonexistent_filename
+  [ "$status" -eq 1 ]
+  [ "$output" = "foo: no such file 'nonexistent_filename'" ]
+}
+</code></pre>
+
+<p>The <code>$status</code> variable contains the status code of the command, and
+the <code>$output</code> variable contains the combined contents of the command's
+standard output and standard error streams.</p>
+
+<p>A third special variable, the <code>$lines</code> array, is available for easily
+accessing individual lines of output. For example, if you want to test
+that invoking <code>foo</code> without any arguments prints usage information on
+the first line:</p>
+
+<pre><code>@test "invoking foo without arguments prints usage" { run foo
+  [ "$status" -eq 1 ]
+  [ "${lines[0]}" = "usage: foo &lt;filename>" ]
+}
+</code></pre>
+
+<h2 id="THE-_LOAD_-COMMAND">THE <code>_LOAD_</code> COMMAND</h2>
+
+<p>You may want to share common code across multiple test files. Bats
+includes a convenient <code>load</code> command for sourcing a Bash source file
+relative to the location of the current test file. For example, if you
+have a Bats test in <code>test/foo.bats</code>, the command</p>
+
+<pre><code>load test_helper
+</code></pre>
+
+<p>will source the script <code>test/test_helper.bash</code> in your test file. This
+can be useful for sharing functions to set up your environment or load
+fixtures.</p>
+
+<h2 id="THE-_SKIP_-COMMAND">THE <code>_SKIP_</code> COMMAND</h2>
+
+<p>Tests can be skipped by using the <code>skip</code> command at the point in a
+test you wish to skip.</p>
+
+<pre><code>@test "A test I don't want to execute for now" {
+  skip
+  run foo
+  [ "$status" -eq 0 ]
+}
+</code></pre>
+
+<p>Optionally, you may include a reason for skipping:</p>
+
+<pre><code>@test "A test I don't want to execute for now" {
+  skip "This command will return zero soon, but not now"
+  run foo
+  [ "$status" -eq 0 ]
+}
+</code></pre>
+
+<p>Or you can skip conditionally:</p>
+
+<pre><code>@test "A test which should run" {
+  if [ foo != bar ]; then
+    skip "foo isn't bar"
+  fi
+
+  run foo
+  [ "$status" -eq 0 ]
+}
+</code></pre>
+
+<h2 id="SETUP-AND-TEARDOWN-FUNCTIONS">SETUP AND TEARDOWN FUNCTIONS</h2>
+
+<p>You can define special <code>setup</code> and <code>teardown</code> functions which run
+before and after each test case, respectively. Use these to load
+fixtures, set up your environment, and clean up when you're done.</p>
+
+<h2 id="CODE-OUTSIDE-OF-TEST-CASES">CODE OUTSIDE OF TEST CASES</h2>
+
+<p>You can include code in your test file outside of <code>@test</code> functions.
+For example, this may be useful if you want to check for dependencies
+and fail immediately if they're not present. However, any output that
+you print in code outside of <code>@test</code>, <code>setup</code> or <code>teardown</code> functions
+must be redirected to <code>stderr</code> (<code>&gt;&amp;2</code>). Otherwise, the output may
+cause Bats to fail by polluting the TAP stream on <code>stdout</code>.</p>
+
+<h2 id="SPECIAL-VARIABLES">SPECIAL VARIABLES</h2>
+
+<p>There are several global variables you can use to introspect on Bats
+tests:</p>
+
+<ul>
+<li><code>$BATS_TEST_FILENAME</code> is the fully expanded path to the Bats test
+file.</li>
+<li><code>$BATS_TEST_DIRNAME</code> is the directory in which the Bats test file is
+located.</li>
+<li><code>$BATS_TEST_NAMES</code> is an array of function names for each test case.</li>
+<li><code>$BATS_TEST_NAME</code> is the name of the function containing the current
+test case.</li>
+<li><code>$BATS_TEST_DESCRIPTION</code> is the description of the current test
+case.</li>
+<li><code>$BATS_TEST_NUMBER</code> is the (1-based) index of the current test case
+in the test file.</li>
+<li><code>$BATS_TMPDIR</code> is the location to a directory that may be used to
+store temporary files.</li>
+</ul>
+
+
+<h2 id="SEE-ALSO">SEE ALSO</h2>
+
+<p><a class="man-ref" href="bats.1.html">bats<span class="s">(1)</span></a></p>
+
+
+  <ol class='man-decor man-foot man foot'>
+    <li class='tl'></li>
+    <li class='tc'>November 2013</li>
+    <li class='tr'>bats(7)</li>
+  </ol>
+
+  </div>
+</body>
+</html>
