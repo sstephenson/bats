@@ -186,3 +186,10 @@ fixtures bats
   [ "${lines[0]}" = "This isn't TAP!" ]
   [ "${lines[1]}" = "Good day to you" ]
 }
+
+@test "variables are preserved" {
+  run bats "$FIXTURE_ROOT/preserved_variables.bats"
+  echo $status
+  echo $output
+  [ $status -eq 0 ]
+}
