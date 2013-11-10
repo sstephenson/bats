@@ -6,61 +6,6 @@
 .SH "NAME"
 \fBbats\fR \- Bats test file format
 .
-.SH "SYNOPSIS"
-.
-.nf
-
-load test_helper
-
-
-setup() {
-  # set up your environment
-  # run before and after each test case
-}
-
-teardown() {
-  # clean up your environment
-  # run before and after each test case
-}
-
-
-code_outside_of_test_cases () {
-  # For example, check for dependencies
-  # and fail immediatelyif they\'re not present\.
-  # Output must be redirected to `stderr` (`>&2`)
-}
-
-
-@test "test description" {
-    run foo arguments
-    [ "$status" \-eq 1 ]
-    [ "$output" = "expected output" ]
-}
-
-@test "test description" {
-  run foo arguments
-  [ "$status" \-eq 1 ]
-  [ "${lines[0]}" = "first line of expected output" ]
-}
-
-
-@test "A test I don\'t want to execute for now" {
-  skip "This command will return zero soon, but not now"
-  run foo
-  [ "$status" \-eq 0 ]
-}
-
-@test "A test which should run" {
-  if [ foo != bar ]; then
-    skip "foo isn\'t bar"
-  fi
-
-  run foo
-  [ "$status" \-eq 0 ]
-}
-.
-.fi
-.
 .SH "DESCRIPTION"
 A Bats test file is a Bash script with special syntax for defining test cases\. Under the hood, each test case is just a function with a description\.
 .
@@ -87,10 +32,7 @@ A Bats test file is a Bash script with special syntax for defining test cases\. 
 .P
 Each Bats test file is evaulated n+1 times, where \fIn\fR is the number of test cases in the file\. The first run counts the number of test cases, then iterates over the test cases and executes each one in its own process\.
 .
-.P
-For details about exactly how Bats evaluates test files, see Bats Evaluation Process: https://github\.com/sstephenson/bats/wiki/Bats\-Evaluation\-Process
-.
-.SH "THE <code>_RUN_</code> HELPER"
+.SH "THE RUN HELPER"
 Many Bats tests need to run a command and then make assertions about its exit status and output\. Bats includes a \fBrun\fR helper that invokes its arguments as a command, saves the exit status and output into special global variables, and then returns with a \fB0\fR status code so you can continue to make assertions in your test case\.
 .
 .P
@@ -120,7 +62,8 @@ A third special variable, the \fB$lines\fR array, is available for easily access
 .
 .nf
 
-@test "invoking foo without arguments prints usage" { run foo
+@test "invoking foo without arguments prints usage" {
+  run foo
   [ "$status" \-eq 1 ]
   [ "${lines[0]}" = "usage: foo <filename>" ]
 }
@@ -129,7 +72,7 @@ A third special variable, the \fB$lines\fR array, is available for easily access
 .
 .IP "" 0
 .
-.SH "THE <code>_LOAD_</code> COMMAND"
+.SH "THE LOAD COMMAND"
 You may want to share common code across multiple test files\. Bats includes a convenient \fBload\fR command for sourcing a Bash source file relative to the location of the current test file\. For example, if you have a Bats test in \fBtest/foo\.bats\fR, the command
 .
 .IP "" 4
@@ -145,7 +88,7 @@ load test_helper
 .P
 will source the script \fBtest/test_helper\.bash\fR in your test file\. This can be useful for sharing functions to set up your environment or load fixtures\.
 .
-.SH "THE <code>_SKIP_</code> COMMAND"
+.SH "THE SKIP COMMAND"
 Tests can be skipped by using the \fBskip\fR command at the point in a test you wish to skip\.
 .
 .IP "" 4
@@ -232,4 +175,4 @@ There are several global variables you can use to introspect on Bats tests:
 .IP "" 0
 .
 .SH "SEE ALSO"
-bats(1)
+\fBbash\fR(1), \fBbats\fR(1)

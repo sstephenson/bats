@@ -1,58 +1,6 @@
 bats(7) -- Bats test file format
 ================================
 
-SYNOPSIS
---------
-
-    load test_helper
-
-
-    setup() {
-      # set up your environment
-      # run before and after each test case
-    }
-
-    teardown() {
-      # clean up your environment
-      # run before and after each test case
-    }
-
-
-    code_outside_of_test_cases () {
-      # For example, check for dependencies 
-      # and fail immediatelyif they're not present.
-      # Output must be redirected to `stderr` (`>&2`)
-    }
-
-
-    @test "test description" {
-        run foo arguments
-        [ "$status" -eq 1 ]
-        [ "$output" = "expected output" ]
-    }
-
-    @test "test description" {
-      run foo arguments
-      [ "$status" -eq 1 ]
-      [ "${lines[0]}" = "first line of expected output" ]
-    }
-
-
-    @test "A test I don't want to execute for now" {
-      skip "This command will return zero soon, but not now"
-      run foo
-      [ "$status" -eq 0 ]
-    }
-
-    @test "A test which should run" {
-      if [ foo != bar ]; then
-        skip "foo isn't bar"
-      fi
-
-      run foo
-      [ "$status" -eq 0 ]
-    }
-
 
 DESCRIPTION
 -----------
@@ -79,13 +27,9 @@ test cases in the file. The first run counts the number of test cases,
 then iterates over the test cases and executes each one in its own
 process.
 
-For details about exactly how Bats evaluates test files, see
-Bats Evaluation Process:
-https://github.com/sstephenson/bats/wiki/Bats-Evaluation-Process
 
-
-THE `_RUN_` HELPER
-------------------
+THE RUN HELPER
+--------------
 
 Many Bats tests need to run a command and then make assertions about
 its exit status and output. Bats includes a `run` helper that invokes
@@ -112,14 +56,15 @@ accessing individual lines of output. For example, if you want to test
 that invoking `foo` without any arguments prints usage information on
 the first line:
 
-    @test "invoking foo without arguments prints usage" { run foo
+    @test "invoking foo without arguments prints usage" {
+      run foo
       [ "$status" -eq 1 ]
       [ "${lines[0]}" = "usage: foo <filename>" ]
     }
 
 
-THE `_LOAD_` COMMAND
-------------------
+THE LOAD COMMAND
+----------------
 
 You may want to share common code across multiple test files. Bats
 includes a convenient `load` command for sourcing a Bash source file
@@ -133,8 +78,8 @@ can be useful for sharing functions to set up your environment or load
 fixtures.
 
 
-THE `_SKIP_` COMMAND
-------------------
+THE SKIP COMMAND
+----------------
 
 Tests can be skipped by using the `skip` command at the point in a
 test you wish to skip.
@@ -208,4 +153,4 @@ store temporary files.
 SEE ALSO
 --------
 
-bats(1)
+`bash`(1), `bats`(1)

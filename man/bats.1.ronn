@@ -1,34 +1,46 @@
 bats(1) -- Bash Automated Testing System
 ========================================
 
+
 SYNOPSIS
 --------
 
 bats [-c] [-p | -t] <test> [<test> ...]
 
+<test> is the path to a Bats test file, or the path to a directory
+containing Bats test files.
+
 
 DESCRIPTION
 -----------
 
+Bats is a TAP-compliant testing framework for Bash. It provides a simple
+way to verify that the UNIX programs you write behave as expected.
 
-Bats is a TAP-compliant testing framework for Bash.
-It provides a simple way to verify that the UNIX programs you write behave as expected.
+A Bats test file is a Bash script with special syntax for defining
+test cases. Under the hood, each test case is just a function with a
+description.
 
-Bats is most useful when testing software written in Bash, but you can use it to test any UNIX program.
+Test cases consist of standard shell commands. Bats makes use of
+Bash's `errexit` (`set -e`) option when running test cases. If every
+command in the test case exits with a `0` status code (success), the
+test passes. In this way, each line is an assertion of truth.
+
+See `bats`(7) for more information on writing Bats tests.
 
 
-FILES
------
+RUNNING TESTS
+-------------
 
 To run your tests, invoke the `bats` interpreter with a path to a test
 file. The file's test cases are run sequentially and in isolation. If
 all the test cases pass, `bats` exits with a `0` status code. If there
 are any failures, `bats` exits with a `1` status code.
 
-You can invoke the `bats` interpreter with multiple test file
-arguments, or with a path to a directory containing multiple `.bats`
-files. Bats will run each test file individually and aggregate the
-results. If any test case fails, `bats` exits with a `1` status code.
+You can invoke the `bats` interpreter with multiple test file arguments,
+or with a path to a directory containing multiple `.bats` files. Bats
+will run each test file individually and aggregate the results. If any
+test case fails, `bats` exits with a `1` status code.
 
 
 OPTIONS
@@ -37,7 +49,7 @@ OPTIONS
   * `-c`, `--count`:
     Count the number of test cases without running any tests
   * `-h`, `--help`:
-    Display this help message
+    Display help message
   * `-p`, `--pretty`:
     Show results in pretty format (default for terminals)
   * `-t`, `--tap`:
@@ -45,10 +57,9 @@ OPTIONS
   * `-v`, `--version`:
     Display the version number
 
-    
-EXAMPLES
---------
 
+OUTPUT
+------
 
 When you run Bats from a terminal, you'll see output as each test is
 performed, with a check-mark next to the test's name if it passes or
@@ -60,12 +71,11 @@ an "X" if it fails.
 
     2 tests, 0 failures
 
-If Bats is not connected to a terminal—in other words, if you
-run it from a continuous integration system or redirect its output to
-a file—the results are displayed in human-readable, machine-parsable
-[TAP format](http://testanything.org/wiki/index.php/TAP_specification#THE_TAP_FORMAT).
-You can force TAP output from a terminal by invoking Bats with the
-`--tap` option.
+If Bats is not connected to a terminal--in other words, if you run it
+from a continuous integration system or redirect its output to a
+file--the results are displayed in human-readable, machine-parsable
+TAP format. You can force TAP output from a terminal by invoking Bats
+with the `--tap` option.
 
     $ bats --tap addition.bats
     1..2
@@ -73,15 +83,27 @@ You can force TAP output from a terminal by invoking Bats with the
     ok 2 addition using dc
 
 
-COPYRIGHT
----------
+EXIT STATUS
+-----------
 
-(c) 2013 Sam Stephenson.
-
-Bats is released under an MIT-style license
+The `bats` interpreter exits with a value of `0` if all test cases pass,
+or `1` if one or more test cases fail.
 
 
 SEE ALSO
 --------
 
-bats(7)
+Bats wiki: _https://github.com/sstephenson/bats/wiki/_
+
+`bash`(1), `bats`(7)
+
+
+COPYRIGHT
+---------
+
+(c) 2013 Sam Stephenson
+
+Bats is released under the terms of an MIT-style license.
+
+
+

@@ -1,3 +1,0 @@
-# manuals
-bats(1)    bats.1.ronn
-bats(7)    bats.7.ronn

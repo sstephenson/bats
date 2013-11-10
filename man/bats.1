@@ -9,13 +9,22 @@
 .SH "SYNOPSIS"
 bats [\-c] [\-p | \-t] \fItest\fR [\fItest\fR \.\.\.]
 .
+.P
+\fItest\fR is the path to a Bats test file, or the path to a directory containing Bats test files\.
+.
 .SH "DESCRIPTION"
 Bats is a TAP\-compliant testing framework for Bash\. It provides a simple way to verify that the UNIX programs you write behave as expected\.
 .
 .P
-Bats is most useful when testing software written in Bash, but you can use it to test any UNIX program\.
+A Bats test file is a Bash script with special syntax for defining test cases\. Under the hood, each test case is just a function with a description\.
 .
-.SH "FILES"
+.P
+Test cases consist of standard shell commands\. Bats makes use of Bash\'s \fBerrexit\fR (\fBset \-e\fR) option when running test cases\. If every command in the test case exits with a \fB0\fR status code (success), the test passes\. In this way, each line is an assertion of truth\.
+.
+.P
+See \fBbats\fR(7) for more information on writing Bats tests\.
+.
+.SH "RUNNING TESTS"
 To run your tests, invoke the \fBbats\fR interpreter with a path to a test file\. The file\'s test cases are run sequentially and in isolation\. If all the test cases pass, \fBbats\fR exits with a \fB0\fR status code\. If there are any failures, \fBbats\fR exits with a \fB1\fR status code\.
 .
 .P
@@ -29,7 +38,7 @@ Count the number of test cases without running any tests
 .
 .TP
 \fB\-h\fR, \fB\-\-help\fR
-Display this help message
+Display help message
 .
 .TP
 \fB\-p\fR, \fB\-\-pretty\fR
@@ -43,7 +52,7 @@ Show results in TAP format
 \fB\-v\fR, \fB\-\-version\fR
 Display the version number
 .
-.SH "EXAMPLES"
+.SH "OUTPUT"
 When you run Bats from a terminal, you\'ll see output as each test is performed, with a check\-mark next to the test\'s name if it passes or an "X" if it fails\.
 .
 .IP "" 4
@@ -61,7 +70,7 @@ $ bats addition\.bats
 .IP "" 0
 .
 .P
-If Bats is not connected to a terminal—in other words, if you run it from a continuous integration system or redirect its output to a file—the results are displayed in human\-readable, machine\-parsable TAP format \fIhttp://testanything\.org/wiki/index\.php/TAP_specification#THE_TAP_FORMAT\fR\. You can force TAP output from a terminal by invoking Bats with the \fB\-\-tap\fR option\.
+If Bats is not connected to a terminal\-\-in other words, if you run it from a continuous integration system or redirect its output to a file\-\-the results are displayed in human\-readable, machine\-parsable TAP format\. You can force TAP output from a terminal by invoking Bats with the \fB\-\-tap\fR option\.
 .
 .IP "" 4
 .
@@ -76,11 +85,17 @@ ok 2 addition using dc
 .
 .IP "" 0
 .
-.SH "COPYRIGHT"
-(c) 2013 Sam Stephenson\.
-.
-.P
-Bats is released under an MIT\-style license
+.SH "EXIT STATUS"
+The \fBbats\fR interpreter exits with a value of \fB0\fR if all test cases pass, or \fB1\fR if one or more test cases fail\.
 .
 .SH "SEE ALSO"
-bats(7)
+Bats wiki: \fIhttps://github\.com/sstephenson/bats/wiki/\fR
+.
+.P
+\fBbash\fR(1), \fBbats\fR(7)
+.
+.SH "COPYRIGHT"
+(c) 2013 Sam Stephenson
+.
+.P
+Bats is released under the terms of an MIT\-style license\.
