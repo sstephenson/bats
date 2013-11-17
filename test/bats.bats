@@ -186,3 +186,13 @@ fixtures bats
   [ "${lines[0]}" = "This isn't TAP!" ]
   [ "${lines[1]}" = "Good day to you" ]
 }
+
+@test "single-line tests" {
+  run bats "$FIXTURE_ROOT/single_line.bats"
+  [ $status -eq 1 ]
+  [ "${lines[1]}" = "ok 1 empty" ]
+  [ "${lines[2]}" = "ok 2 passing" ]
+  [ "${lines[3]}" = "ok 3 input redirection" ]
+  [ "${lines[4]}" = "not ok 4 failing" ]
+  [ "${lines[5]}" = "# (in test file $FIXTURE_ROOT/single_line.bats, line 9)" ]
+}
