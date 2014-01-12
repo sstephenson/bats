@@ -28,6 +28,7 @@ fi
 
 BATS_TEST_DIRNAME="$(dirname "$BATS_TEST_FILENAME")"
 BATS_TEST_NAMES=()
+BATS_PLUGIN_DIR="$HOME/.bats/plugins"
 
 load() {
   local filename="$BATS_TEST_DIRNAME/$1.bash"
@@ -37,6 +38,16 @@ load() {
   }
 
   source "$BATS_TEST_DIRNAME/$1.bash"
+}
+
+load_plugin() {
+  local plugin_path="$BATS_PLUGIN_DIR/$1/$1.plugin.bats"
+  [ -f "$plugin_path" ] || {
+    echo "bats: plugin $1 does not exist" >&2
+    exit 1
+  }
+
+  source "$plugin_path"
 }
 
 run() {
