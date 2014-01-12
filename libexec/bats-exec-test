@@ -50,6 +50,13 @@ load_plugin() {
   source "$plugin_path"
 }
 
+load_batsrc() {
+  local batsrc_file="$HOME/.batsrc"
+  if [ -f $batsrc_file ]; then
+    source $batsrc_file
+  fi
+}
+
 run() {
   local e E T
   [[ ! "$-" =~ e ]] || e=1
@@ -276,6 +283,8 @@ bats_evaluate_preprocessed_source() {
   fi
   source "$BATS_TEST_SOURCE"
 }
+
+load_batsrc
 
 exec 3<&1
 
