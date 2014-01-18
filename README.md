@@ -213,6 +213,15 @@ Bats. For example, to install Bats into `/usr/local`,
 Note that you may need to run `install.sh` with `sudo` if you do not
 have permission to write to the installation prefix.
 
+## Installing Bats with Homebrew
+
+If you are using [the Homebrew package manager](http://brew.sh/) for
+Mac OS X, then you can install Bats as follows:
+
+    $ brew install bats
+
+This will use Homebrew's installation prefix (`/usr/local` by default)
+
 ## Support
 
 The Bats source code repository is [hosted on
