@@ -136,5 +136,7 @@ else
   formatter="cat"
 fi
 
+export BATS_TMPDIR="$(mktemp -d --tmpdir tmp.bats.XXXXX)"
+
 set -o pipefail execfail
 exec "$command" $count_flag $extended_syntax_flag "${filenames[@]}" | "$formatter"
