@@ -69,6 +69,11 @@ skip() {
   exit 0
 }
 
+fail() {
+  BATS_TEST_COMPLETED=1
+  exit 1
+}
+
 bats_test_begin() {
   BATS_TEST_DESCRIPTION="$1"
   if [ -n "$BATS_EXTENDED_SYNTAX" ]; then
