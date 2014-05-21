@@ -30,13 +30,20 @@ BATS_TEST_DIRNAME="$(dirname "$BATS_TEST_FILENAME")"
 BATS_TEST_NAMES=()
 
 load() {
-  local filename="$BATS_TEST_DIRNAME/$1.bash"
+  local inc="$1"
+  local filename
+
+  if [[ "${inc}" == "/"* ]] ; then
+    filename="${inc}"
+  else
+    filename="$BATS_TEST_DIRNAME/${inc}.bash"
+  fi
   [ -f "$filename" ] || {
     echo "bats: $filename does not exist" >&2
     exit 1
   }
 
-  source "$BATS_TEST_DIRNAME/$1.bash"
+  source "${filename}"
 }
 
 run() {
@@ -50,6 +57,38 @@ run() {
   output="$("$@" 2>&1)"
   status="$?"
   IFS=$'\n' lines=($output)
+  [ -z "$e" ] || set -e
+  [ -z "$E" ] || set -E
+  [ -z "$T" ] || set -T
+}
+
+# code for storing stdout and stderr separately
+# is taken from http://stackoverflow.com/a/18086548
+# (question http://stackoverflow.com/questions/11027679/bash-store-stdout-and-stderr-in-different-variables)
+run_outerr() {
+  local e E T
+  [[ ! "$-" =~ e ]] || e=1
+  [[ ! "$-" =~ E ]] || E=1
+  [[ ! "$-" =~ T ]] || T=1
+  set +e
+  set +E
+  set +T
+
+  local tmp_out tmp_err tmp_status
+  eval "$(
+    "$@" \
+      2> >(tmp_err="$(cat)" ; declare -p tmp_err) \
+      1> >(tmp_out="$(cat)" ; declare -p tmp_out)
+    tmp_status="$?"
+    declare -p tmp_status
+  )"
+
+  output="${tmp_out}"
+  error="${tmp_err}"
+  status="${tmp_status}"
+
+  IFS=$'\n' lines_out=($output)
+  IFS=$'\n' lines_err=($error)
   [ -z "$e" ] || set -e
   [ -z "$E" ] || set -E
   [ -z "$T" ] || set -T
@@ -112,15 +151,24 @@ bats_print_stack_trace() {
   local index=1
   local count="${#BATS_STACK_TRACE[@]}"
   local line
+  local frame
+  local filename
 
   for frame in "${BATS_STACK_TRACE[@]}"; do
+    if [ $index -eq $count ]; then
+      filename="${BATS_TEST_FILENAME}"
+    else
+      filename="$(bats_frame_filename "$frame")"
+    fi
+
     if [ $index -eq 1 ]; then
       line="$BATS_LINE_NUMBER"
-      echo -n "# ("
+      echo "# (command"
+      echo "#  \`$(sed -e "${line}!d" -e "${line}s:^[ \t]\+::" -e "${line}q" "${filename}")'"
     else
       line="$(bats_frame_line "$frame")"
-      echo -n "#  "
     fi
+    echo -n "#  "
 
     local fn="$(bats_frame_function "$frame")"
     if [ "$fn" != "$BATS_TEST_NAME" ]; then
@@ -128,9 +176,8 @@ bats_print_stack_trace() {
     fi
 
     if [ $index -eq $count ]; then
-      echo "in test file $BATS_TEST_FILENAME, line $line)"
+      echo "in test file $filename, line $line)"
     else
-      local filename="$(bats_frame_filename "$frame")"
       echo "in file $filename, line $line,"
     fi
 

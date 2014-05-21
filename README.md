@@ -68,7 +68,7 @@ results. If any test case fails, `bats` exits with a `1` status code.
 
 ## Writing tests
 
-Each Bats test file is evaulated n+1 times, where _n_ is the number of
+Each Bats test file is evaluated n+1 times, where _n_ is the number of
 test cases in the file. The first run counts the number of test cases,
 then iterates over the test cases and executes each one in its own
 process.

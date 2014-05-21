@@ -30,7 +30,7 @@ A Bats test file is a Bash script with special syntax for defining test cases\. 
 .IP "" 0
 .
 .P
-Each Bats test file is evaulated n+1 times, where \fIn\fR is the number of test cases in the file\. The first run counts the number of test cases, then iterates over the test cases and executes each one in its own process\.
+Each Bats test file is evaluated n+1 times, where \fIn\fR is the number of test cases in the file\. The first run counts the number of test cases, then iterates over the test cases and executes each one in its own process\.
 .
 .SH "THE RUN HELPER"
 Many Bats tests need to run a command and then make assertions about its exit status and output\. Bats includes a \fBrun\fR helper that invokes its arguments as a command, saves the exit status and output into special global variables, and then returns with a \fB0\fR status code so you can continue to make assertions in your test case\.

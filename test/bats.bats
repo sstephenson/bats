@@ -43,26 +43,32 @@ fixtures bats
 @test "one failing test" {
   run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]
-  [ ${lines[0]} = "1..1" ]
-  [ ${lines[1]} = "not ok 1 a failing test" ]
-  [ ${lines[2]} = "# (in test file $FIXTURE_ROOT/failing.bats, line 4)" ]
+  [ "${lines[0]}" = '1..1' ]
+  [ "${lines[1]}" = 'not ok 1 a failing test' ]
+  [ "${lines[2]}" = '# (command' ]
+  [ "${lines[3]}" = "#  \`false'" ]
+  [ "${lines[4]}" = "#  in test file $FIXTURE_ROOT/failing.bats, line 4)" ]
 }
 
 @test "one failing and one passing test" {
   run bats "$FIXTURE_ROOT/failing_and_passing.bats"
   [ $status -eq 1 ]
-  [ ${lines[0]} = "1..2" ]
-  [ ${lines[1]} = "not ok 1 a failing test" ]
-  [ ${lines[2]} = "# (in test file $FIXTURE_ROOT/failing_and_passing.bats, line 2)" ]
-  [ ${lines[3]} = "ok 2 a passing test" ]
+  [ "${lines[0]}" = '1..2' ]
+  [ "${lines[1]}" = 'not ok 1 a failing test' ]
+  [ "${lines[2]}" = '# (command' ]
+  [ "${lines[3]}" = "#  \`false'" ]
+  [ "${lines[4]}" = "#  in test file $FIXTURE_ROOT/failing_and_passing.bats, line 2)" ]
+  [ "${lines[5]}" = 'ok 2 a passing test' ]
 }
 
 @test "failing helper function logs the test case's line number" {
   run bats "$FIXTURE_ROOT/failing_helper.bats"
   [ $status -eq 1 ]
-  [ "${lines[1]}" = "not ok 1 failing helper function" ]
-  [ "${lines[2]}" = "# (from function \`failing_helper' in file $FIXTURE_ROOT/test_helper.bash, line 6," ]
-  [ "${lines[3]}" = "#  in test file $FIXTURE_ROOT/failing_helper.bats, line 5)" ]
+  [ "${lines[1]}" = 'not ok 1 failing helper function' ]
+  [ "${lines[2]}" = '# (command' ]
+  [ "${lines[3]}" = "#  \`false'" ]
+  [ "${lines[4]}" = "#  from function \`failing_helper' in file $FIXTURE_ROOT/test_helper.bash, line 6," ]
+  [ "${lines[5]}" = "#  in test file $FIXTURE_ROOT/failing_helper.bats, line 5)" ]
 }
 
 @test "test environments are isolated" {
@@ -89,22 +95,28 @@ fixtures bats
 @test "setup failure" {
   run bats "$FIXTURE_ROOT/failing_setup.bats"
   [ $status -eq 1 ]
-  [ "${lines[1]}" = "not ok 1 truth" ]
-  [ "${lines[2]}" = "# (from function \`setup' in test file $FIXTURE_ROOT/failing_setup.bats, line 2)" ]
+  [ "${lines[1]}" = 'not ok 1 truth' ]
+  [ "${lines[2]}" = '# (command' ]
+  [ "${lines[3]}" = "#  \`false'" ]
+  [ "${lines[4]}" = "#  from function \`setup' in test file $FIXTURE_ROOT/failing_setup.bats, line 2)" ]
 }
 
 @test "passing test with teardown failure" {
   PASS=1 run bats "$FIXTURE_ROOT/failing_teardown.bats"
   [ $status -eq 1 ]
-  [ "${lines[1]}" = "not ok 1 truth" ]
-  [ "${lines[2]}" = "# (from function \`teardown' in test file $FIXTURE_ROOT/failing_teardown.bats, line 2)" ]
+  [ "${lines[1]}" = 'not ok 1 truth' ]
+  [ "${lines[2]}" = '# (command' ]
+  [ "${lines[3]}" = "#  \`false'" ]
+  [ "${lines[4]}" = "#  from function \`teardown' in test file $FIXTURE_ROOT/failing_teardown.bats, line 2)" ]
 }
 
 @test "failing test with teardown failure" {
   PASS=0 run bats "$FIXTURE_ROOT/failing_teardown.bats"
   [ $status -eq 1 ]
-  [ "${lines[1]}" = "not ok 1 truth" ]
-  [ "${lines[2]}" = "# (in test file $FIXTURE_ROOT/failing_teardown.bats, line 6)" ]
+  [ "${lines[1]}" =  'not ok 1 truth' ]
+  [ "${lines[2]}" =  '# (command' ]
+  [ "${lines[3]}" = $'#  `[ "$PASS" = "1" ]\'' ]
+  [ "${lines[4]}" =  "#  in test file $FIXTURE_ROOT/failing_teardown.bats, line 6)" ]
 }
 
 @test "load sources scripts relative to the current test file" {
@@ -117,12 +129,22 @@ fixtures bats
   [ $status -eq 1 ]
 }
 
+@test "load sources scripts by absolute path" {
+  HELPER_NAME="${FIXTURE_ROOT}/test_helper.bash" run bats "$FIXTURE_ROOT/load.bats"
+  [ $status -eq 0 ]
+}
+
+@test "load aborts if the script, specified by an absolute path, does not exist" {
+  HELPER_NAME="${FIXTURE_ROOT}/nonexistent" run bats "$FIXTURE_ROOT/load.bats"
+  [ $status -eq 1 ]
+}
+
 @test "output is discarded for passing tests and printed for failing tests" {
   run bats "$FIXTURE_ROOT/output.bats"
   [ $status -eq 1 ]
-  [ "${lines[5]}" = "# failure stdout 1" ]
-  [ "${lines[6]}" = "# failure stdout 2" ]
-  [ "${lines[9]}" = "# failure stderr" ]
+  [ "${lines[7]}"  = '# failure stdout 1' ]
+  [ "${lines[8]}"  = '# failure stdout 2' ]
+  [ "${lines[13]}" = '# failure stderr' ]
 }
 
 @test "-c prints the number of tests" {
@@ -162,10 +184,10 @@ fixtures bats
 @test "extended syntax" {
   run bats-exec-test -x "$FIXTURE_ROOT/failing_and_passing.bats"
   [ $status -eq 1 ]
-  [ "${lines[1]}" = "begin 1 a failing test" ]
-  [ "${lines[2]}" = "not ok 1 a failing test" ]
-  [ "${lines[4]}" = "begin 2 a passing test" ]
-  [ "${lines[5]}" = "ok 2 a passing test" ]
+  [ "${lines[1]}" = 'begin 1 a failing test' ]
+  [ "${lines[2]}" = 'not ok 1 a failing test' ]
+  [ "${lines[6]}" = 'begin 2 a passing test' ]
+  [ "${lines[7]}" = 'ok 2 a passing test' ]
 }
 
 @test "pretty and tap formats" {
@@ -190,9 +212,11 @@ fixtures bats
 @test "single-line tests" {
   run bats "$FIXTURE_ROOT/single_line.bats"
   [ $status -eq 1 ]
-  [ "${lines[1]}" = "ok 1 empty" ]
-  [ "${lines[2]}" = "ok 2 passing" ]
-  [ "${lines[3]}" = "ok 3 input redirection" ]
-  [ "${lines[4]}" = "not ok 4 failing" ]
-  [ "${lines[5]}" = "# (in test file $FIXTURE_ROOT/single_line.bats, line 9)" ]
+  [ "${lines[1]}" =  'ok 1 empty' ]
+  [ "${lines[2]}" =  'ok 2 passing' ]
+  [ "${lines[3]}" =  'ok 3 input redirection' ]
+  [ "${lines[4]}" =  'not ok 4 failing' ]
+  [ "${lines[5]}" =  '# (command' ]
+  [ "${lines[6]}" = $'#  `@test "failing" { false; }\'' ]
+  [ "${lines[7]}" =  "#  in test file $FIXTURE_ROOT/single_line.bats, line 9)" ]
 }
