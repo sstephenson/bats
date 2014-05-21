@@ -151,15 +151,24 @@ bats_print_stack_trace() {
   local index=1
   local count="${#BATS_STACK_TRACE[@]}"
   local line
+  local frame
+  local filename
 
   for frame in "${BATS_STACK_TRACE[@]}"; do
+    if [ $index -eq $count ]; then
+      filename="${BATS_TEST_FILENAME}"
+    else
+      filename="$(bats_frame_filename "$frame")"
+    fi
+
     if [ $index -eq 1 ]; then
       line="$BATS_LINE_NUMBER"
-      echo -n "# ("
+      echo "# (command"
+      echo "#  \`$(sed -e "${line}!d" -e "${line}s:^[ \t]\+::" -e "${line}q" "${filename}")'"
     else
       line="$(bats_frame_line "$frame")"
-      echo -n "#  "
     fi
+    echo -n "#  "
 
     local fn="$(bats_frame_function "$frame")"
     if [ "$fn" != "$BATS_TEST_NAME" ]; then
@@ -167,9 +176,8 @@ bats_print_stack_trace() {
     fi
 
     if [ $index -eq $count ]; then
-      echo "in test file $BATS_TEST_FILENAME, line $line)"
+      echo "in test file $filename, line $line)"
     else
-      local filename="$(bats_frame_filename "$frame")"
       echo "in file $filename, line $line,"
     fi
 
