@@ -117,6 +117,16 @@ fixtures bats
   [ $status -eq 1 ]
 }
 
+@test "load sources scripts by absolute path" {
+  HELPER_NAME="${FIXTURE_ROOT}/test_helper.bash" run bats "$FIXTURE_ROOT/load.bats"
+  [ $status -eq 0 ]
+}
+
+@test "load aborts if the script, specified by an absolute path, does not exist" {
+  HELPER_NAME="${FIXTURE_ROOT}/nonexistent" run bats "$FIXTURE_ROOT/load.bats"
+  [ $status -eq 1 ]
+}
+
 @test "output is discarded for passing tests and printed for failing tests" {
   run bats "$FIXTURE_ROOT/output.bats"
   [ $status -eq 1 ]
