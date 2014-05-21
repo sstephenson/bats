@@ -55,6 +55,38 @@ run() {
   [ -z "$T" ] || set -T
 }
 
+# code for storing stdout and stderr separately
+# is taken from http://stackoverflow.com/a/18086548
+# (question http://stackoverflow.com/questions/11027679/bash-store-stdout-and-stderr-in-different-variables)
+run_outerr() {
+  local e E T
+  [[ ! "$-" =~ e ]] || e=1
+  [[ ! "$-" =~ E ]] || E=1
+  [[ ! "$-" =~ T ]] || T=1
+  set +e
+  set +E
+  set +T
+
+  local tmp_out tmp_err tmp_status
+  eval "$(
+    "$@" \
+      2> >(tmp_err="$(cat)" ; declare -p tmp_err) \
+      1> >(tmp_out="$(cat)" ; declare -p tmp_out)
+    tmp_status="$?"
+    declare -p tmp_status
+  )"
+
+  output="${tmp_out}"
+  error="${tmp_err}"
+  status="${tmp_status}"
+
+  IFS=$'\n' lines_out=($output)
+  IFS=$'\n' lines_err=($error)
+  [ -z "$e" ] || set -e
+  [ -z "$E" ] || set -E
+  [ -z "$T" ] || set -T
+}
+
 setup() {
   true
 }
