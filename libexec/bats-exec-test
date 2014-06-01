@@ -30,14 +30,15 @@ BATS_TEST_DIRNAME="$(dirname "$BATS_TEST_FILENAME")"
 BATS_TEST_NAMES=()
 
 load() {
-  local inc="$1"
+  local name="$1"
   local filename
 
-  if [[ "${inc}" == "/"* ]] ; then
-    filename="${inc}"
+  if [ "${name:0:1}" = "/" ]; then
+    filename="${name}"
   else
-    filename="$BATS_TEST_DIRNAME/${inc}.bash"
+    filename="$BATS_TEST_DIRNAME/${name}.bash"
   fi
+
   [ -f "$filename" ] || {
     echo "bats: $filename does not exist" >&2
     exit 1
