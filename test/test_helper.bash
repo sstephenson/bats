@@ -7,5 +7,7 @@ setup() {
 }
 
 teardown() {
+  # Safe guard, if $TMP might end up empty!
+  [[ -d "$TMP" ]] || { echo "FATAL: \$TMP is not a directory in teardown."; exit 1; }
   rm -f "$TMP"/*
 }
