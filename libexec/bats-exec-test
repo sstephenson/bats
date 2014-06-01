@@ -173,6 +173,8 @@ bats_frame_filename() {
 
 bats_error_trap() {
   trap - debug
+  BATS_FAILED_COMMAND=$1
+  BATS_FAILED_STATUS=$2
 }
 
 bats_teardown_trap() {
@@ -201,6 +203,7 @@ bats_exit_trap() {
   if [ -z "$BATS_TEST_COMPLETED" ] || [ -z "$BATS_TEARDOWN_COMPLETED" ]; then
     echo "not ok $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION" >&3
     bats_print_stack_trace >&3
+    echo "#   '$BATS_FAILED_COMMAND' exited with status $BATS_FAILED_STATUS" >&3
     sed -e "s/^/# /" < "$BATS_OUT" >&3
     status=1
   else
@@ -235,7 +238,7 @@ bats_perform_test() {
     BATS_TEST_COMPLETED=""
     BATS_TEARDOWN_COMPLETED=""
     trap "bats_capture_stack_trace \"\$BASH_SOURCE\" \$LINENO" debug
-    trap "bats_error_trap" err
+    trap "bats_error_trap \"\$BASH_COMMAND\" \$?" err
     trap "bats_teardown_trap" exit
     "$BATS_TEST_NAME" >>"$BATS_OUT" 2>&1
     BATS_TEST_COMPLETED=1

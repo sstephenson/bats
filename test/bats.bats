@@ -46,6 +46,7 @@ fixtures bats
   [ ${lines[0]} = "1..1" ]
   [ ${lines[1]} = "not ok 1 a failing test" ]
   [ ${lines[2]} = "# (in test file $FIXTURE_ROOT/failing.bats, line 4)" ]
+  [ ${lines[3]} = "#   'false' exited with status 1" ]
 }
 
 @test "one failing and one passing test" {
@@ -54,7 +55,8 @@ fixtures bats
   [ ${lines[0]} = "1..2" ]
   [ ${lines[1]} = "not ok 1 a failing test" ]
   [ ${lines[2]} = "# (in test file $FIXTURE_ROOT/failing_and_passing.bats, line 2)" ]
-  [ ${lines[3]} = "ok 2 a passing test" ]
+  [ ${lines[3]} = "#   'false' exited with status 1" ]
+  [ ${lines[4]} = "ok 2 a passing test" ]
 }
 
 @test "failing helper function logs the test case's line number" {
@@ -130,9 +132,9 @@ fixtures bats
 @test "output is discarded for passing tests and printed for failing tests" {
   run bats "$FIXTURE_ROOT/output.bats"
   [ $status -eq 1 ]
-  [ "${lines[5]}" = "# failure stdout 1" ]
-  [ "${lines[6]}" = "# failure stdout 2" ]
-  [ "${lines[9]}" = "# failure stderr" ]
+  [ "${lines[6]}"  = "# failure stdout 1" ]
+  [ "${lines[7]}"  = "# failure stdout 2" ]
+  [ "${lines[11]}" = "# failure stderr" ]
 }
 
 @test "-c prints the number of tests" {
@@ -174,8 +176,8 @@ fixtures bats
   [ $status -eq 1 ]
   [ "${lines[1]}" = "begin 1 a failing test" ]
   [ "${lines[2]}" = "not ok 1 a failing test" ]
-  [ "${lines[4]}" = "begin 2 a passing test" ]
-  [ "${lines[5]}" = "ok 2 a passing test" ]
+  [ "${lines[5]}" = "begin 2 a passing test" ]
+  [ "${lines[6]}" = "ok 2 a passing test" ]
 }
 
 @test "pretty and tap formats" {
