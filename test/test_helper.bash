@@ -7,5 +7,5 @@ setup() {
 }
 
 teardown() {
-  rm -f "$TMP"/*
+  [ -d "$TMP" ] && rm -f "$TMP"/*
 }
