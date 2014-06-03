@@ -122,12 +122,12 @@ bats_print_stack_trace() {
   local index=1
   local count="${#@}"
 
-  for frame in "$@"; do
+  for frame; do
     lineno="$(bats_frame_lineno "$frame")"
     if [ $index -eq 1 ]; then
-      echo -n "# ("
+      echo -n "("
     else
-      echo -n "#  "
+      echo -n " "
     fi
 
     local fn="$(bats_frame_function "$frame")"
@@ -171,9 +171,66 @@ bats_frame_filename() {
   fi
 }
 
+bats_record_warning() {
+  local warning
+  local line
+
+  for line; do
+    warning="$warning$line"$'\n'
+  done
+
+  warning="$warning  (in file $BATS_SOURCE, line $BATS_LINENO)"
+  BATS_WARNINGS["${#BATS_WARNINGS[@]}"]="$warning"
+}
+
+bats_print_warnings() {
+  local warning
+
+  for warning in "${BATS_WARNINGS[@]}"; do
+    echo "WARNING: $warning"
+  done
+}
+
+bats_record_double_bracket_warning() {
+  if [ "${BASH_COMMAND:0:2}" = "[[" ]; then
+    if bats_should_warn_about_double_brackets; then
+      bats_record_warning \
+        "Bare \`[[ ]]' expressions, when false, may not cause test failures." \
+        "Read more at https://github.com/sstephenson/bats/wiki/Double-Brackets"
+    fi
+  fi
+}
+
+bats_should_warn_about_double_brackets() {
+  local source_line="$(bats_read_source_line)"
+  local normalized_command="$(bats_normalize_command "$BASH_COMMAND")"
+  local normalized_source_line="$(bats_normalize_command "$source_line")"
+  [ "$normalized_command" = "$normalized_source_line" ]
+}
+
+bats_normalize_command() {
+  local command="$1"
+  command="${command// /}"
+  command="${command//$'\t'/}"
+  printf "%s" "$command"
+}
+
+bats_read_source_line() {
+  sed -n "${BATS_LINENO}p" "$BATS_SOURCE"
+}
+
+bats_print_captured_output() {
+  cat "$BATS_OUT"
+}
+
+bats_format_tap_comment() {
+  sed -e "s/^/# /"
+}
+
 bats_debug_trap() {
   if [ "$BASH_SOURCE" != "$1" ]; then
     bats_capture_stack_trace
+    bats_record_double_bracket_warning
   fi
 }
 
@@ -207,13 +264,16 @@ bats_exit_trap() {
 
   if [ -z "$BATS_TEST_COMPLETED" ] || [ -z "$BATS_TEARDOWN_COMPLETED" ]; then
     echo "not ok $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION" >&3
-    bats_print_stack_trace "${BATS_ERROR_STACK_TRACE[@]}" >&3
-    sed -e "s/^/# /" < "$BATS_OUT" >&3
+    { bats_print_stack_trace "${BATS_ERROR_STACK_TRACE[@]}"
+      bats_print_captured_output
+    } | bats_format_tap_comment >&3
     status=1
   else
     echo "ok ${BATS_TEST_NUMBER}${skipped} ${BATS_TEST_DESCRIPTION}" >&3
     status=0
   fi
+
+  bats_print_warnings | bats_format_tap_comment >&3
 
   rm -f "$BATS_OUT"
   exit "$status"

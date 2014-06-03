@@ -206,3 +206,14 @@ fixtures bats
   [ "${lines[4]}" = "not ok 4 failing" ]
   [ "${lines[5]}" = "# (in test file $FIXTURE_ROOT/single_line.bats, line 9)" ]
 }
+
+@test "bare double-bracket expressions trigger warnings" {
+  run bats "$FIXTURE_ROOT/double_brackets.bats"
+  [ $status -eq 0 ]
+  [ "${lines[1]}" = "ok 1 bare" ]
+  [ "${lines[2]}" = "# WARNING: Bare \`[[ ]]' expressions, when false, may not cause test failures." ]
+  [ "${lines[3]}" = "# Read more at https://github.com/sstephenson/bats/wiki/Double-Brackets" ]
+  [ "${lines[4]}" = "#   (in file $FIXTURE_ROOT/double_brackets.bats, line 2)" ]
+  [ "${lines[5]}" = "ok 2 chained" ]
+  [ "${lines[6]}" = "ok 3 if" ]
+}
