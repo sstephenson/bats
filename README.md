@@ -239,7 +239,6 @@ on the wiki.
 
 * add package.json for bpkg
 * use install correctly
-* add package.json
 * Edited for formatting, spacing, and descriptive headings for Bats helpers/commands/functions.
 * Default to TAP output when the CI environment variable is set
 * Safeguard test teardown (#45)
