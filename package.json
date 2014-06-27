@@ -1,6 +1,6 @@
 {
   "name": "bats",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Bash Automated Testing System",
   "global": "true",
   "install": "./install.sh /usr/local",
