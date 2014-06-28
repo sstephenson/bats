@@ -153,7 +153,7 @@ bats_print_stack_trace() {
       # inspired by Gentoo Portage die()
       failed_cmd="$(sed \
         -e "${failed_cmd_line}!d" \
-        -e "${failed_cmd_line}s:^[ \t]\+::" \
+        -e "${failed_cmd_line}s:^[ 	][ 	]*::" \
         -e "${failed_cmd_line}q" \
         "${failed_cmd_filename}")"
       echo "#   \`${failed_cmd}' failed"
