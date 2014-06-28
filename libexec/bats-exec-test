@@ -120,11 +120,24 @@ bats_print_stack_trace() {
   local index=1
   local count="${#BATS_STACK_TRACE[@]}"
   local line
+  local frame
+  local filename
+  local failed_cmd_line
+  local failed_cmd_filename
+  local failed_cmd
 
   for frame in "${BATS_STACK_TRACE[@]}"; do
+    if [ $index -eq $count ]; then
+      filename="${BATS_TEST_FILENAME}"
+    else
+      filename="$(bats_frame_filename "$frame")"
+    fi
+
     if [ $index -eq 1 ]; then
       line="$BATS_LINE_NUMBER"
       echo -n "# ("
+      failed_cmd_line="${line}"
+      failed_cmd_filename="${filename}"
     else
       line="$(bats_frame_line "$frame")"
       echo -n "#  "
@@ -136,9 +149,15 @@ bats_print_stack_trace() {
     fi
 
     if [ $index -eq $count ]; then
-      echo "in test file $BATS_TEST_FILENAME, line $line)"
+      echo "in test file $filename, line $line)"
+      # inspired by Gentoo Portage die()
+      failed_cmd="$(sed \
+        -e "${failed_cmd_line}!d" \
+        -e "${failed_cmd_line}s:^[ \t]\+::" \
+        -e "${failed_cmd_line}q" \
+        "${failed_cmd_filename}")"
+      echo "#   \`${failed_cmd}' failed"
     else
-      local filename="$(bats_frame_filename "$frame")"
       echo "in file $filename, line $line,"
     fi
 
