@@ -59,11 +59,11 @@ run() {
   local temp_stdout=$(mktemp -t stdout.XXXXXX)
   local temp_stderr=$(mktemp -t stderr.XXXXXX)
 
-  $("$@" 2> $temp_stderr 1> $temp_stdout)
+  ( "$@" 2> "$temp_stderr" 1> "$temp_stdout" )
   status="$?"
 
-  output_stdout=$( < $temp_stdout)
-  output_stderr=$( < $temp_stderr)
+  output_stdout=$( < "$temp_stdout")
+  output_stderr=$( < "$temp_stderr")
   output="${output_stderr}${output_stdout}"
 
   IFS=$'\n' lines=($output) lines_stdout=($output_stdout) lines_stderr=($output_stderr)
