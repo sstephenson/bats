@@ -1,6 +1,6 @@
 # Bats: Bash Automated Testing System
 
-Bats is a [TAP](http://testanything.org/)-compliant testing framework
+Bats is a [TAP](http://testanything.org)-compliant testing framework
 for Bash. It provides a simple way to verify that the UNIX programs
 you write behave as expected.
 
@@ -30,6 +30,7 @@ Bash's `errexit` (`set -e`) option when running test cases. If every
 command in the test case exits with a `0` status code (success), the
 test passes. In this way, each line is an assertion of truth.
 
+
 ## Running tests
 
 To run your tests, invoke the `bats` interpreter with a path to a test
@@ -48,9 +49,10 @@ an "X" if it fails.
     2 tests, 0 failures
 
 If Bats is not connected to a terminal—in other words, if you
-run it from a continuous integration system or redirect its output to
+run it from a continuous integration system, or redirect its output to
 a file—the results are displayed in human-readable, machine-parsable
 [TAP format](http://testanything.org).
+
 You can force TAP output from a terminal by invoking Bats with the
 `--tap` option.
 
@@ -66,18 +68,19 @@ arguments, or with a path to a directory containing multiple `.bats`
 files. Bats will run each test file individually and aggregate the
 results. If any test case fails, `bats` exits with a `1` status code.
 
+
 ## Writing tests
 
-Each Bats test file is evaluated n+1 times, where _n_ is the number of
+Each Bats test file is evaluated _n+1_ times, where _n_ is the number of
 test cases in the file. The first run counts the number of test cases,
 then iterates over the test cases and executes each one in its own
 process.
 
-For details about exactly how Bats evaluates test files, see [Bats
-Evaluation Process](https://github.com/sstephenson/bats/wiki/Bats-Evaluation-Process)
+For more details about how Bats evaluates test files, see 
+[Bats Evaluation Process](https://github.com/sstephenson/bats/wiki/Bats-Evaluation-Process)
 on the wiki.
 
-### The _run_ helper
+### `run`: Test other commands
 
 Many Bats tests need to run a command and then make assertions about
 its exit status and output. Bats includes a `run` helper that invokes
@@ -114,7 +117,7 @@ the first line:
 }
 ```
 
-### The _load_ command
+### `load`: Share common code
 
 You may want to share common code across multiple test files. Bats
 includes a convenient `load` command for sourcing a Bash source file
@@ -129,7 +132,7 @@ will source the script `test/test_helper.bash` in your test file. This
 can be useful for sharing functions to set up your environment or load
 fixtures.
 
-### The _skip_ command
+### `skip`: Easily skip tests
 
 Tests can be skipped by using the `skip` command at the point in a
 test you wish to skip.
@@ -165,9 +168,9 @@ Or you can skip conditionally:
 }
 ```
 
-### Setup and teardown functions
+### `setup` and `teardown`: Pre- and post-test hooks
 
-You can define special `setup` and `teardown` functions which run
+You can define special `setup` and `teardown` functions, which run
 before and after each test case, respectively. Use these to load
 fixtures, set up your environment, and clean up when you're done.
 
@@ -199,6 +202,7 @@ in the test file.
 * `$BATS_TMPDIR` is the location to a directory that may be used to
 store temporary files.
 
+
 ## Installing Bats from source
 
 Check out a copy of the Bats repository. Then, either add the Bats
@@ -212,6 +216,7 @@ Bats. For example, to install Bats into `/usr/local`,
 
 Note that you may need to run `install.sh` with `sudo` if you do not
 have permission to write to the installation prefix.
+
 
 ## Support
 
@@ -227,7 +232,8 @@ To learn how to set up your editor for Bats syntax highlighting, see
 [Syntax Highlighting](https://github.com/sstephenson/bats/wiki/Syntax-Highlighting)
 on the wiki.
 
-### Version history
+
+## Version history
 
 *0.3.1* (October 28, 2013)
 

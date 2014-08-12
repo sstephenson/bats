@@ -118,13 +118,23 @@ bats_capture_stack_trace() {
 
 bats_print_stack_trace() {
   local frame
+  local filename
   local lineno
   local index=1
   local count="${#@}"
+  local failed_line
 
   for frame in "$@"; do
+    if [ $index -eq $count ]; then
+      filename="$BATS_TEST_FILENAME"
+    else
+      filename="$(bats_frame_filename "$frame")"
+    fi
+
     lineno="$(bats_frame_lineno "$frame")"
+
     if [ $index -eq 1 ]; then
+      failed_line="$(bats_extract_line "$filename" "$lineno")"
       echo -n "# ("
     else
       echo -n "#  "
@@ -136,9 +146,10 @@ bats_print_stack_trace() {
     fi
 
     if [ $index -eq $count ]; then
-      echo "in test file $BATS_TEST_FILENAME, line $lineno)"
+      local failed_command="$(bats_strip_string "$failed_line")"
+      echo "in test file $filename, line $lineno)"
+      echo "#   \`${failed_command}' failed"
     else
-      local filename="$(bats_frame_filename "$frame")"
       echo "in file $filename, line $lineno,"
     fi
 
@@ -169,6 +180,17 @@ bats_frame_filename() {
   else
     echo "$filename"
   fi
+}
+
+bats_extract_line() {
+  local filename="$1"
+  local lineno="$2"
+  sed -n "${lineno}p" "$filename"
+}
+
+bats_strip_string() {
+  local string="$1"
+  printf "%s" "$string" | sed -e "s/^[ "$'\t'"]*//" -e "s/[ "$'\t'"]*$//"
 }
 
 bats_debug_trap() {

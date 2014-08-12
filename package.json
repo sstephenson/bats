@@ -1,0 +1,9 @@
+{
+  "name": "bats",
+  "version": "0.3.1",
+  "description": "Bash Automated Testing System",
+  "global": "true",
+  "install": "./install.sh /usr/local",
+  "scripts": [ "libexec/bats", "libexec/bats-exec-suite", "libexec/bats-exec-test", "libexec/bats-format-tap-stream", "libexec/bats-preprocess", "bin/bats" ]
+}
+
