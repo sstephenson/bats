@@ -118,23 +118,20 @@ bats_capture_stack_trace() {
 
 bats_print_stack_trace() {
   local frame
-  local filename
-  local lineno
   local index=1
   local count="${#@}"
-  local failed_line
 
   for frame in "$@"; do
+    local filename
     if [ $index -eq $count ]; then
       filename="$BATS_TEST_FILENAME"
     else
       filename="$(bats_frame_filename "$frame")"
     fi
 
-    lineno="$(bats_frame_lineno "$frame")"
+    local lineno="$(bats_frame_lineno "$frame")"
 
     if [ $index -eq 1 ]; then
-      failed_line="$(bats_extract_line "$filename" "$lineno")"
       echo -n "# ("
     else
       echo -n "#  "
@@ -146,15 +143,31 @@ bats_print_stack_trace() {
     fi
 
     if [ $index -eq $count ]; then
-      local failed_command="$(bats_strip_string "$failed_line")"
       echo "in test file $filename, line $lineno)"
-      echo "#   \`${failed_command}' failed"
     else
       echo "in file $filename, line $lineno,"
     fi
 
     let index+=1
   done
+}
+
+bats_print_failed_command() {
+  local frame="$1"
+  local count="${#@}"
+
+  local filename
+  if [ $count -eq 1 ]; then
+    filename="$BATS_TEST_FILENAME"
+  else
+    filename="$(bats_frame_filename "$frame")"
+  fi
+
+  local lineno="$(bats_frame_lineno "$frame")"
+  local failed_line="$(bats_extract_line "$filename" "$lineno")"
+  local failed_command="$(bats_strip_string "$failed_line")"
+
+  echo "#   \`${failed_command}' failed"
 }
 
 bats_frame_lineno() {
@@ -230,6 +243,7 @@ bats_exit_trap() {
   if [ -z "$BATS_TEST_COMPLETED" ] || [ -z "$BATS_TEARDOWN_COMPLETED" ]; then
     echo "not ok $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION" >&3
     bats_print_stack_trace "${BATS_ERROR_STACK_TRACE[@]}" >&3
+    bats_print_failed_command "${BATS_ERROR_STACK_TRACE[@]}" >&3
     sed -e "s/^/# /" < "$BATS_OUT" >&3
     status=1
   else
