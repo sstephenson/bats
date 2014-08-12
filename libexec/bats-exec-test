@@ -122,7 +122,7 @@ bats_print_stack_trace() {
   local count="${#@}"
 
   for frame in "$@"; do
-    local filename="$(bats_frame_filename "$frame")"
+    local filename="$(bats_trim_filename "$(bats_frame_filename "$frame")")"
     local lineno="$(bats_frame_lineno "$frame")"
 
     if [ $index -eq 1 ]; then
@@ -197,6 +197,17 @@ bats_extract_line() {
 bats_strip_string() {
   local string="$1"
   printf "%s" "$string" | sed -e "s/^[ "$'\t'"]*//" -e "s/[ "$'\t'"]*$//"
+}
+
+bats_trim_filename() {
+  local filename="$1"
+  local length="${#BATS_CWD}"
+
+  if [ "${filename:0:length+1}" = "${BATS_CWD}/" ]; then
+    echo "${filename:length+1}"
+  else
+    echo "$filename"
+  fi
 }
 
 bats_debug_trap() {

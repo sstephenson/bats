@@ -45,7 +45,7 @@ fixtures bats
   [ $status -eq 1 ]
   [ "${lines[0]}" = '1..1' ]
   [ "${lines[1]}" = 'not ok 1 a failing test' ]
-  [ "${lines[2]}" = "# (in test file $FIXTURE_ROOT/failing.bats, line 4)" ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing.bats, line 4)" ]
   [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed" ]
 }
 
@@ -54,7 +54,7 @@ fixtures bats
   [ $status -eq 1 ]
   [ "${lines[0]}" = '1..2' ]
   [ "${lines[1]}" = 'not ok 1 a failing test' ]
-  [ "${lines[2]}" = "# (in test file $FIXTURE_ROOT/failing_and_passing.bats, line 2)" ]
+  [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing_and_passing.bats, line 2)" ]
   [ "${lines[3]}" = "#   \`false' failed" ]
   [ "${lines[4]}" = 'ok 2 a passing test' ]
 }
@@ -69,8 +69,8 @@ fixtures bats
   run bats "$FIXTURE_ROOT/failing_helper.bats"
   [ $status -eq 1 ]
   [ "${lines[1]}" = 'not ok 1 failing helper function' ]
-  [ "${lines[2]}" = "# (from function \`failing_helper' in file $FIXTURE_ROOT/test_helper.bash, line 6," ]
-  [ "${lines[3]}" = "#  in test file $FIXTURE_ROOT/failing_helper.bats, line 5)" ]
+  [ "${lines[2]}" = "# (from function \`failing_helper' in file $RELATIVE_FIXTURE_ROOT/test_helper.bash, line 6," ]
+  [ "${lines[3]}" = "#  in test file $RELATIVE_FIXTURE_ROOT/failing_helper.bats, line 5)" ]
   [ "${lines[4]}" = "#   \`false' failed" ]
 }
 
@@ -99,7 +99,7 @@ fixtures bats
   run bats "$FIXTURE_ROOT/failing_setup.bats"
   [ $status -eq 1 ]
   [ "${lines[1]}" = 'not ok 1 truth' ]
-  [ "${lines[2]}" = "# (from function \`setup' in test file $FIXTURE_ROOT/failing_setup.bats, line 2)" ]
+  [ "${lines[2]}" = "# (from function \`setup' in test file $RELATIVE_FIXTURE_ROOT/failing_setup.bats, line 2)" ]
   [ "${lines[3]}" = "#   \`false' failed" ]
 }
 
@@ -107,7 +107,7 @@ fixtures bats
   PASS=1 run bats "$FIXTURE_ROOT/failing_teardown.bats"
   [ $status -eq 1 ]
   [ "${lines[1]}" = 'not ok 1 truth' ]
-  [ "${lines[2]}" = "# (from function \`teardown' in test file $FIXTURE_ROOT/failing_teardown.bats, line 2)" ]
+  [ "${lines[2]}" = "# (from function \`teardown' in test file $RELATIVE_FIXTURE_ROOT/failing_teardown.bats, line 2)" ]
   [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed" ]
 }
 
@@ -115,7 +115,7 @@ fixtures bats
   PASS=0 run bats "$FIXTURE_ROOT/failing_teardown.bats"
   [ $status -eq 1 ]
   [ "${lines[1]}" =  'not ok 1 truth' ]
-  [ "${lines[2]}" =  "# (in test file $FIXTURE_ROOT/failing_teardown.bats, line 6)" ]
+  [ "${lines[2]}" =  "# (in test file $RELATIVE_FIXTURE_ROOT/failing_teardown.bats, line 6)" ]
   [ "${lines[3]}" = $'#   `[ "$PASS" = "1" ]\' failed' ]
 }
 
@@ -123,6 +123,13 @@ fixtures bats
   PASS=1 STATUS=2 run bats "$FIXTURE_ROOT/failing_teardown.bats"
   [ $status -eq 1 ]
   [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed with status 2" ]
+}
+
+@test "failing test file outside of BATS_CWD" {
+  cd "$TMP"
+  run bats "$FIXTURE_ROOT/failing.bats"
+  [ $status -eq 1 ]
+  [ "${lines[2]}" = "# (in test file $FIXTURE_ROOT/failing.bats, line 4)" ]
 }
 
 @test "load sources scripts relative to the current test file" {
@@ -222,6 +229,6 @@ fixtures bats
   [ "${lines[2]}" =  'ok 2 passing' ]
   [ "${lines[3]}" =  'ok 3 input redirection' ]
   [ "${lines[4]}" =  'not ok 4 failing' ]
-  [ "${lines[5]}" =  "# (in test file $FIXTURE_ROOT/single_line.bats, line 9)" ]
+  [ "${lines[5]}" =  "# (in test file $RELATIVE_FIXTURE_ROOT/single_line.bats, line 9)" ]
   [ "${lines[6]}" = $'#   `@test "failing" { false; }\' failed' ]
 }
