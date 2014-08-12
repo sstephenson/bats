@@ -148,13 +148,19 @@ bats_print_stack_trace() {
 
 bats_print_failed_command() {
   local frame="$1"
+  local status="$2"
   local filename="$(bats_frame_filename "$frame")"
   local lineno="$(bats_frame_lineno "$frame")"
 
   local failed_line="$(bats_extract_line "$filename" "$lineno")"
   local failed_command="$(bats_strip_string "$failed_line")"
+  echo -n "#   \`${failed_command}' "
 
-  echo "#   \`${failed_command}' failed"
+  if [ $status -eq 1 ]; then
+    echo "failed"
+  else
+    echo "failed with status $status"
+  fi
 }
 
 bats_frame_lineno() {
@@ -200,17 +206,23 @@ bats_debug_trap() {
 }
 
 bats_error_trap() {
+  BATS_ERROR_STATUS="$?"
   BATS_ERROR_STACK_TRACE=( "${BATS_PREVIOUS_STACK_TRACE[@]}" )
   trap - debug
 }
 
 bats_teardown_trap() {
   trap "bats_exit_trap" exit
-  if teardown >>"$BATS_OUT" 2>&1; then
+  local status=0
+  teardown >>"$BATS_OUT" 2>&1 || status="$?"
+
+  if [ $status -eq 0 ]; then
     BATS_TEARDOWN_COMPLETED=1
   elif [ -n "$BATS_TEST_COMPLETED" ]; then
+    BATS_ERROR_STATUS="$status"
     BATS_ERROR_STACK_TRACE=( "${BATS_CURRENT_STACK_TRACE[@]}" )
   fi
+
   bats_exit_trap
 }
 
@@ -230,7 +242,7 @@ bats_exit_trap() {
   if [ -z "$BATS_TEST_COMPLETED" ] || [ -z "$BATS_TEARDOWN_COMPLETED" ]; then
     echo "not ok $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION" >&3
     bats_print_stack_trace "${BATS_ERROR_STACK_TRACE[@]}" >&3
-    bats_print_failed_command "${BATS_ERROR_STACK_TRACE[@]}" >&3
+    bats_print_failed_command "${BATS_ERROR_STACK_TRACE[0]}" "$BATS_ERROR_STATUS" >&3
     sed -e "s/^/# /" < "$BATS_OUT" >&3
     status=1
   else

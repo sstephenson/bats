@@ -1,5 +1,5 @@
 teardown() {
-  false
+  eval "( exit ${STATUS:-1} )"
 }
 
 @test "truth" {

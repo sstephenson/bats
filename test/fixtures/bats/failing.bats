@@ -1,5 +1,5 @@
 @test "a failing test" {
   true
   true
-  false
+  eval "( exit ${STATUS:-1} )"
 }

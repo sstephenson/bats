@@ -46,7 +46,7 @@ fixtures bats
   [ "${lines[0]}" = '1..1' ]
   [ "${lines[1]}" = 'not ok 1 a failing test' ]
   [ "${lines[2]}" = "# (in test file $FIXTURE_ROOT/failing.bats, line 4)" ]
-  [ "${lines[3]}" = "#   \`false' failed" ]
+  [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed" ]
 }
 
 @test "one failing and one passing test" {
@@ -57,6 +57,12 @@ fixtures bats
   [ "${lines[2]}" = "# (in test file $FIXTURE_ROOT/failing_and_passing.bats, line 2)" ]
   [ "${lines[3]}" = "#   \`false' failed" ]
   [ "${lines[4]}" = 'ok 2 a passing test' ]
+}
+
+@test "failing test with significant status" {
+  STATUS=2 run bats "$FIXTURE_ROOT/failing.bats"
+  [ $status -eq 1 ]
+  [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed with status 2" ]
 }
 
 @test "failing helper function logs the test case's line number" {
@@ -102,7 +108,7 @@ fixtures bats
   [ $status -eq 1 ]
   [ "${lines[1]}" = 'not ok 1 truth' ]
   [ "${lines[2]}" = "# (from function \`teardown' in test file $FIXTURE_ROOT/failing_teardown.bats, line 2)" ]
-  [ "${lines[3]}" = "#   \`false' failed" ]
+  [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed" ]
 }
 
 @test "failing test with teardown failure" {
@@ -111,6 +117,12 @@ fixtures bats
   [ "${lines[1]}" =  'not ok 1 truth' ]
   [ "${lines[2]}" =  "# (in test file $FIXTURE_ROOT/failing_teardown.bats, line 6)" ]
   [ "${lines[3]}" = $'#   `[ "$PASS" = "1" ]\' failed' ]
+}
+
+@test "teardown failure with significant status" {
+  PASS=1 STATUS=2 run bats "$FIXTURE_ROOT/failing_teardown.bats"
+  [ $status -eq 1 ]
+  [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed with status 2" ]
 }
 
 @test "load sources scripts relative to the current test file" {
