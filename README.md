@@ -235,6 +235,22 @@ on the wiki.
 
 ## Version history
 
+*0.3.2* (June 26, 2014)
+
+* add package.json for bpkg
+* use install correctly
+* Edited for formatting, spacing, and descriptive headings for Bats helpers/commands/functions.
+* Default to TAP output when the CI environment variable is set
+* Safeguard test teardown (#45)
+* Make `load` handle absolute paths too 
+* Support single-line test definitions
+* Avoid `expr` for faster preprocessing
+* Ensure $PREFIX/share/man/man{1,7} directories exist
+* Correctly log errors in `setup` and `teardown` functions
+* Prefer `let x+=1` for incrementing counters
+* Log the full stack trace when a test fails
+* Hook up Travis CI
+
 *0.3.1* (October 28, 2013)
 
 * Fixed an incompatibility with the pretty formatter in certain
