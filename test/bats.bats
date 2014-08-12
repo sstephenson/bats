@@ -71,7 +71,7 @@ fixtures bats
   [ "${lines[1]}" = 'not ok 1 failing helper function' ]
   [ "${lines[2]}" = "# (from function \`failing_helper' in file $RELATIVE_FIXTURE_ROOT/test_helper.bash, line 6," ]
   [ "${lines[3]}" = "#  in test file $RELATIVE_FIXTURE_ROOT/failing_helper.bats, line 5)" ]
-  [ "${lines[4]}" = "#   \`false' failed" ]
+  [ "${lines[4]}" = "#   \`failing_helper' failed" ]
 }
 
 @test "test environments are isolated" {
