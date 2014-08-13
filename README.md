@@ -235,6 +235,21 @@ on the wiki.
 
 ## Version history
 
+*0.4.0* (August 13, 2014)
+
+* Improved the display of failing test cases. Bats now shows the
+  source code of failing test lines, along with full stack traces
+  including function names, filenames, and line numbers.
+* Improved the display of the pretty-printed test summary line to
+  include the number of skipped tests, if any.
+* Improved the speed of the preprocessor, dramatically shortening test
+  and suite startup times.
+* Added support for absolute pathnames to the `load` helper.
+* Added support for single-line `@test` definitions.
+* Added bats(1) and bats(7) manual pages.
+* Modified the `bats` command to default to TAP output when the `$CI`
+  variable is set, to better support environments such as Travis CI.
+
 *0.3.1* (October 28, 2013)
 
 * Fixed an incompatibility with the pretty formatter in certain
