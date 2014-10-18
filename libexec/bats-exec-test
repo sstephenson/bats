@@ -196,7 +196,7 @@ bats_extract_line() {
 
 bats_strip_string() {
   local string="$1"
-  printf "%s" "$string" | sed -e "s/^[ "$'\t'"]*//" -e "s/[ "$'\t'"]*$//"
+  printf "%s" "$string" | sed -e "s/^[ "$'\t'"]*//" -e "s/[ "$'\t'"]*$//" 2> /dev/null
 }
 
 bats_trim_filename() {
