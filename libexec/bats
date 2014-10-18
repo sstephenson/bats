@@ -27,7 +27,12 @@ help() {
 }
 
 resolve_link() {
-  $(type -p greadlink readlink | head -1) "$1"
+  local readlink=$(type -p greadlink readlink | head -1)
+  if [ -x "$readlink" ]; then
+    $readlink "$1"
+  else
+    /usr/bin/perl -le 'print readlink shift' "$1"
+  fi
 }
 
 abs_dirname() {
