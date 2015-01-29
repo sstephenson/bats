@@ -13,7 +13,7 @@ fixtures suite
   run bats "$FIXTURE_ROOT/single"
   [ $status -eq 0 ]
   [ ${lines[0]} = "1..1" ]
-  [ ${lines[1]} = "ok 1 a passing test" ]
+  [ "${lines[1]}" = "ok 1 a passing test" ]
 }
 
 @test "counting tests in a suite" {
