@@ -30,13 +30,13 @@ fixtures bats
 @test "empty test file runs zero tests" {
   run bats "$FIXTURE_ROOT/empty.bats"
   [ $status -eq 0 ]
-  [ $output = "1..0" ]
+  [ "$output" = "1..0" ]
 }
 
 @test "one passing test" {
   run bats "$FIXTURE_ROOT/passing.bats"
   [ $status -eq 0 ]
-  [ ${lines[0]} = "1..1" ]
+  [ "${lines[0]}" = "1..1" ]
   [ "${lines[1]}" = "ok 1 a passing test" ]
 }
 
