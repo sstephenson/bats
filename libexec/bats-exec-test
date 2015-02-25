@@ -48,7 +48,7 @@ load() {
 }
 
 run() {
-  local e E T
+  local e E T oldIFS
   [[ ! "$-" =~ e ]] || e=1
   [[ ! "$-" =~ E ]] || E=1
   [[ ! "$-" =~ T ]] || T=1
@@ -57,10 +57,12 @@ run() {
   set +T
   output="$("$@" 2>&1)"
   status="$?"
+  oldIFS=$IFS
   IFS=$'\n' lines=($output)
   [ -z "$e" ] || set -e
   [ -z "$E" ] || set -E
   [ -z "$T" ] || set -T
+  IFS=$oldIFS
 }
 
 setup() {

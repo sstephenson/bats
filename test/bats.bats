@@ -30,14 +30,14 @@ fixtures bats
 @test "empty test file runs zero tests" {
   run bats "$FIXTURE_ROOT/empty.bats"
   [ $status -eq 0 ]
-  [ $output = "1..0" ]
+  [ "$output" = "1..0" ]
 }
 
 @test "one passing test" {
   run bats "$FIXTURE_ROOT/passing.bats"
   [ $status -eq 0 ]
-  [ ${lines[0]} = "1..1" ]
-  [ ${lines[1]} = "ok 1 a passing test" ]
+  [ "${lines[0]}" = "1..1" ]
+  [ "${lines[1]}" = "ok 1 a passing test" ]
 }
 
 @test "summary passing tests" {
@@ -255,4 +255,10 @@ fixtures bats
   [ "${lines[4]}" =  'not ok 4 failing' ]
   [ "${lines[5]}" =  "# (in test file $RELATIVE_FIXTURE_ROOT/single_line.bats, line 9)" ]
   [ "${lines[6]}" = $'#   `@test "failing" { false; }\' failed' ]
+}
+
+@test "testing IFS not modified by run" {
+  run bats "$FIXTURE_ROOT/loop_keep_IFS.bats"
+  [ $status -eq 0 ]
+  [ "${lines[1]}" = "ok 1 loop_func" ]
 }
