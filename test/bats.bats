@@ -262,3 +262,12 @@ fixtures bats
   [ $status -eq 0 ]
   [ "${lines[1]}" = "ok 1 loop_func" ]
 }
+
+@test "empty lines in output are preserved" {
+  run echo -ne "line0\n\nline2"
+
+  [ "${#lines[@]}" -eq 3 ]
+  [ "${lines[0]}" = "line0" ]
+  [ "${lines[1]}" = "" ]
+  [ "${lines[2]}" = "line2" ]
+}
