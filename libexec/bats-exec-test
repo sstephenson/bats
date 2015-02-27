@@ -58,7 +58,10 @@ run() {
   output="$("$@" 2>&1)"
   status="$?"
   oldIFS=$IFS
-  IFS=$'\n' lines=($output)
+  lines=()
+  while IFS= read -r LINE; do
+    lines+=( "$LINE" )
+  done < <(echo "$output")
   [ -z "$e" ] || set -e
   [ -z "$E" ] || set -E
   [ -z "$T" ] || set -T
