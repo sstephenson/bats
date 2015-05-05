@@ -163,6 +163,10 @@ bats_print_failed_command() {
   else
     echo "failed with status $status"
   fi
+
+  if [ -n "$output" ]; then
+      echo "#   $output"
+  fi
 }
 
 bats_frame_lineno() {
