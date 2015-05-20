@@ -21,7 +21,7 @@ else
 fi
 
 update_screen_width() {
-  screen_width="$(tput cols)"
+  screen_width=${COLUMNS:-$(tput cols)}
   count_column_left=$(( $screen_width - $count_column_width ))
 }
 
