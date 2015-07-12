@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "BATS" "7" "November 2013" "" ""
+.TH "BATS" "7" "August 2015" "" ""
 .
 .SH "NAME"
 \fBbats\fR \- Bats test file format
@@ -87,6 +87,25 @@ load test_helper
 .
 .P
 will source the script \fBtest/test_helper\.bash\fR in your test file\. This can be useful for sharing functions to set up your environment or load fixtures\.
+.
+.P
+THE LOAD_STD COMMAND
+.
+.P
+Common test helpers are compiled into libraries and included in the \fIStandard Library\fR for convenience\. To load a library use the \fBload_std\fR command\. For example, the command below loads the \fICore\fR library in your test file\.
+.
+.IP "" 4
+.
+.nf
+
+load_std \'core\'
+.
+.fi
+.
+.IP "" 0
+.
+.P
+See the documentation of the Standard Library for the available libraries and the test helpers they provide\.
 .
 .SH "THE SKIP COMMAND"
 Tests can be skipped by using the \fBskip\fR command at the point in a test you wish to skip\.
@@ -175,4 +194,4 @@ There are several global variables you can use to introspect on Bats tests:
 .IP "" 0
 .
 .SH "SEE ALSO"
-\fBbash\fR(1), \fBbats\fR(1)
+\fBbash\fR(1), \fBbats\fR(1), \fBbatslib\fR(7)

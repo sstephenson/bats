@@ -78,6 +78,19 @@ can be useful for sharing functions to set up your environment or load
 fixtures.
 
 
+THE LOAD_STD COMMAND
+
+Common test helpers are compiled into libraries and included in the
+*Standard Library* for convenience. To load a library use the `load_std`
+command. For example, the command below loads the *Core* library in your
+test file.
+
+    load_std 'core'
+
+See the documentation of the Standard Library for the available
+libraries and the test helpers they provide.
+
+
 THE SKIP COMMAND
 ----------------
 
@@ -153,4 +166,4 @@ store temporary files.
 SEE ALSO
 --------
 
-`bash`(1), `bats`(1)
+`bash`(1), `bats`(1), `batslib`(7)

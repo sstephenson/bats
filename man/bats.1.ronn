@@ -95,7 +95,7 @@ SEE ALSO
 
 Bats wiki: _https://github.com/sstephenson/bats/wiki/_
 
-`bash`(1), `bats`(7)
+`bash`(1), `bats`(7), `batslib`(7)
 
 
 COPYRIGHT
