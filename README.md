@@ -383,12 +383,7 @@ If either value is longer than one line both are displayed in
 
 #### `assert_success`
 
-This function tests `$status` and additionally `$output` depending on
-the number of parameters.
-
-##### `$status` test
-
-When no parameters are specified, fail if `$status` is not zero.
+Fail if `$status` is not 0.
 
 ```bash
 @test 'assert_success() status only' {
@@ -408,34 +403,6 @@ output : have
 
 If `$output` is longer than one line, it is displayed in *multi-line*
 format.
-
-##### Optional `$output` test
-
-Additionally, if one parameter is specified and the status test passed,
-`$output` is compared against the parameter as expected output.
-
-```bash
-@test 'assert_success() status and output' {
-  run echo 'have'
-  local expected='want'
-  assert_success "$expected"
-}
-```
-
-If the output test fails, the expected and actual outputs are displayed.
-
-```
--- command succeeded, but output differs --
-expected : want
-actual   : have
---
-```
-
-If either value is longer than one line both are displayed in
-*multi-line* format.
-
-If the status test fails, the output test is not performed and the
-output is identical to the status-only form's.
 
 #### `assert_failure`
 

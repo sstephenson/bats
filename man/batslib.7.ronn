@@ -87,15 +87,10 @@ recent invocation of `run`.
   displayed in _mulit-line_ format. When no parameters are specified,
   <EXPECTED> is read from the standard input.
 
-* `assert_success` [<EXPECTED>]:
-  When no parameters are specified, fail if `$status` is not `0`. On
-  failure `$status` and `$output` are displayed. If `$output` is longer
-  than one line, it is displayed in _mulit-line_ format.
-
-  When <EXPECTED> is specified and `$status` is `0`, fail if <EXPECTED>
-  does not equal `$output`. On failure both values are displayed. If
-  either one is longer than one line, both are displayed in _multi-line_
-  format.
+* `assert_success`:
+  Fail if `$status` is not `0`. On failure `$status` and `$output` are
+  displayed. If `$output` is longer than one line, it is displayed in
+  _mulit-line_ format.
 
 * `assert_failure` [<EXPECTED>]:
   When no parameters are specified, fail if `$status` is `0`. On failure

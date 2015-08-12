@@ -110,38 +110,25 @@ assert_output() {
   fi
 }
 
-# Fail and display an error message if `$status' is not zero. The error
+# Fail and display an error message if `$status' is not 0. The error
 # message contains `$status' and `$output'.
-#
-# Optionally, if the status check passed, `$output' can be tested
-# against the first positional parameter as expected output. If the
-# output check fails the error message contains the expected and the
-# actual output.
 #
 # Globals:
 #   status
 #   output
 # Arguments:
-#   $1 - [opt] expected output
+#   none
 # Returns:
-#   0 - status and, optionally, output check passed
+#   0 - `$status' is 0
 #   1 - otherwise
 # Outputs:
-#   STDERR - `$status' and `$output', if status check fails
-#            expected and actual output, if output check fails
+#   STDERR - `$status' and `$output', if `$status' is not 0
 assert_success() {
-  (( $# > 0 )) && local -r expected="$1"
   if (( status != 0 )); then
     { local -ir width=6
       batslib_print_kv_single "$width" 'status' "$status"
       batslib_print_kv_single_or_multi "$width" 'output' "$output"
     } | batslib_decorate 'command failed' \
-      | flunk
-  elif (( $# > 0 )) && [[ $output != "$1" ]]; then
-    batslib_print_kv_single_or_multi 8 \
-        'expected' "$expected" \
-        'actual'   "$output" \
-      | batslib_decorate 'command succeeded, but output differs' \
       | flunk
   fi
 }
