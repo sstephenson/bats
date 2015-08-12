@@ -96,10 +96,7 @@ Fail if \fB$status\fR is not \fB0\fR\. On failure \fB$status\fR and \fB$output\f
 .
 .TP
 \fBassert_failure\fR [\fIEXPECTED\fR]
-When no parameters are specified, fail if \fB$status\fR is \fB0\fR\. On failure \fB$output\fR is displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulit\-line\fR format\.
-.
-.IP
-When \fIEXPECTED\fR is specified and \fB$status\fR is not \fB0\fR, fail if \fIEXPECTED\fR does not equal \fB$output\fR\. On failure both values are displayed\. If either one is longer than one line, both are displayed in \fImulti\-line\fR format\.
+Fail if \fB$status\fR is \fB0\fR\. On failure \fB$output\fR is displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulit\-line\fR format\.
 .
 .TP
 \fBassert_line\fR [\fIINDEX\fR] \fILINE\fR
