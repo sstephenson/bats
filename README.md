@@ -426,6 +426,32 @@ output : have
 If `$output` is longer than one line, it is displayed in *multi-line*
 format.
 
+##### Expected status
+
+When one parameter is specified, fail if `$status` does not equal the
+expected status specified by the parameter.
+
+```bash
+@test 'assert_failure() with expected status' {
+  run bash -c "echo 'error'; exit 1"
+  assert_failure 2
+}
+```
+
+On failure the expected and actual status, and `$output` are displayed.
+
+```
+-- command failed as expected, but status differs --
+expected : 2
+actual   : 1
+output   : error
+--
+```
+
+If `$output` is longer than one line, it is displayed in *multi-line*
+format.
+
+
 #### `assert_line`
 
 Depending on the number of parameters, this function tests either that

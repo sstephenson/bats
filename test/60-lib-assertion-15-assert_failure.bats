@@ -30,3 +30,36 @@ load test_helper
   [ "${lines[3]}" == '  ok 2' ]
   [ "${lines[4]}" == '--' ]
 }
+
+@test 'assert_failure() test $status against the first positional parameter if specified' {
+  run bash -c 'echo ok; exit 1'
+  run assert_failure 1
+  [ "$status" -eq 0 ]
+  [ "${#lines[@]}" -eq 0 ]
+}
+
+@test 'assert_failure() displays $output, and the expected and actual status if they differ' {
+  run bash -c 'echo error; exit 1'
+  run assert_failure 2
+  [ "$status" -eq 1 ]
+  [ "${#lines[@]}" -eq 5 ]
+  [ "${lines[0]}" == '-- command failed as expected, but status differs --' ]
+  [ "${lines[1]}" == 'expected : 2' ]
+  [ "${lines[2]}" == 'actual   : 1' ]
+  [ "${lines[3]}" == 'output   : error' ]
+  [ "${lines[4]}" == '--' ]
+}
+
+@test 'assert_failure() when status differs, displays $output in multi-line format if necessary' {
+  run bash -c "echo $'error 1\nerror 2'; exit 1"
+  run assert_failure 2
+  [ "$status" -eq 1 ]
+  [ "${#lines[@]}" -eq 7 ]
+  [ "${lines[0]}" == '-- command failed as expected, but status differs --' ]
+  [ "${lines[1]}" == 'expected : 2' ]
+  [ "${lines[2]}" == 'actual   : 1' ]
+  [ "${lines[3]}" == 'output (2 lines):' ]
+  [ "${lines[4]}" == '  error 1' ]
+  [ "${lines[5]}" == '  error 2' ]
+  [ "${lines[6]}" == '--' ]
+}

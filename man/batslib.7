@@ -98,6 +98,9 @@ Fail if \fB$status\fR is not \fB0\fR\. On failure \fB$status\fR and \fB$output\f
 \fBassert_failure\fR [\fIEXPECTED\fR]
 Fail if \fB$status\fR is \fB0\fR\. On failure \fB$output\fR is displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulit\-line\fR format\.
 .
+.IP
+When \fIEXPECTED\fR is specified, fail if it does not equal \fB$status\fR\. On failure \fIEXPECTED\fR, \fB$status\fR and \fB$output\fR are displayed\.
+.
 .TP
 \fBassert_line\fR [\fIINDEX\fR] \fILINE\fR
 When only \fILINE\fR is specified, fail if \fB${lines[@]}\fR does not contain \fILINE\fR\. On failure \fILINE\fR and \fB$output\fR are displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulit\-line\fR format\.

@@ -97,6 +97,9 @@ recent invocation of `run`.
   `$output` is longer than one line, it is displayed in _mulit-line_
   format.
 
+  When <EXPECTED> is specified, fail if it does not equal `$status`. On
+  failure <EXPECTED>, `$status` and `$output` are displayed.
+
 * `assert_line` [<INDEX>] <LINE>:
   When only <LINE> is specified, fail if `${lines[@]}` does not contain
   <LINE>. On failure <LINE> and `$output` are displayed. If `$output` is
