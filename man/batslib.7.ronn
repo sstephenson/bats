@@ -81,11 +81,23 @@ recent invocation of `run`.
   are displayed. If either one is longer than one line, both are
   displayed in _mulit-line_ format.
 
-* `assert_output` [<EXPECTED>]:
+* `assert_output` [-l <INDEX>|-L] [<EXPECTED>]:
   Fail if <EXPECTED> does not equal `$output`. On failure both values
   are displayed. If either one is longer than one line, both are
   displayed in _mulit-line_ format. When no parameters are specified,
   <EXPECTED> is read from the standard input.
+
+  When `-l` is used, fail if <EXPECTED> does not equal the <INDEX>-th
+  element of `${lines[@]}`. On failure, <INDEX>, <EXPECTED> and the
+  actual line are displayed.
+
+  When `-L` is used, fail if <EXPECTED> is not found in `${lines[@]}`.
+  On failure, <EXPECTED> and `$output` are displayed. If `$output` is
+  longer than one line, it is displayed in _mulit-line_ format.
+
+  **NOTE:** Due to a bug in Bats, empty lines are discarded, causing
+  line indices to change and preventing testing for empty lines. See
+  [BUGS][] for more.
 
 * `assert_success`:
   Fail if `$status` is not `0`. On failure `$status` and `$output` are
@@ -99,19 +111,6 @@ recent invocation of `run`.
 
   When <EXPECTED> is specified, fail if it does not equal `$status`. On
   failure <EXPECTED>, `$status` and `$output` are displayed.
-
-* `assert_line` [<INDEX>] <LINE>:
-  When only <LINE> is specified, fail if `${lines[@]}` does not contain
-  <LINE>. On failure <LINE> and `$output` are displayed. If `$output` is
-  longer than one line, it is displayed in _mulit-line_ format.
-
-  When <INDEX> is specified, fail if <LINE> does not equal
-  `${lines[INDEX]}`. On failure <INDEX>, <LINE> and `${lines[INDEX]}`
-  are dispalyed.
-
-  **NOTE:** Due to a bug in Bats, empty lines are discarded, causing
-  line indices to change and preventing testing for empty lines. See
-  [BUGS][] for more.
 
 * `refute_line` [<INDEX>] <LINE>:
   When only <LINE> is specified, fail if `${lines[@]}` contains <LINE>.

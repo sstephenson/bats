@@ -87,8 +87,17 @@ Fail if \fIEXPRESSION\fR evaluates to false\. On failure, \fIEXPRESSION\fR is di
 Fail if \fIEXPECTED\fR and \fIACTUAL\fR do not equal\. On failure both values are displayed\. If either one is longer than one line, both are displayed in \fImulit\-line\fR format\.
 .
 .TP
-\fBassert_output\fR [\fIEXPECTED\fR]
+\fBassert_output\fR [\-l \fIINDEX\fR|\-L] [\fIEXPECTED\fR]
 Fail if \fIEXPECTED\fR does not equal \fB$output\fR\. On failure both values are displayed\. If either one is longer than one line, both are displayed in \fImulit\-line\fR format\. When no parameters are specified, \fIEXPECTED\fR is read from the standard input\.
+.
+.IP
+When \fB\-l\fR is used, fail if \fIEXPECTED\fR does not equal the \fIINDEX\fR\-th element of \fB${lines[@]}\fR\. On failure, \fIINDEX\fR, \fIEXPECTED\fR and the actual line are displayed\.
+.
+.IP
+When \fB\-L\fR is used, fail if \fIEXPECTED\fR is not found in \fB${lines[@]}\fR\. On failure, \fIEXPECTED\fR and \fB$output\fR are displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulit\-line\fR format\.
+.
+.IP
+\fBNOTE:\fR Due to a bug in Bats, empty lines are discarded, causing line indices to change and preventing testing for empty lines\. See \fIBUGS\fR for more\.
 .
 .TP
 \fBassert_success\fR
@@ -100,16 +109,6 @@ Fail if \fB$status\fR is \fB0\fR\. On failure \fB$output\fR is displayed\. If \f
 .
 .IP
 When \fIEXPECTED\fR is specified, fail if it does not equal \fB$status\fR\. On failure \fIEXPECTED\fR, \fB$status\fR and \fB$output\fR are displayed\.
-.
-.TP
-\fBassert_line\fR [\fIINDEX\fR] \fILINE\fR
-When only \fILINE\fR is specified, fail if \fB${lines[@]}\fR does not contain \fILINE\fR\. On failure \fILINE\fR and \fB$output\fR are displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulit\-line\fR format\.
-.
-.IP
-When \fIINDEX\fR is specified, fail if \fILINE\fR does not equal \fB${lines[INDEX]}\fR\. On failure \fIINDEX\fR, \fILINE\fR and \fB${lines[INDEX]}\fR are dispalyed\.
-.
-.IP
-\fBNOTE:\fR Due to a bug in Bats, empty lines are discarded, causing line indices to change and preventing testing for empty lines\. See \fIBUGS\fR for more\.
 .
 .TP
 \fBrefute_line\fR [\fIINDEX\fR] \fILINE\fR

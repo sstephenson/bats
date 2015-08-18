@@ -82,31 +82,111 @@ assert_equal() {
   fi
 }
 
-# Fail and display an error message if `$output' does not equal the
-# expected output as specified either by the first positional parameter
-# or on the standard input (by piping or redirection). The error message
-# contains the expected and the actual output.
+# Fail and display an error message if the expected output does not
+# match the actual output. The expected output can be specified either
+# by the first parameter or on the standard input.
+#
+# By default, `$output' is compared against the expected output, and the
+# error message contains both values.
+#
+# When `-l' is used, the <index>-th element of `${lines[@]}' is
+# compared. On failure, the error message contains the line index, and
+# the expected and actual line at the given index.
+#
+# When `-L' is used, the test passes if `${lines[@]}' contains the
+# expected line. On failure, the expected line and `$output' are
+# displayed.
 #
 # Globals:
 #   output
+#   lines
+# Options:
+#   -l <index> - match against the <index>-th element of `$lines'
+#   -L - pass if the expected line is found in `$output'
 # Arguments:
-#   $1 - [opt = STDIN] expected output
+#   $1 - [opt = STDIN] expected output/line
 # Returns:
-#   0 - expected equals actual output
+#   0 - expected matches actual output/line
 #   1 - otherwise
 # Inputs:
-#   STDIN - [opt = $1] expected output
+#   STDIN - [opt = $1] expected output/line
 # Outputs:
-#   STDERR - expected and actual output, on failure
+#   STDERR - failure details, on failure
+#            error message, on `-l' missing its <index> argument
 assert_output() {
+  # Local variables.
+  local is_line_match=0
+  local is_contained=0
+
+  # Handle options.
+  while (( $# > 0 )); do
+    case "$1" in
+      -l)
+        if (( $# < 2 )) || ! [[ $2 =~ ^([0-9]|[1-9][0-9]+)$ ]]; then
+          echo "\`-l' requires an integer argument" \
+            | batslib_decorate 'ERROR: assert_output' \
+            | flunk
+          return "$?"
+        fi
+        is_line_match=1
+        local -ri idx="$2"
+        shift 2
+        ;;
+      -L) is_contained=1; shift ;;
+      --) break ;;
+      *) break ;;
+    esac
+  done
+
+  if (( is_line_match )) && (( is_contained )); then
+    echo "\`-l' and \`-L' are mutually exclusive" \
+      | batslib_decorate 'ERROR: assert_output' \
+      | flunk
+    return "$?"
+  fi
+
+  # Arguments.
   local expected
   (( $# == 0 )) && expected="$(cat -)" || expected="$1"
-  if [[ $expected != "$output" ]]; then
-    batslib_print_kv_single_or_multi 8 \
-        'expected' "$expected" \
-        'actual'   "$output" \
-      | batslib_decorate 'output differs' \
+
+  # Matching.
+  if (( is_contained )); then
+    # Line contained in output.
+    local temp_line
+    for temp_line in "${lines[@]}"; do
+      [[ $temp_line == "$expected" ]] && return 0
+    done
+    { local -ar single=(
+        'line'   "$expected"
+      )
+      local -ar may_be_multi=(
+        'output' "$output"
+      )
+      local -ir width="$( batslib_get_max_single_line_key_width \
+                          "${single[@]}" "${may_be_multi[@]}" )"
+      batslib_print_kv_single "$width" "${single[@]}"
+      batslib_print_kv_single_or_multi "$width" "${may_be_multi[@]}"
+    } | batslib_decorate 'line is not in output' \
       | flunk
+  elif (( is_line_match )); then
+    # Specific line.
+    if [[ ${lines[$idx]} != "$expected" ]]; then
+      batslib_print_kv_single 8 \
+          'index'    "$idx" \
+          'expected' "$expected" \
+          'actual'   "${lines[$idx]}" \
+        | batslib_decorate 'line differs' \
+        | flunk
+    fi
+  else
+    # Entire output.
+    if [[ $output != "$expected" ]]; then
+      batslib_print_kv_single_or_multi 8 \
+          'expected' "$expected" \
+          'actual'   "$output" \
+        | batslib_decorate 'output differs' \
+        | flunk
+    fi
   fi
 }
 
@@ -164,62 +244,6 @@ assert_failure() {
       batslib_print_kv_single_or_multi "$width" \
           'output' "$output"
     } | batslib_decorate 'command failed as expected, but status differs' \
-      | flunk
-  fi
-}
-
-# Fail and display an error message if `${lines[@]}' does not contain
-# the expected line. The error message contains the expected line and
-# `$output'.
-#
-# Optionally, if two positional parameters are specified, the expected
-# line is only sought in the line whose index is given in the first
-# parameter. In this case, the error message contains the line index,
-# and the expected and actual line at the given index.
-#
-# Globals:
-#   lines
-#   output
-# Arguments:
-#   $1 - [opt] zero-based index of line to match against
-#   $2 - line to look for
-# Returns:
-#   0 - line found
-#   1 - otherwise
-# Outputs:
-#   STDERR - expected line and `$output', on failure
-#            index, expected and actual line at index, on failure
-assert_line() {
-  if (( $# > 1 )); then
-    local -ir idx="$1"
-    local -r line="$2"
-
-    if [[ ${lines[$idx]} != "$line" ]]; then
-      batslib_print_kv_single 8 \
-          'index'    "$idx" \
-          'expected' "$line" \
-          'actual'   "${lines[$idx]}" \
-        | batslib_decorate 'line differs' \
-        | flunk
-    fi
-  else
-    local -r line="$1"
-    local temp_line
-
-    for temp_line in "${lines[@]}"; do
-      [[ $temp_line == "$line" ]] && return 0
-    done
-    { local -ar single=(
-        'line'   "$line"
-      )
-      local -ar may_be_multi=(
-        'output' "$output"
-      )
-      local -ir width="$( batslib_get_max_single_line_key_width \
-                          "${single[@]}" "${may_be_multi[@]}" )"
-      batslib_print_kv_single "$width" "${single[@]}"
-      batslib_print_kv_single_or_multi "$width" "${may_be_multi[@]}"
-    } | batslib_decorate 'line is not in output' \
       | flunk
   fi
 }

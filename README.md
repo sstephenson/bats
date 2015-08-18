@@ -349,7 +349,16 @@ If either value is longer than one line both are displayed in
 
 #### `assert_output`
 
-Fail if `$output` does not equal the expected output.
+This function helps to verify that a command or function produces the
+correct output. It can compare the entire output, a single line or make
+sure that a given line is part of the output.
+
+***Note:*** *Due to a [bug in Bats][bats-93], empty lines are discarded,
+causing line indices to change and preventing testing for empty lines.*
+
+##### Matching the entire output
+
+By default, fail if `$output` does not equal the expected output.
 
 ```bash
 @test 'assert_output()' {
@@ -380,6 +389,55 @@ actual   : have
 
 If either value is longer than one line both are displayed in
 *multi-line* format.
+
+##### Matching a single line
+
+When `-l <index>` is used, fail if the expected line does not equal the
+output line identified by its index in `${lines[@]}`.
+
+```bash
+@test 'assert_line() in specific line' {
+  run echo $'have 0\nhave 1\nhave 2'
+  assert_output -l 1 'want'
+}
+```
+
+On failure the index, and the expected and actual lines are displayed.
+
+```
+-- line differs --
+index    : 1
+expected : want
+actual   : have 1
+--
+```
+
+##### Line contained in output
+
+When `-L` is used, fail if `${lines[@]}` does not contain the expected
+line.
+
+```bash
+@test 'assert_line() in entire output' {
+  run echo $'have 0\nhave 1\nhave 2'
+  assert_output -L 'want'
+}
+```
+
+On failure `$output` and the expected line are displayed.
+
+```
+-- line is not in output --
+line : want
+output (3 lines):
+  have 1
+  have 2
+  have 3
+--
+```
+
+If `$output` is not longer than one line, it is displayed in
+*two-column* format.
 
 #### `assert_success`
 
@@ -451,67 +509,6 @@ output   : error
 If `$output` is longer than one line, it is displayed in *multi-line*
 format.
 
-
-#### `assert_line`
-
-Depending on the number of parameters, this function tests either that
-the output contains the expected line or that the expected line appears
-in a specific line of the output identified by its index.
-
-This function is the opposite of `refute_line()`.
-
-***Note:*** *Due to a [bug in Bats][bats-93], empty lines are discarded,
-causing line indices to change and preventing testing for empty lines.*
-
-##### Entire output
-
-When one parameter is specified, fail if `${lines[@]}` does not contain
-the line specified by the parameter.
-
-```bash
-@test 'assert_line() in entire output' {
-  run echo $'have 1\nhave 2\nhave 3'
-  assert_line 'want'
-}
-```
-
-On failure `$output` and the expected line are displayed.
-
-```
--- line is not in output --
-line : want
-output (3 lines):
-  have 1
-  have 2
-  have 3
---
-```
-
-If `$output` is not longer than one line, it is displayed in
-*two-column* format.
-
-##### Specific line
-
-When two parameters are specified, zero-based line index and expected
-line respectively, fail if the output line identified by its index in
-`${lines[@]}` does not equal the expected line.
-
-```bash
-@test 'assert_line() in specific line' {
-  run echo $'have 1\nhave 2\nhave 3'
-  assert_line 1 'want'
-}
-```
-
-On failure the index, and the expected and actual lines are displayed.
-
-```
--- line differs --
-index    : 1
-expected : want
-actual   : have 2
---
-```
 
 #### `refute_line`
 
