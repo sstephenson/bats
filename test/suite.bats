@@ -62,3 +62,13 @@ fixtures suite
   [ "${lines[5]}" = "begin 3 quasi-truth" ]
   [ "${lines[6]}" = "not ok 3 quasi-truth" ]
 }
+
+@test "including shared tests" {
+  run bats "$FIXTURE_ROOT/include"
+  [ $status -eq 0 ]
+  [ "${lines[0]}" = "1..4" ]
+  echo "$output" | grep "^ok . a truth"
+  echo "$output" | grep "^ok . c truth"
+  echo "$output" | grep "^ok . shared truth via a"
+  echo "$output" | grep "^ok . shared truth via c"
+}
