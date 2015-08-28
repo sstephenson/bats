@@ -81,7 +81,7 @@ recent invocation of `run`.
   are displayed. If either one is longer than one line, both are
   displayed in _mulit-line_ format.
 
-* `assert_output` [-l <INDEX>|-L] [<EXPECTED>]:
+* `assert_output` [-l <INDEX>|-L] [-p|-r] [<EXPECTED>]:
   Fail if <EXPECTED> does not equal `$output`. On failure both values
   are displayed. If either one is longer than one line, both are
   displayed in _mulit-line_ format. When no parameters are specified,
@@ -95,9 +95,19 @@ recent invocation of `run`.
   On failure, <EXPECTED> and `$output` are displayed. If `$output` is
   longer than one line, it is displayed in _mulit-line_ format.
 
-  **NOTE:** Due to a bug in Bats, empty lines are discarded, causing
-  line indices to change and preventing testing for empty lines. See
-  [BUGS][] for more.
+  The default, literal matching can be changed to substring and regular
+  expression matching.
+
+  Using `-p` enables partial matching, and the assertion fails if
+  <EXPECTED> as a substring is not found in the output.
+
+  Using `-r` enables regular expression matching, and the assertion
+  fails if <EXPECTED> as an extended regular expression does not match
+  the output.
+
+  **NOTE:** Due to a bug in Bats, empty lines are discarded from
+  `${lines[@]}`, causing line indices to change and preventing testing
+  for empty lines. See [BUGS][] for more.
 
 * `assert_success`:
   Fail if `$status` is not `0`. On failure `$status` and `$output` are
@@ -138,7 +148,7 @@ Report bugs on Bats' GitHub issue tracker at
 
 Due to a bug in Bats, empty lines are missing from `${lines[@]}`,
 causing line indices to change and preventing testing for empty lines
-when using `assert_line` and `refute_line`. See PR \#93 on Github at
+when using `assert_output` and `refute_line`. See PR \#93 on Github at
 <https://github.com/sstephenson/bats/pull/93>.
 
 
@@ -149,4 +159,4 @@ TODO(ztombol): Find a suitable license.
 
 ## SEE ALSO
 
-`bash`(1), `bats`(1), `bats`(7)
+`bash`(1), `bats`(1), `bats`(7), `regex(7)`

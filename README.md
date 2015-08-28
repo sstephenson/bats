@@ -347,98 +347,6 @@ actual   : have
 If either value is longer than one line both are displayed in
 *multi-line* format.
 
-#### `assert_output`
-
-This function helps to verify that a command or function produces the
-correct output. It can compare the entire output, a single line or make
-sure that a given line is part of the output.
-
-***Note:*** *Due to a [bug in Bats][bats-93], empty lines are discarded,
-causing line indices to change and preventing testing for empty lines.*
-
-##### Matching the entire output
-
-By default, fail if `$output` does not equal the expected output.
-
-```bash
-@test 'assert_output()' {
-  run echo 'have'
-  local expected='want'
-  assert_output "$expected"
-}
-```
-
-The expected output can also be specified on the standard input.
-
-```bash
-@test 'assert_output() with pipe' {
-  run echo 'have'
-  local expected='want'
-  echo "$expected" | assert_output
-}
-```
-
-On failure the expected and actual outputs are displayed.
-
-```
--- output differs --
-expected : want
-actual   : have
---
-```
-
-If either value is longer than one line both are displayed in
-*multi-line* format.
-
-##### Matching a single line
-
-When `-l <index>` is used, fail if the expected line does not equal the
-output line identified by its index in `${lines[@]}`.
-
-```bash
-@test 'assert_line() in specific line' {
-  run echo $'have 0\nhave 1\nhave 2'
-  assert_output -l 1 'want'
-}
-```
-
-On failure the index, and the expected and actual lines are displayed.
-
-```
--- line differs --
-index    : 1
-expected : want
-actual   : have 1
---
-```
-
-##### Line contained in output
-
-When `-L` is used, fail if `${lines[@]}` does not contain the expected
-line.
-
-```bash
-@test 'assert_line() in entire output' {
-  run echo $'have 0\nhave 1\nhave 2'
-  assert_output -L 'want'
-}
-```
-
-On failure `$output` and the expected line are displayed.
-
-```
--- line is not in output --
-line : want
-output (3 lines):
-  have 1
-  have 2
-  have 3
---
-```
-
-If `$output` is not longer than one line, it is displayed in
-*two-column* format.
-
 #### `assert_success`
 
 Fail if `$status` is not 0.
@@ -509,6 +417,135 @@ output   : error
 If `$output` is longer than one line, it is displayed in *multi-line*
 format.
 
+#### `assert_output`
+
+This functions helps to verify that a command or function produces the
+correct output. It can match the entire output, a specific line, and
+even look for a line in the output. Matching can be literal, partial or
+regular expression.
+
+##### Matching the entire output
+
+By default, the entire `$output` is matched, and the assertion fails if
+it does not equal the expected output.
+
+```bash
+@test 'assert_output()' {
+  run echo 'have'
+  assert_output 'want'
+}
+```
+
+The expected output can be specified on the standard input as well.
+
+```bash
+@test 'assert_output() with pipe' {
+  run echo 'have'
+  echo 'want' | assert_output
+}
+```
+
+On failure, the expected and actual outputs are displayed.
+
+```
+-- output differs --
+expected : want
+actual   : have
+--
+```
+
+If either value is longer than one line both are displayed in
+*multi-line* format.
+
+##### Matching a specific line
+
+***Note:*** *Due to a [bug in Bats][bats-93], empty lines are discarded
+from `${lines[@]}`, causing line indices to change and preventing
+testing for empty lines.*
+
+When `-l <index>` is used, only the line specified by its `index` in
+`${lines[@]}` is matched, and the assertion fails if it does not equal
+the expected line.
+
+```bash
+@test 'assert_output() specific line' {
+  run echo $'have-0\nhave-1\nhave-2'
+  assert_output -l 1 'want-1'
+}
+```
+
+On failure, the index, and the expected and actual line are displayed.
+
+```
+-- line differs --
+index    : 1
+expected : want-1
+actual   : have-1
+--
+```
+
+##### Line found in output
+
+***Note:*** *Due to a [bug in Bats][bats-93], empty lines are discarded
+from `${lines[@]}`, causing line indices to change and preventing
+testing for empty lines.*
+
+When `-L` is used, fail if the expected line is not found in
+`${lines[@]}`.
+
+```bash
+@test 'assert_output() line found in output' {
+  run echo $'have-0\nhave-1\nhave-2'
+  assert_output -L 'want'
+}
+```
+
+On failure, the expected line and `$output` are displayed.
+
+```
+-- output does not contain line --
+line : want
+output (3 lines):
+  have-0
+  have-1
+  have-2
+--
+```
+
+If `$output` is not longer than one line, it is displayed in
+*two-column* format.
+
+##### Partial matching
+
+Partial matching, enabled using `-p`, provides more flexibility than the
+default literal matching. The assertion fails if the expected output as
+a substring can not be found in the output.
+
+```bash
+@test 'assert_output() partial matching' {
+  run echo 'ERROR: no such file or directory'
+  assert_output -p 'ERROR'
+}
+```
+
+This option can be used with `-l` or `-L` as well, and does not change
+the set of information displayed on failure.
+
+##### Regular expression matching
+
+Regular expression matching, enabled using `-r`, provides the most
+flexibility. The assertion fails if the expected output specified as an
+extended regular expression does not match the output.
+
+```bash
+@test 'assert_output() regular expression matching' {
+  run echo 'Foobar v0.1.0'
+  assert_output -r '^Foobar v[0-9]+\.[0-9]+\.[0-9]$'
+}
+```
+
+This option can be used with `-l` or `-L` as well, and does not change
+the set of information displayed on failure.
 
 #### `refute_line`
 

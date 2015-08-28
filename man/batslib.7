@@ -87,7 +87,7 @@ Fail if \fIEXPRESSION\fR evaluates to false\. On failure, \fIEXPRESSION\fR is di
 Fail if \fIEXPECTED\fR and \fIACTUAL\fR do not equal\. On failure both values are displayed\. If either one is longer than one line, both are displayed in \fImulit\-line\fR format\.
 .
 .TP
-\fBassert_output\fR [\-l \fIINDEX\fR|\-L] [\fIEXPECTED\fR]
+\fBassert_output\fR [\-l \fIINDEX\fR|\-L] [\-p|\-r] [\fIEXPECTED\fR]
 Fail if \fIEXPECTED\fR does not equal \fB$output\fR\. On failure both values are displayed\. If either one is longer than one line, both are displayed in \fImulit\-line\fR format\. When no parameters are specified, \fIEXPECTED\fR is read from the standard input\.
 .
 .IP
@@ -97,7 +97,16 @@ When \fB\-l\fR is used, fail if \fIEXPECTED\fR does not equal the \fIINDEX\fR\-t
 When \fB\-L\fR is used, fail if \fIEXPECTED\fR is not found in \fB${lines[@]}\fR\. On failure, \fIEXPECTED\fR and \fB$output\fR are displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulit\-line\fR format\.
 .
 .IP
-\fBNOTE:\fR Due to a bug in Bats, empty lines are discarded, causing line indices to change and preventing testing for empty lines\. See \fIBUGS\fR for more\.
+The default, literal matching can be changed to substring and regular expression matching\.
+.
+.IP
+Using \fB\-p\fR enables partial matching, and the assertion fails if \fIEXPECTED\fR as a substring is not found in the output\.
+.
+.IP
+Using \fB\-r\fR enables regular expression matching, and the assertion fails if \fIEXPECTED\fR as an extended regular expression does not match the output\.
+.
+.IP
+\fBNOTE:\fR Due to a bug in Bats, empty lines are discarded from \fB${lines[@]}\fR, causing line indices to change and preventing testing for empty lines\. See \fIBUGS\fR for more\.
 .
 .TP
 \fBassert_success\fR
@@ -126,10 +135,10 @@ When \fIINDEX\fR is specified, fail if \fILINE\fR equals \fB${lines[INDEX]}\fR\.
 Report bugs on Bats\' GitHub issue tracker at \fIhttps://github\.com/sstephenson/bats/issues\fR\.
 .
 .SS "Known bugs"
-Due to a bug in Bats, empty lines are missing from \fB${lines[@]}\fR, causing line indices to change and preventing testing for empty lines when using \fBassert_line\fR and \fBrefute_line\fR\. See PR #93 on Github at \fIhttps://github\.com/sstephenson/bats/pull/93\fR\.
+Due to a bug in Bats, empty lines are missing from \fB${lines[@]}\fR, causing line indices to change and preventing testing for empty lines when using \fBassert_output\fR and \fBrefute_line\fR\. See PR #93 on Github at \fIhttps://github\.com/sstephenson/bats/pull/93\fR\.
 .
 .SH "COPYRIGHT"
 TODO(ztombol): Find a suitable license\.
 .
 .SH "SEE ALSO"
-\fBbash\fR(1), \fBbats\fR(1), \fBbats\fR(7)
+\fBbash\fR(1), \fBbats\fR(1), \fBbats\fR(7), \fBregex(7)\fR

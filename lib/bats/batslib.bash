@@ -82,41 +82,47 @@ assert_equal() {
   fi
 }
 
-# Fail and display an error message if the expected output does not
-# match the actual output. The expected output can be specified either
-# by the first parameter or on the standard input.
+# Fail and display an error message if the expected does not match the
+# actual output. The expected output can be specified either by the
+# first parameter or on the standard input.
 #
-# By default, `$output' is compared against the expected output, and the
+# By default, the expected output is compared against `$output', and the
 # error message contains both values.
 #
-# When `-l' is used, the <index>-th element of `${lines[@]}' is
-# compared. On failure, the error message contains the line index, and
-# the expected and actual line at the given index.
+# Option `-l <index>' compares against `${lines[<index>]}'. The error
+# message contains the compared lines and <index>.
 #
-# When `-L' is used, the test passes if `${lines[@]}' contains the
-# expected line. On failure, the expected line and `$output' are
-# displayed.
+# Option `-L' compares against all lines in `${lines[@]}' until a match
+# is found. If no match is found, the function fails and the error
+# message contains the expected line and `$output'.
+#
+# By default, literal matching is performed. Option `-p' and `-r' change
+# this to partial (substring) and regular expression (extended)
+# matching, respectively.
 #
 # Globals:
 #   output
 #   lines
 # Options:
-#   -l <index> - match against the <index>-th element of `$lines'
-#   -L - pass if the expected line is found in `$output'
+#   -l <index> - match against the <index>-th element of `${lines[@]}'
+#   -L - match against all elements of `${lines[@]}' until one matches
+#   -p - substring match
+#   -r - extended regular expression match
 # Arguments:
-#   $1 - [opt = STDIN] expected output/line
+#   $1 - [=STDIN] expected output
 # Returns:
-#   0 - expected matches actual output/line
+#   0 - expected matches the actual output
 #   1 - otherwise
 # Inputs:
-#   STDIN - [opt = $1] expected output/line
+#   STDIN - [=$1] expected output
 # Outputs:
-#   STDERR - failure details, on failure
-#            error message, on `-l' missing its <index> argument
+#   STDERR - assertion details, on failure
+#            error message, on error
 assert_output() {
-  # Local variables.
-  local is_line_match=0
-  local is_contained=0
+  local -i is_match_line=0
+  local -i is_match_contained=0
+  local -i is_mode_partial=0
+  local -i is_mode_regex=0
 
   # Handle options.
   while (( $# > 0 )); do
@@ -126,66 +132,156 @@ assert_output() {
           echo "\`-l' requires an integer argument" \
             | batslib_decorate 'ERROR: assert_output' \
             | flunk
-          return "$?"
+          return $?
         fi
-        is_line_match=1
+        is_match_line=1
         local -ri idx="$2"
         shift 2
         ;;
-      -L) is_contained=1; shift ;;
+      -L) is_match_contained=1; shift ;;
+      -p) is_mode_partial=1; shift ;;
+      -r) is_mode_regex=1; shift ;;
       --) break ;;
       *) break ;;
     esac
   done
 
-  if (( is_line_match )) && (( is_contained )); then
+  if (( is_match_line )) && (( is_match_contained )); then
     echo "\`-l' and \`-L' are mutually exclusive" \
       | batslib_decorate 'ERROR: assert_output' \
       | flunk
-    return "$?"
+    return $?
+  fi
+
+  if (( is_mode_partial )) && (( is_mode_regex )); then
+    echo "\`-p' and \`-r' are mutually exclusive" \
+      | batslib_decorate 'ERROR: assert_output' \
+      | flunk
+    return $?
   fi
 
   # Arguments.
   local expected
   (( $# == 0 )) && expected="$(cat -)" || expected="$1"
 
-  # Matching.
-  if (( is_contained )); then
-    # Line contained in output.
-    local temp_line
-    for temp_line in "${lines[@]}"; do
-      [[ $temp_line == "$expected" ]] && return 0
-    done
-    { local -ar single=(
-        'line'   "$expected"
-      )
-      local -ar may_be_multi=(
-        'output' "$output"
-      )
-      local -ir width="$( batslib_get_max_single_line_key_width \
-                          "${single[@]}" "${may_be_multi[@]}" )"
-      batslib_print_kv_single "$width" "${single[@]}"
-      batslib_print_kv_single_or_multi "$width" "${may_be_multi[@]}"
-    } | batslib_decorate 'line is not in output' \
+  if (( is_mode_regex == 1 )) && [[ '' =~ $expected ]] || (( $? == 2 )); then
+    echo "Invalid extended regular expression: \`$expected'" \
+      | batslib_decorate 'ERROR: assert_output' \
       | flunk
-  elif (( is_line_match )); then
-    # Specific line.
-    if [[ ${lines[$idx]} != "$expected" ]]; then
-      batslib_print_kv_single 8 \
-          'index'    "$idx" \
-          'expected' "$expected" \
-          'actual'   "${lines[$idx]}" \
-        | batslib_decorate 'line differs' \
+    return $?
+  fi
+
+  # Matching.
+  if (( is_match_contained )); then
+    # Line contained in output.
+    if (( is_mode_regex )); then
+      local -i idx
+      for (( idx = 0; idx < ${#lines[@]}; ++idx )); do
+        [[ ${lines[$idx]} =~ $expected ]] && return 0
+      done
+      { local -ar single=(
+          'regex'  "$expected"
+        )
+        local -ar may_be_multi=(
+          'output' "$output"
+        )
+        local -ir width="$( batslib_get_max_single_line_key_width \
+                              "${single[@]}" "${may_be_multi[@]}" )"
+        batslib_print_kv_single "$width" "${single[@]}"
+        batslib_print_kv_single_or_multi "$width" "${may_be_multi[@]}"
+      } | batslib_decorate 'no output line matches regular expression' \
         | flunk
+    elif (( is_mode_partial )); then
+      local -i idx
+      for (( idx = 0; idx < ${#lines[@]}; ++idx )); do
+        [[ ${lines[$idx]} == *"$expected"* ]] && return 0
+      done
+      { local -ar single=(
+          'substring' "$expected"
+        )
+        local -ar may_be_multi=(
+          'output'    "$output"
+        )
+        local -ir width="$( batslib_get_max_single_line_key_width \
+                              "${single[@]}" "${may_be_multi[@]}" )"
+        batslib_print_kv_single "$width" "${single[@]}"
+        batslib_print_kv_single_or_multi "$width" "${may_be_multi[@]}"
+      } | batslib_decorate 'no output line contains substring' \
+        | flunk
+    else
+      local -i idx
+      for (( idx = 0; idx < ${#lines[@]}; ++idx )); do
+        [[ ${lines[$idx]} == "$expected" ]] && return 0
+      done
+      { local -ar single=(
+          'line'   "$expected"
+        )
+        local -ar may_be_multi=(
+          'output' "$output"
+        )
+        local -ir width="$( batslib_get_max_single_line_key_width \
+                            "${single[@]}" "${may_be_multi[@]}" )"
+        batslib_print_kv_single "$width" "${single[@]}"
+        batslib_print_kv_single_or_multi "$width" "${may_be_multi[@]}"
+      } | batslib_decorate 'output does not contain line' \
+        | flunk
+    fi
+  elif (( is_match_line )); then
+    # Specific line.
+    if (( is_mode_regex )); then
+      if ! [[ ${lines[$idx]} =~ $expected ]]; then
+        batslib_print_kv_single 5 \
+            'index' "$idx" \
+            'regex' "$expected" \
+            'line'  "${lines[$idx]}" \
+          | batslib_decorate 'regular expression does not match line' \
+          | flunk
+      fi
+    elif (( is_mode_partial )); then
+      if [[ ${lines[$idx]} != *"$expected"* ]]; then
+        batslib_print_kv_single 9 \
+            'index'     "$idx" \
+            'substring' "$expected" \
+            'line'      "${lines[$idx]}" \
+          | batslib_decorate 'line does not contain substring' \
+          | flunk
+      fi
+    else
+      if [[ ${lines[$idx]} != "$expected" ]]; then
+        batslib_print_kv_single 8 \
+            'index'    "$idx" \
+            'expected' "$expected" \
+            'actual'   "${lines[$idx]}" \
+          | batslib_decorate 'line differs' \
+          | flunk
+      fi
     fi
   else
     # Entire output.
-    if [[ $output != "$expected" ]]; then
-      batslib_print_kv_single_or_multi 8 \
-          'expected' "$expected" \
-          'actual'   "$output" \
-        | batslib_decorate 'output differs' \
-        | flunk
+    if (( is_mode_regex )); then
+      if ! [[ $output =~ $expected ]]; then
+        batslib_print_kv_single_or_multi 6 \
+            'regex'  "$expected" \
+            'output' "$output" \
+          | batslib_decorate 'regular expression does not match output' \
+          | flunk
+      fi
+    elif (( is_mode_partial )); then
+      if [[ $output != *"$expected"* ]]; then
+        batslib_print_kv_single_or_multi 9 \
+            'substring' "$expected" \
+            'output'    "$output" \
+          | batslib_decorate 'output does not contain substring' \
+          | flunk
+      fi
+    else
+      if [[ $output != "$expected" ]]; then
+        batslib_print_kv_single_or_multi 8 \
+            'expected' "$expected" \
+            'actual'   "$output" \
+          | batslib_decorate 'output differs' \
+          | flunk
+      fi
     fi
   fi
 }
