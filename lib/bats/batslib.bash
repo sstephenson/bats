@@ -286,6 +286,239 @@ assert_output() {
   fi
 }
 
+# Fail and display an error message if the unexpected matches the actual
+# output. The unexpected output can be specified either by the first
+# parameter or on the standard input.
+#
+# By default, the unexpected output is compared against `$output', and
+# the error message contains this value.
+#
+# Option `-l <index>' compares against `${lines[<index>]}'. The error
+# message contains the compared lines and <index>.
+#
+# Option `-L' compares against all lines in `${lines[@]}' until a match
+# is found. If a match is found, the function fails and the error
+# message contains the unexpected line, its index and `${lines[@]}'.
+#
+# By default, literal matching is performed. Option `-p' and `-r' change
+# this to partial (substring) and regular expression (extended)
+# matching, respectively. On failure, the substring and regular
+# expression is added to the error message.
+#
+# Globals:
+#   output
+#   lines
+# Options:
+#   -l <index> - match against the <index>-th element of `${lines[@]}'
+#   -L - match against all elements of `${lines[@]}' until one matches
+#   -p - substring match
+#   -r - extended regular expression match
+# Arguments:
+#   $1 - [=STDIN] unexpected output
+# Returns:
+#   0 - unexpected does not match the actual output
+#   1 - otherwise
+# Inputs:
+#   STDIN - [=$1] unexpected output
+# Outputs:
+#   STDERR - assertion details, on failure
+#            error message, on error
+refute_output() {
+  local -i is_match_line=0
+  local -i is_match_contained=0
+  local -i is_mode_partial=0
+  local -i is_mode_regex=0
+
+  # Handle options.
+  while (( $# > 0 )); do
+    case "$1" in
+      -l)
+        if (( $# < 2 )) || ! [[ $2 =~ ^([0-9]|[1-9][0-9]+)$ ]]; then
+          echo "\`-l' requires an integer argument" \
+            | batslib_decorate 'ERROR: refute_output' \
+            | flunk
+          return $?
+        fi
+        is_match_line=1
+        local -ri idx="$2"
+        shift 2
+        ;;
+      -L) is_match_contained=1; shift ;;
+      -p) is_mode_partial=1; shift ;;
+      -r) is_mode_regex=1; shift ;;
+      --) break ;;
+      *) break ;;
+    esac
+  done
+
+  if (( is_match_line )) && (( is_match_contained )); then
+    echo "\`-l' and \`-L' are mutually exclusive" \
+      | batslib_decorate 'ERROR: refute_output' \
+      | flunk
+    return $?
+  fi
+
+  if (( is_mode_partial )) && (( is_mode_regex )); then
+    echo "\`-p' and \`-r' are mutually exclusive" \
+      | batslib_decorate 'ERROR: refute_output' \
+      | flunk
+    return $?
+  fi
+
+  # Arguments.
+  local unexpected
+  (( $# == 0 )) && unexpected="$(cat -)" || unexpected="$1"
+
+  if (( is_mode_regex == 1 )) && [[ '' =~ $unexpected ]] || (( $? == 2 )); then
+    echo "Invalid extended regular expression: \`$unexpected'" \
+      | batslib_decorate 'ERROR: refute_output' \
+      | flunk
+    return $?
+  fi
+
+  # Matching.
+  if (( is_match_contained )); then
+    # Line contained in output.
+    if (( is_mode_regex )); then
+      local -i idx
+      for (( idx = 0; idx < ${#lines[@]}; ++idx )); do
+        if [[ ${lines[$idx]} =~ $unexpected ]]; then
+          { local -ar single=(
+              'regex'  "$unexpected"
+              'index'  "$idx"
+            )
+            local -a may_be_multi=(
+              'output' "$output"
+            )
+            local -ir width="$( batslib_get_max_single_line_key_width \
+                                "${single[@]}" "${may_be_multi[@]}" )"
+            batslib_print_kv_single "$width" "${single[@]}"
+            if batslib_is_single_line "${may_be_multi[1]}"; then
+              batslib_print_kv_single "$width" "${may_be_multi[@]}"
+            else
+              may_be_multi[1]="$( printf '%s' "${may_be_multi[1]}" \
+                                    | batslib_prefix \
+                                    | batslib_mark '>' "$idx" )"
+              batslib_print_kv_multi "${may_be_multi[@]}"
+            fi
+          } | batslib_decorate 'no line should match the regular expression' \
+            | flunk
+          return $?
+        fi
+      done
+    elif (( is_mode_partial )); then
+      local -i idx
+      for (( idx = 0; idx < ${#lines[@]}; ++idx )); do
+        if [[ ${lines[$idx]} == *"$unexpected"* ]]; then
+          { local -ar single=(
+              'substring' "$unexpected"
+              'index'     "$idx"
+            )
+            local -a may_be_multi=(
+              'output'    "$output"
+            )
+            local -ir width="$( batslib_get_max_single_line_key_width \
+                                "${single[@]}" "${may_be_multi[@]}" )"
+            batslib_print_kv_single "$width" "${single[@]}"
+            if batslib_is_single_line "${may_be_multi[1]}"; then
+              batslib_print_kv_single "$width" "${may_be_multi[@]}"
+            else
+              may_be_multi[1]="$( printf '%s' "${may_be_multi[1]}" \
+                                    | batslib_prefix \
+                                    | batslib_mark '>' "$idx" )"
+              batslib_print_kv_multi "${may_be_multi[@]}"
+            fi
+          } | batslib_decorate 'no line should contain substring' \
+            | flunk
+          return $?
+        fi
+      done
+    else
+      local -i idx
+      for (( idx = 0; idx < ${#lines[@]}; ++idx )); do
+        if [[ ${lines[$idx]} == "$unexpected" ]]; then
+          { local -ar single=(
+              'line'   "$unexpected"
+              'index'  "$idx"
+            )
+            local -a may_be_multi=(
+              'output' "$output"
+            )
+            local -ir width="$( batslib_get_max_single_line_key_width \
+                                "${single[@]}" "${may_be_multi[@]}" )"
+            batslib_print_kv_single "$width" "${single[@]}"
+            if batslib_is_single_line "${may_be_multi[1]}"; then
+              batslib_print_kv_single "$width" "${may_be_multi[@]}"
+            else
+              may_be_multi[1]="$( printf '%s' "${may_be_multi[1]}" \
+                                    | batslib_prefix \
+                                    | batslib_mark '>' "$idx" )"
+              batslib_print_kv_multi "${may_be_multi[@]}"
+            fi
+          } | batslib_decorate 'line should not be in output' \
+            | flunk
+          return $?
+        fi
+      done
+    fi
+  elif (( is_match_line )); then
+    # Specific line.
+    if (( is_mode_regex )); then
+      if [[ ${lines[$idx]} =~ $unexpected ]] || (( $? == 0 )); then
+        batslib_print_kv_single 5 \
+            'index' "$idx" \
+            'regex' "$unexpected" \
+            'line'  "${lines[$idx]}" \
+          | batslib_decorate 'regular expression should not match line' \
+          | flunk
+      fi
+    elif (( is_mode_partial )); then
+      if [[ ${lines[$idx]} == *"$unexpected"* ]]; then
+        batslib_print_kv_single 9 \
+            'index'     "$idx" \
+            'substring' "$unexpected" \
+            'line'      "${lines[$idx]}" \
+          | batslib_decorate 'line should not contain substring' \
+          | flunk
+      fi
+    else
+      if [[ ${lines[$idx]} == "$unexpected" ]]; then
+        batslib_print_kv_single 10 \
+            'index'      "$idx" \
+            'unexpected' "$unexpected" \
+          | batslib_decorate 'line should differ' \
+          | flunk
+      fi
+    fi
+  else
+    # Entire output.
+    if (( is_mode_regex )); then
+      if [[ $output =~ $unexpected ]] || (( $? == 0 )); then
+        batslib_print_kv_single_or_multi 6 \
+            'regex'  "$unexpected" \
+            'output' "$output" \
+          | batslib_decorate 'regular expression should not match output' \
+          | flunk
+      fi
+    elif (( is_mode_partial )); then
+      if [[ $output == *"$unexpected"* ]]; then
+        batslib_print_kv_single_or_multi 9 \
+            'substring' "$unexpected" \
+            'output'    "$output" \
+          | batslib_decorate 'output should not contain substring' \
+          | flunk
+      fi
+    else
+      if [[ $output == "$unexpected" ]]; then
+        batslib_print_kv_single_or_multi 6 \
+            'output' "$output" \
+          | batslib_decorate 'output equals, but it was expected to differ' \
+          | flunk
+      fi
+    fi
+  fi
+}
+
 # Fail and display an error message if `$status' is not 0. The error
 # message contains `$status' and `$output'.
 #
@@ -341,70 +574,5 @@ assert_failure() {
           'output' "$output"
     } | batslib_decorate 'command failed as expected, but status differs' \
       | flunk
-  fi
-}
-
-# Fail and display an error message if `${lines[@]}' contains the given
-# line.  The error message contains the unexpected line, its index in
-# `$output', and `$output'.
-#
-# Optionally, if two positional parameters are specified, the unexpected
-# line is only sought in the line whose index is given in the first
-# parameter. In this case, the error message contains the line index,
-# and the unexpected line.
-#
-# Globals:
-#   lines
-#   output
-# Arguments:
-#   $1 - [opt] zero-based index of line to match against
-#   $2 - line to look for
-# Returns:
-#   0 - line not found
-#   1 - otherwise
-# Outputs:
-#   STDERR - unexpected line, its index and `$output', on failure
-#            index and unexpected line, on failure
-refute_line() {
-  if (( $# > 1 )); then
-    local -ir idx="$1"
-    local -r line="$2"
-
-    if [[ ${lines[$idx]} == "$line" ]]; then
-      batslib_print_kv_single 5 \
-          'index' "$idx" \
-          'line'  "$line" \
-        | batslib_decorate 'line should differ from expected' \
-        | flunk
-    fi
-  else
-    local -r line="$1"
-
-    local idx
-    for (( idx = 0; idx < ${#lines[@]}; ++idx )); do
-      if [[ ${lines[$idx]} == "$line" ]]; then
-        { local -ar single=(
-            'line'   "$line"
-            'index'  "$idx"
-          )
-          local -a may_be_multi=(
-            'output' "$output"
-          )
-          local -ir width="$( batslib_get_max_single_line_key_width \
-                              "${single[@]}" "${may_be_multi[@]}" )"
-          batslib_print_kv_single "$width" "${single[@]}"
-          if batslib_is_single_line "${may_be_multi[1]}"; then
-            batslib_print_kv_single "$width" "${may_be_multi[@]}"
-          else
-            may_be_multi[1]="$( printf '%s' "${may_be_multi[1]}" \
-                                  | batslib_prefix \
-                                  | batslib_mark '>' "$idx" )"
-            batslib_print_kv_multi "${may_be_multi[@]}"
-          fi
-        } | batslib_decorate 'line should not be in output' \
-          | flunk
-        return 1
-      fi
-    done
   fi
 }

@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "BATSLIB" "7" "August 2015" "" ""
+.TH "BATSLIB" "7" "September 2015" "" ""
 .
 .SH "NAME"
 \fBbatslib\fR \- Bats Standard Library of Test Helpers
@@ -109,6 +109,28 @@ Using \fB\-r\fR enables regular expression matching, and the assertion fails if 
 \fBNOTE:\fR Due to a bug in Bats, empty lines are discarded from \fB${lines[@]}\fR, causing line indices to change and preventing testing for empty lines\. See \fIBUGS\fR for more\.
 .
 .TP
+\fBrefute_output\fR [\-l \fIINDEX\fR|\-L] [\-p|\-r] [\fIUNEXPECTED\fR]
+Fail if \fIUNEXPECTED\fR equals \fB$output\fR\. On failure, \fB$output\fR is displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulti\-line\fR format\. When no parameters are specified, \fIUNEXPECTED\fR is read from the standard input\.
+.
+.IP
+When \fB\-l\fR is used, fail if \fIUNEXPECTED\fR equals the \fIINDEX\fR\-th element of \fB${lines[@]}\fR\. On failure, \fIINDEX\fR and \fIUNEXPECTED\fR are displayed\.
+.
+.IP
+When \fB\-L\fR is used, fail if \fIUNEXPECTED\fR is found in \fB${lines[@]}\fR\. On failure, \fIUNEXPECTED\fR, its index in \fB${lines[@]}\fR and \fB$output\fR are displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulti\-line\fR format with the unexpected line highlighted\.
+.
+.IP
+The default, literal matching can be changed to substring and regular expression matching\.
+.
+.IP
+Using \fB\-p\fR enables partial matching, and the assertion fails if \fIUNEXPECTED\fR as a substring is found in the output\. On failure, \fIUNEXPECTED\fR is displayed in addition\.
+.
+.IP
+Using \fB\-r\fR enables regular expression matching, and the assertion fails if \fIUNEXPECTED\fR as an extended regular expression matches the output\. On failure, \fIUNEXPECTED\fR is displayed in addition\.
+.
+.IP
+\fBNOTE:\fR Due to a bug in Bats, empty lines are discarded from \fB${lines[@]}\fR, causing line indices to change and preventing testing for empty lines\. See \fIBUGS\fR for more\.
+.
+.TP
 \fBassert_success\fR
 Fail if \fB$status\fR is not \fB0\fR\. On failure \fB$status\fR and \fB$output\fR are displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulit\-line\fR format\.
 .
@@ -118,16 +140,6 @@ Fail if \fB$status\fR is \fB0\fR\. On failure \fB$output\fR is displayed\. If \f
 .
 .IP
 When \fIEXPECTED\fR is specified, fail if it does not equal \fB$status\fR\. On failure \fIEXPECTED\fR, \fB$status\fR and \fB$output\fR are displayed\.
-.
-.TP
-\fBrefute_line\fR [\fIINDEX\fR] \fILINE\fR
-When only \fILINE\fR is specified, fail if \fB${lines[@]}\fR contains \fILINE\fR\. On failure \fILINE\fR, its zero\-based index in \fB${lines[@]}\fR, and \fB$output\fR are dispalyed\. If \fB$output\fR is longer than one line, it is displayed in \fImulit\-line\fR format with \fILINE\fR highlighted\.
-.
-.IP
-When \fIINDEX\fR is specified, fail if \fILINE\fR equals \fB${lines[INDEX]}\fR\. On failure \fILINE\fR and \fIINDEX\fR are dispalyed\.
-.
-.IP
-\fBNOTE:\fR Due to a bug in Bats, empty lines are discarded, causing line indices to change and preventing testing for empty lines\. See \fIBUGS\fR for more\.
 .
 .SH "BUGS"
 .

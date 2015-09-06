@@ -109,6 +109,35 @@ recent invocation of `run`.
   `${lines[@]}`, causing line indices to change and preventing testing
   for empty lines. See [BUGS][] for more.
 
+* `refute_output` [-l <INDEX>|-L] [-p|-r] [<UNEXPECTED>]:
+  Fail if <UNEXPECTED> equals `$output`. On failure, `$output` is
+  displayed. If `$output` is longer than one line, it is displayed in
+  _multi-line_ format. When no parameters are specified, <UNEXPECTED> is
+  read from the standard input.
+
+  When `-l` is used, fail if <UNEXPECTED> equals the <INDEX>-th element
+  of `${lines[@]}`. On failure, <INDEX> and <UNEXPECTED> are displayed.
+
+  When `-L` is used, fail if <UNEXPECTED> is found in `${lines[@]}`. On
+  failure, <UNEXPECTED>, its index in `${lines[@]}` and `$output` are
+  displayed. If `$output` is longer than one line, it is displayed in
+  _multi-line_ format with the unexpected line highlighted.
+
+  The default, literal matching can be changed to substring and regular
+  expression matching.
+
+  Using `-p` enables partial matching, and the assertion fails if
+  <UNEXPECTED> as a substring is found in the output. On failure,
+  <UNEXPECTED> is displayed in addition.
+
+  Using `-r` enables regular expression matching, and the assertion
+  fails if <UNEXPECTED> as an extended regular expression matches the
+  output. On failure, <UNEXPECTED> is displayed in addition.
+
+  **NOTE:** Due to a bug in Bats, empty lines are discarded from
+  `${lines[@]}`, causing line indices to change and preventing testing
+  for empty lines. See [BUGS][] for more.
+
 * `assert_success`:
   Fail if `$status` is not `0`. On failure `$status` and `$output` are
   displayed. If `$output` is longer than one line, it is displayed in
@@ -121,19 +150,6 @@ recent invocation of `run`.
 
   When <EXPECTED> is specified, fail if it does not equal `$status`. On
   failure <EXPECTED>, `$status` and `$output` are displayed.
-
-* `refute_line` [<INDEX>] <LINE>:
-  When only <LINE> is specified, fail if `${lines[@]}` contains <LINE>.
-  On failure <LINE>, its zero-based index in `${lines[@]}`, and
-  `$output` are dispalyed. If `$output` is longer than one line, it is
-  displayed in _mulit-line_ format with <LINE> highlighted.
-
-  When <INDEX> is specified, fail if <LINE> equals `${lines[INDEX]}`. On
-  failure <LINE> and <INDEX> are dispalyed.
-
-  **NOTE:** Due to a bug in Bats, empty lines are discarded, causing
-  line indices to change and preventing testing for empty lines. See
-  [BUGS][] for more.
 
 
 ## BUGS

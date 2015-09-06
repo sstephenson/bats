@@ -547,69 +547,154 @@ extended regular expression does not match the output.
 This option can be used with `-l` or `-L` as well, and does not change
 the set of information displayed on failure.
 
-#### `refute_line`
+#### `refute_output`
 
-Depending on the number of parameters, this function tests either that
-the output does not contain the unexpected line or that the unexpected
-line does not appear in a specific line of the output identified by its
-index.
+Similarly to `assert_output`, this function also helps to verify that a
+command or function produces the correct output. `refute_output` is the
+logical complement of `assert_output`. Instead of testing that the
+output matches the expected output, `refute_output` tests that the
+output does not match the unexpected output. It can match the entire
+output, a specific line, and even look for a line in the output.
+Matching can be literal, partial or regular expression.
 
-This function is the opposite of `assert_line()`.
+##### Matching the entire output
 
-***Note:*** *Due to a [bug in Bats][bats-93], empty lines are discarded,
-causing line indices to change and preventing testing for empty lines.*
-
-
-##### Entire output
-
-When one parameter is specified, fail if `${lines[@]}` contains the line
-specified by the parameter.
+By default, the entire `$output` is matched, and the assertion fails if
+it equals the unexpected output.
 
 ```bash
-@test 'refute_line() in entire output' {
-  run echo $'have 1\nwant\nhave 2'
-  refute_line 'want'
+@test 'refute_output()' {
+  run echo 'want'
+  refute_output 'want'
 }
 ```
 
-On failure the unexpected line, its zero-based index, and `$output` with
-the unexpected line highlighted are displayed.
+The unexpected output can be specified on the standard input as well.
+
+```bash
+@test 'refute_output() with pipe' {
+  run echo 'want'
+  echo 'want' | refute_output
+}
+```
+
+On failure, the unexpected output is displayed.
+
+```
+-- output equals, but it was expected to differ --
+output : want
+--
+```
+
+If `$output` is longer than one line, it is displayed in *multi-line*
+format.
+
+##### Matching a specific line
+
+***Note:*** *Due to a [bug in Bats][bats-93], empty lines are discarded
+from `${lines[@]}`, causing line indices to change and preventing
+testing for empty lines.*
+
+When `-l <index>` is used, only the line specified by its `index` in
+`${lines[@]}` is matched, and the assertion fails if it equals the
+expected line.
+
+```bash
+@test 'refute_output() specific line' {
+  run echo $'have-0\nwant-1\nhave-2'
+  refute_output -l 1 'want-1'
+}
+```
+
+On failure, the index, and the unexpected line are displayed.
+
+```
+-- line should differ --
+index      : 1
+unexpected : want-1
+--
+```
+
+##### Line found in output
+
+***Note:*** *Due to a [bug in Bats][bats-93], empty lines are discarded
+from `${lines[@]}`, causing line indices to change and preventing
+testing for empty lines.*
+
+When `-L` is used, fail if the unexpected line is found in
+`${lines[@]}`.
+
+```bash
+@test 'refute_output() line found in output' {
+  run echo $'have-0\nwant\nhave-2'
+  refute_output -L 'want'
+}
+```
+
+On failure, the unexpected line, its index in `${lines[@]}` and
+`$output` with the unexpected line highlighted are displayed.
 
 ```
 -- line should not be in output --
 line  : want
 index : 1
 output (3 lines):
-  have 1
+  have-0
 > want
-  have 2
+  have-2
 --
 ```
 
 If `$output` is not longer than one line, it is displayed in
-*two-column* format.
+*two-column* format without highlighting.
 
-##### Specific line
+##### Partial matching
 
-When two parameters are specified, zero-based line index and unexpected
-line respectively, fail if the output line identified by its index in
-`${lines[@]}` equals the unexpected line.
+Partial matching, enabled using `-p`, provides more flexibility than the
+default literal matching. The assertion fails if the unexpected output as
+a substring can be found in the output.
 
 ```bash
-@test 'refute_line() in specific line' {
-  run echo $'have 1\nwant\nhave 2'
-  refute_line 1 'want'
+@test 'refute_output() partial matching' {
+  run echo 'ERROR: no such file or directory'
+  refute_output -p 'ERROR'
 }
 ```
 
-On failure the unexpected line and its index are displayed.
+On failure, this option displays the substring in addition.
 
 ```
--- line should differ from expected --
-index : 1
-line  : want
+-- output should not contain substring --
+substring : ERROR
+output    : ERROR: no such file or directory
 --
 ```
+
+This option can be used with `-l` or `-L` as well.
+
+##### Regular expression matching
+
+Regular expression matching, enabled using `-r`, provides the most
+flexibility. The assertion fails if the expected output specified as an
+extended regular expression does not match the output.
+
+```bash
+@test 'refute_output() regular expression matching' {
+  run echo 'Foobar v0.1.0'
+  refute_output -r '^Foobar v[0-9]+\.[0-9]+\.[0-9]$'
+}
+```
+
+On failure, this option displays the regular expression in addition.
+
+```
+-- regular expression should not match output --
+regex  : ^Foobar v[0-9]+\.[0-9]+\.[0-9]$
+output : Foobar v0.1.0
+--
+```
+
+This option can be used with `-l` or `-L` as well.
 
 [bats-93]: https://github.com/sstephenson/bats/pull/93
 
