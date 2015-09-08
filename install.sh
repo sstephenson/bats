@@ -10,13 +10,13 @@ abs_dirname() {
   local path="$1"
 
   while [ -n "$path" ]; do
-    cd "${path%/*}"
+    cd "${path%/*}" >/dev/null
     local name="${path##*/}"
     path="$(resolve_link "$name" || true)"
   done
 
   pwd
-  cd "$cwd"
+  cd "$cwd" >/dev/null
 }
 
 PREFIX="$1"

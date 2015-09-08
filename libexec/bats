@@ -35,19 +35,19 @@ abs_dirname() {
   local path="$1"
 
   while [ -n "$path" ]; do
-    cd "${path%/*}"
+    cd "${path%/*}" >/dev/null
     local name="${path##*/}"
     path="$(resolve_link "$name" || true)"
   done
 
   pwd
-  cd "$cwd"
+  cd "$cwd" >/dev/null
 }
 
 expand_path() {
-  { cd "$(dirname "$1")" 2>/dev/null
+  { cd "$(dirname "$1")" >/dev/null 2>&1
     local dirname="$PWD"
-    cd "$OLDPWD"
+    cd "$OLDPWD" >/dev/null
     echo "$dirname/$(basename "$1")"
   } || echo "$1"
 }
