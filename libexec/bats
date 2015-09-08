@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 set -e
+if [ ! -z "$CDPATH" -a -z "$BATS_KEEP_CDPATH" ]; then
+  echo "Unsetting CDPATH to prevent problems like https://github.com/sstephenson/bats/issues/104 ..."
+  echo "To suppress this behavior, set BATS_KEEP_CDPATH"
+  echo "You may want to consider not exporting CDPATH"
+  unset CDPATH
+fi
 
 version() {
   echo "Bats 0.4.0"
