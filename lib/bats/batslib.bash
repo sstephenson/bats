@@ -39,22 +39,36 @@ flunk() {
   return 1
 }
 
-# Fail and display the given condition if it evaluates to false. Only
-# simple commands can be used in the expression given to `assert'.
-# Compound commands, such as `[[', are not supported.
+# Fail and display an error message if the expression evaluates to
+# false. The expression must be a simple command. Compound commands,
+# such as `[[', can be used only when executed with `bash -c'. The error
+# message contains the expression, `$status' and `$output'.
 #
 # Globals:
-#   none
+#   status
+#   output
 # Arguments:
-#   $@ - condition to evaluate
+#   $0 - expression to evaluate
 # Returns:
-#   0 - condition evaluated to TRUE
-#   1 - condition evaluated to FALSE
+#   0 - expression evaluates to TRUE
+#   1 - expression evaluates to FALSE
 # Outputs:
-#   STDERR - failed condition, on failure
+#   STDERR - assertion details, on failure
 assert() {
   if ! "$@"; then
-    echo "condition : $@" | batslib_decorate 'assertion failed' | flunk
+    { local -ar single=(
+        'expression' "$*"
+        'status'     "$status"
+      )
+      local -ar may_be_multi=(
+        'output'     "$output"
+      )
+      local -ir width="$( batslib_get_max_single_line_key_width \
+                            "${single[@]}" "${may_be_multi[@]}" )"
+      batslib_print_kv_single "$width" "${single[@]}"
+      batslib_print_kv_single_or_multi "$width" "${may_be_multi[@]}"
+    } | batslib_decorate 'assertion failed' \
+      | flunk
   fi
 }
 

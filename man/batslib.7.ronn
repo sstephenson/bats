@@ -70,11 +70,11 @@ recent invocation of `run`.
   from the standard input.
 
 * `assert` <EXPRESSION>:
-  Fail if <EXPRESSION> evaluates to false. On failure, <EXPRESSION> is
-  displayed.
+  Fail if <EXPRESSION> evaluates to false. On failure, <EXPRESSION>,
+  `$status` and `$output` is displayed.
 
-  **Note:** <EXPRESSION> can only be a simple command. Compound
-  commands, such as `[[`, are not supported.
+  **Note:** <EXPRESSION> must be a simple command. Compound commands,
+  such as `[[`, can be used only when executed with `bash -c`.
 
 * `assert_equal` <EXPECTED> <ACTUAL>:
   Fail if <EXPECTED> and <ACTUAL> do not equal. On failure both values

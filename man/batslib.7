@@ -77,10 +77,10 @@ Display \fIMESSAGE\fR and fail\. This function provides a convenient way to repo
 .
 .TP
 \fBassert\fR \fIEXPRESSION\fR
-Fail if \fIEXPRESSION\fR evaluates to false\. On failure, \fIEXPRESSION\fR is displayed\.
+Fail if \fIEXPRESSION\fR evaluates to false\. On failure, \fIEXPRESSION\fR, \fB$status\fR and \fB$output\fR is displayed\.
 .
 .IP
-\fBNote:\fR \fIEXPRESSION\fR can only be a simple command\. Compound commands, such as \fB[[\fR, are not supported\.
+\fBNote:\fR \fIEXPRESSION\fR must be a simple command\. Compound commands, such as \fB[[\fR, can be used only when executed with \fBbash \-c\fR\.
 .
 .TP
 \fBassert_equal\fR \fIEXPECTED\fR \fIACTUAL\fR
