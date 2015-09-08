@@ -312,9 +312,9 @@ Fail if the given expression evaluates to false.
 
 ***Note:*** *The expression must be a simple command. [Compound
 commands](https://www.gnu.org/software/bash/manual/bash.html#Compound-Commands),
-such as `[[', can be used only when executed with `bash -c'.*
+such as `[[`, can be used only when executed with `bash -c`.
 
-On failure the failed expression, `$status' and `$output' are displayed.
+On failure the failed expression, `$status` and `$output` are displayed.
 
 ```
 -- assertion failed --
