@@ -61,14 +61,6 @@ load test_helper
   [ "$status" -eq 1 ]
 }
 
-@test 'assert_output(): reads the expected output from STDIN' {
-  run echo 'a'
-  export output
-  run bash -c ". '${BATS_LIB}/batslib.bash'; echo 'a' | assert_output"
-  [ "$status" -eq 0 ]
-  [ "${#lines[@]}" -eq 0 ]
-}
-
 # Partial matching: `-p <partial>'.
 
 @test "assert_output() -p <partial>: returns 0 if <partial> is a substring in \`\$output'" {
@@ -167,7 +159,7 @@ load test_helper
 
 
 #
-# Matching a single line: `-l <index>'.
+# Matching a specific line: `-l <index>'.
 #
 
 # Literal matching.
@@ -195,16 +187,6 @@ load test_helper
   run echo $'a\nb\nc'
   run assert_output -l 1 '*'
   [ "$status" -eq 1 ]
-}
-
-@test 'assert_output() -l: without <index> returns 1 and displays an error message' {
-  run echo $'a\nb\nc'
-  run assert_output -l 'a'
-  [ "$status" -eq 1 ]
-  [ "${#lines[@]}" -eq 3 ]
-  [ "${lines[0]}" == '-- ERROR: assert_output --' ]
-  [ "${lines[1]}" == "\`-l' requires an integer argument" ]
-  [ "${lines[2]}" == '--' ]
 }
 
 # Partial matching: `-p <partial>'.
@@ -251,21 +233,21 @@ load test_helper
 
 
 #
-# Containing a line: `-L'.
+# Containing a line: `-l'.
 #
 
 # Literal matching.
 
-@test "assert_output() -L <expected>: returns 0 if <expected> is a line in \`\${lines[@]}'" {
+@test "assert_output() -l <expected>: returns 0 if <expected> is a line in \`\${lines[@]}'" {
   run echo $'a\nb\nc'
-  run assert_output -L 'b'
+  run assert_output -l 'b'
   [ "$status" -eq 0 ]
   [ "${#lines[@]}" -eq 0 ]
 }
 
-@test "assert_output() -L <expected>: returns 1 and displays details if <expected> is not a line in \`\${lines[@]}'" {
+@test "assert_output() -l <expected>: returns 1 and displays details if <expected> is not a line in \`\${lines[@]}'" {
   run echo 'b'
-  run assert_output -L 'a'
+  run assert_output -l 'a'
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 4 ]
   [ "${lines[0]}" == '-- output does not contain line --' ]
@@ -274,9 +256,9 @@ load test_helper
   [ "${lines[3]}" == '--' ]
 }
 
-@test "assert_output() -L <expected>: displays \`\$output' in multi-line format if necessary" {
+@test "assert_output() -l <expected>: displays \`\$output' in multi-line format if necessary" {
   run echo $'b 0\nb 1'
-  run assert_output -L 'a'
+  run assert_output -l 'a'
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 6 ]
   [ "${lines[0]}" == '-- output does not contain line --' ]
@@ -287,24 +269,24 @@ load test_helper
   [ "${lines[5]}" == '--' ]
 }
 
-@test 'assert_output() -L <expected>: performs literal matching by default' {
+@test 'assert_output() -l <expected>: performs literal matching by default' {
   run echo 'a'
-  run assert_output -L '*'
+  run assert_output -l '*'
   [ "$status" -eq 1 ]
 }
 
 # Partial matching: `-p <partial>'.
 
-@test "assert_output() -L -p <partial>: returns 0 if <partial> is a substring in at least one line in \`\${lines[@]}'" {
+@test "assert_output() -l -p <partial>: returns 0 if <partial> is a substring in at least one line in \`\${lines[@]}'" {
   run echo $'a\nabc\nc'
-  run assert_output -L -p 'b'
+  run assert_output -l -p 'b'
   [ "$status" -eq 0 ]
   [ "${#lines[@]}" -eq 0 ]
 }
 
-@test "assert_output() -L -p <partial>: returns 1 and displays details if <partial> is not a substring in any line in \`\${lines[@]}'" {
+@test "assert_output() -l -p <partial>: returns 1 and displays details if <partial> is not a substring in any line in \`\${lines[@]}'" {
   run echo 'b'
-  run assert_output -L -p 'a'
+  run assert_output -l -p 'a'
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 4 ]
   [ "${lines[0]}" == '-- no output line contains substring --' ]
@@ -313,9 +295,9 @@ load test_helper
   [ "${lines[3]}" == '--' ]
 }
 
-@test "assert_output() -L -p <partial>: displays details in multi-line format if necessary" {
+@test "assert_output() -l -p <partial>: displays details in multi-line format if necessary" {
   run echo $'b 0\nb 1'
-  run assert_output -L -p 'a'
+  run assert_output -l -p 'a'
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 6 ]
   [ "${lines[0]}" == '-- no output line contains substring --' ]
@@ -328,16 +310,16 @@ load test_helper
 
 # Regular expression matching: `-r <regex>'.
 
-@test "assert_output() -L -r <regex>: returns 0 if <regex> matches any line in \`\${lines[@]}'" {
+@test "assert_output() -l -r <regex>: returns 0 if <regex> matches any line in \`\${lines[@]}'" {
   run echo $'a\nb\nc'
-  run assert_output -L -r '.*b.*'
+  run assert_output -l -r '.*b.*'
   [ "$status" -eq 0 ]
   [ "${#lines[@]}" -eq 0 ]
 }
 
-@test "assert_output() -L -r <regex>: returns 1 and displays details if <regex> does not match any lines in \`\${lines[@]}'" {
+@test "assert_output() -l -r <regex>: returns 1 and displays details if <regex> does not match any lines in \`\${lines[@]}'" {
   run echo 'b'
-  run assert_output -L -r '.*a.*'
+  run assert_output -l -r '.*a.*'
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 4 ]
   [ "${lines[0]}" == '-- no output line matches regular expression --' ]
@@ -346,9 +328,9 @@ load test_helper
   [ "${lines[3]}" == '--' ]
 }
 
-@test 'assert_output() -L -r <regex>: displays details in multi-line format if necessary' {
+@test 'assert_output() -l -r <regex>: displays details in multi-line format if necessary' {
   run echo $'b 0\nb 1'
-  run assert_output -L -r '.*a.*'
+  run assert_output -l -r '.*a.*'
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 6 ]
   [ "${lines[0]}" == '-- no output line matches regular expression --' ]
@@ -364,12 +346,12 @@ load test_helper
 # Common.
 #
 
-@test 'assert_output() -l and -L are mutually exclusive' {
-  run assert_output -l 1 -L 'b'
+@test 'assert_output() -l and -l <index> are mutually exclusive' {
+  run assert_output -l -l 1 'b'
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 3 ]
   [ "${lines[0]}" == '-- ERROR: assert_output --' ]
-  [ "${lines[1]}" == "\`-l' and \`-L' are mutually exclusive" ]
+  [ "${lines[1]}" == "\`-l' and \`-l <index>' are mutually exclusive" ]
   [ "${lines[2]}" == '--' ]
 }
 

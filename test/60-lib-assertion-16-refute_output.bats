@@ -44,14 +44,6 @@ load test_helper
   [ "$status" -eq 0 ]
 }
 
-@test 'refute_output(): reads the unexpected output from STDIN' {
-  run echo 'b'
-  export output
-  run bash -c ". '${BATS_LIB}/batslib.bash'; echo 'a' | refute_output"
-  [ "$status" -eq 0 ]
-  [ "${#lines[@]}" -eq 0 ]
-}
-
 # Partial matching: `-p <partial>'.
 
 @test "refute_output() -p <partial>: returns 0 if <partial> is not a substring in \`\$output'" {
@@ -122,7 +114,7 @@ load test_helper
 
 
 #
-# Matching a single line: `-l <index>'.
+# Matching a specific line: `-l <index>'.
 #
 
 # Literal matching.
@@ -149,16 +141,6 @@ load test_helper
   run echo $'a\nb\nc'
   run refute_output -l 1 '*'
   [ "$status" -eq 0 ]
-}
-
-@test 'refute_output() -l: without <index> returns 1 and displays an error message' {
-  run echo $'a\nb\nc'
-  run refute_output -l 'a'
-  [ "$status" -eq 1 ]
-  [ "${#lines[@]}" -eq 3 ]
-  [ "${lines[0]}" == '-- ERROR: refute_output --' ]
-  [ "${lines[1]}" == "\`-l' requires an integer argument" ]
-  [ "${lines[2]}" == '--' ]
 }
 
 # Partial matching: `-p <partial>'.
@@ -205,21 +187,21 @@ load test_helper
 
 
 #
-# Containing a line: `-L'.
+# Containing a line: `-l'.
 #
 
 # Literal matching.
 
-@test "refute_output() -L <unexpected>: returns 0 if <unexpected> is not a line in \`\${lines[@]}'" {
+@test "refute_output() -l <unexpected>: returns 0 if <unexpected> is not a line in \`\${lines[@]}'" {
   run echo $'a\nb\nc'
-  run refute_output -L 'd'
+  run refute_output -l 'd'
   [ "$status" -eq 0 ]
   [ "${#lines[@]}" -eq 0 ]
 }
 
-@test "refute_output() -L <unexpected>: returns 1 and displays details if <unexpected> is not a line in \`\${lines[@]}'" {
+@test "refute_output() -l <unexpected>: returns 1 and displays details if <unexpected> is not a line in \`\${lines[@]}'" {
   run echo 'a'
-  run refute_output -L 'a'
+  run refute_output -l 'a'
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 5 ]
   [ "${lines[0]}" == '-- line should not be in output --' ]
@@ -229,9 +211,9 @@ load test_helper
   [ "${lines[4]}" == '--' ]
 }
 
-@test "refute_output() -L <unexpected>: displays details in multi-line format if necessary" {
+@test "refute_output() -l <unexpected>: displays details in multi-line format if necessary" {
   run echo $'a\nb\nc'
-  run refute_output -L 'b'
+  run refute_output -l 'b'
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 8 ]
   [ "${lines[0]}" == '-- line should not be in output --' ]
@@ -244,24 +226,24 @@ load test_helper
   [ "${lines[7]}" == '--' ]
 }
 
-@test 'refute_output() -L <unexpected>: performs literal matching by default' {
+@test 'refute_output() -l <unexpected>: performs literal matching by default' {
   run echo 'a'
-  run refute_output -L '*'
+  run refute_output -l '*'
   [ "$status" -eq 0 ]
 }
 
 # Partial matching: `-p <partial>'.
 
-@test "refute_output() -L -p <partial>: returns 0 if <partial> is not a substring in any line in \`\${lines[@]}'" {
+@test "refute_output() -l -p <partial>: returns 0 if <partial> is not a substring in any line in \`\${lines[@]}'" {
   run echo $'a\nb\nc'
-  run refute_output -L -p 'd'
+  run refute_output -l -p 'd'
   [ "$status" -eq 0 ]
   [ "${#lines[@]}" -eq 0 ]
 }
 
-@test "refute_output() -L -p <partial>: returns 1 and displays details if <partial> is a substring in at least one line in \`\${lines[@]}'" {
+@test "refute_output() -l -p <partial>: returns 1 and displays details if <partial> is a substring in at least one line in \`\${lines[@]}'" {
   run echo 'a'
-  run refute_output -L -p 'a'
+  run refute_output -l -p 'a'
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 5 ]
   [ "${lines[0]}" == '-- no line should contain substring --' ]
@@ -271,9 +253,9 @@ load test_helper
   [ "${lines[4]}" == '--' ]
 }
 
-@test "refute_output() -L -p <partial>: displays details in multi-line format if necessary" {
+@test "refute_output() -l -p <partial>: displays details in multi-line format if necessary" {
   run echo $'a\nabc\nc'
-  run refute_output -L -p 'b'
+  run refute_output -l -p 'b'
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 8 ]
   [ "${lines[0]}" == '-- no line should contain substring --' ]
@@ -288,16 +270,16 @@ load test_helper
 
 # Regular expression matching: `-r <regex>'.
 
-@test "refute_output() -L -r <regex>: returns 0 if <regex> does not match any line in \`\${lines[@]}'" {
+@test "refute_output() -l -r <regex>: returns 0 if <regex> does not match any line in \`\${lines[@]}'" {
   run echo $'a\nb\nc'
-  run refute_output -L -r '.*d.*'
+  run refute_output -l -r '.*d.*'
   [ "$status" -eq 0 ]
   [ "${#lines[@]}" -eq 0 ]
 }
 
-@test "refute_output() -L -r <regex>: returns 1 and displays details if <regex> matches any lines in \`\${lines[@]}'" {
+@test "refute_output() -l -r <regex>: returns 1 and displays details if <regex> matches any lines in \`\${lines[@]}'" {
   run echo 'a'
-  run refute_output -L -r '.*a.*'
+  run refute_output -l -r '.*a.*'
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 5 ]
   [ "${lines[0]}" == '-- no line should match the regular expression --' ]
@@ -307,9 +289,9 @@ load test_helper
   [ "${lines[4]}" == '--' ]
 }
 
-@test 'refute_output() -L -r <regex>: displays details in multi-line format if necessary' {
+@test 'refute_output() -l -r <regex>: displays details in multi-line format if necessary' {
   run echo $'a\nabc\nc'
-  run refute_output -L -r '.*b.*'
+  run refute_output -l -r '.*b.*'
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 8 ]
   [ "${lines[0]}" == '-- no line should match the regular expression --' ]
@@ -327,12 +309,12 @@ load test_helper
 # Common.
 #
 
-@test 'refute_output() -l and -L are mutually exclusive' {
-  run refute_output -l 1 -L 'b'
+@test 'refute_output() -l and -l <index> are mutually exclusive' {
+  run refute_output -l -l 1 'b'
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 3 ]
   [ "${lines[0]}" == '-- ERROR: refute_output --' ]
-  [ "${lines[1]}" == "\`-l' and \`-L' are mutually exclusive" ]
+  [ "${lines[1]}" == "\`-l' and \`-l <index>' are mutually exclusive" ]
   [ "${lines[2]}" == '--' ]
 }
 

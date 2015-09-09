@@ -441,15 +441,6 @@ it does not equal the expected output.
 }
 ```
 
-The expected output can be specified on the standard input as well.
-
-```bash
-@test 'assert_output() with pipe' {
-  run echo 'have'
-  echo 'want' | assert_output
-}
-```
-
 On failure, the expected and actual outputs are displayed.
 
 ```
@@ -495,13 +486,13 @@ actual   : have-1
 from `${lines[@]}`, causing line indices to change and preventing
 testing for empty lines.*
 
-When `-L` is used, fail if the expected line is not found in
-`${lines[@]}`.
+When `-l` is used without `<index>`, fail if the expected line is not
+found in `${lines[@]}`.
 
 ```bash
 @test 'assert_output() line found in output' {
   run echo $'have-0\nhave-1\nhave-2'
-  assert_output -L 'want'
+  assert_output -l 'want'
 }
 ```
 
@@ -533,8 +524,8 @@ a substring can not be found in the output.
 }
 ```
 
-This option can be used with `-l` or `-L` as well, and does not change
-the set of information displayed on failure.
+This option can be used with `-l` as well, and does not change the set
+of information displayed on failure.
 
 ##### Regular expression matching
 
@@ -549,8 +540,8 @@ extended regular expression does not match the output.
 }
 ```
 
-This option can be used with `-l` or `-L` as well, and does not change
-the set of information displayed on failure.
+This option can be used with `-l` as well, and does not change the set
+of information displayed on failure.
 
 #### `refute_output`
 
@@ -571,15 +562,6 @@ it equals the unexpected output.
 @test 'refute_output()' {
   run echo 'want'
   refute_output 'want'
-}
-```
-
-The unexpected output can be specified on the standard input as well.
-
-```bash
-@test 'refute_output() with pipe' {
-  run echo 'want'
-  echo 'want' | refute_output
 }
 ```
 
@@ -626,13 +608,13 @@ unexpected : want-1
 from `${lines[@]}`, causing line indices to change and preventing
 testing for empty lines.*
 
-When `-L` is used, fail if the unexpected line is found in
-`${lines[@]}`.
+When `-l` is used without `<index>`, fail if the unexpected line is
+found in `${lines[@]}`.
 
 ```bash
 @test 'refute_output() line found in output' {
   run echo $'have-0\nwant\nhave-2'
-  refute_output -L 'want'
+  refute_output -l 'want'
 }
 ```
 
@@ -675,7 +657,7 @@ output    : ERROR: no such file or directory
 --
 ```
 
-This option can be used with `-l` or `-L` as well.
+This option can be used with `-l` as well.
 
 ##### Regular expression matching
 
@@ -699,7 +681,7 @@ output : Foobar v0.1.0
 --
 ```
 
-This option can be used with `-l` or `-L` as well.
+This option can be used with `-l` as well.
 
 [bats-93]: https://github.com/sstephenson/bats/pull/93
 

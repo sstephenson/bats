@@ -87,14 +87,14 @@ Fail if \fIEXPRESSION\fR evaluates to false\. On failure, \fIEXPRESSION\fR, \fB$
 Fail if \fIEXPECTED\fR and \fIACTUAL\fR do not equal\. On failure both values are displayed\. If either one is longer than one line, both are displayed in \fImulit\-line\fR format\.
 .
 .TP
-\fBassert_output\fR [\-l \fIINDEX\fR|\-L] [\-p|\-r] [\fIEXPECTED\fR]
-Fail if \fIEXPECTED\fR does not equal \fB$output\fR\. On failure both values are displayed\. If either one is longer than one line, both are displayed in \fImulit\-line\fR format\. When no parameters are specified, \fIEXPECTED\fR is read from the standard input\.
+\fBassert_output\fR [\-l [\fIINDEX\fR]] [\-p|\-r] \fIEXPECTED\fR
+Fail if \fIEXPECTED\fR does not equal \fB$output\fR\. On failure both values are displayed\. If either one is longer than one line, both are displayed in \fImulit\-line\fR format\.
 .
 .IP
-When \fB\-l\fR is used, fail if \fIEXPECTED\fR does not equal the \fIINDEX\fR\-th element of \fB${lines[@]}\fR\. On failure, \fIINDEX\fR, \fIEXPECTED\fR and the actual line are displayed\.
+When \fB\-l <INDEX>\fR is used, fail if \fIEXPECTED\fR does not equal the \fIINDEX\fR\-th element of \fB${lines[@]}\fR\. On failure, \fIINDEX\fR, \fIEXPECTED\fR and the actual line are displayed\.
 .
 .IP
-When \fB\-L\fR is used, fail if \fIEXPECTED\fR is not found in \fB${lines[@]}\fR\. On failure, \fIEXPECTED\fR and \fB$output\fR are displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulit\-line\fR format\.
+When \fB\-l\fR is used without \fB<INDEX>\fR, fail if \fIEXPECTED\fR is not found in \fB${lines[@]}\fR\. On failure, \fIEXPECTED\fR and \fB$output\fR are displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulit\-line\fR format\.
 .
 .IP
 The default, literal matching can be changed to substring and regular expression matching\.
@@ -109,14 +109,14 @@ Using \fB\-r\fR enables regular expression matching, and the assertion fails if 
 \fBNOTE:\fR Due to a bug in Bats, empty lines are discarded from \fB${lines[@]}\fR, causing line indices to change and preventing testing for empty lines\. See \fIBUGS\fR for more\.
 .
 .TP
-\fBrefute_output\fR [\-l \fIINDEX\fR|\-L] [\-p|\-r] [\fIUNEXPECTED\fR]
-Fail if \fIUNEXPECTED\fR equals \fB$output\fR\. On failure, \fB$output\fR is displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulti\-line\fR format\. When no parameters are specified, \fIUNEXPECTED\fR is read from the standard input\.
+\fBrefute_output\fR [\-l [\fIINDEX\fR]] [\-p|\-r] \fIUNEXPECTED\fR
+Fail if \fIUNEXPECTED\fR equals \fB$output\fR\. On failure, \fB$output\fR is displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulti\-line\fR format\.
 .
 .IP
-When \fB\-l\fR is used, fail if \fIUNEXPECTED\fR equals the \fIINDEX\fR\-th element of \fB${lines[@]}\fR\. On failure, \fIINDEX\fR and \fIUNEXPECTED\fR are displayed\.
+When \fB\-l <INDEX>\fR is used, fail if \fIUNEXPECTED\fR equals the \fIINDEX\fR\-th element of \fB${lines[@]}\fR\. On failure, \fIINDEX\fR and \fIUNEXPECTED\fR are displayed\.
 .
 .IP
-When \fB\-L\fR is used, fail if \fIUNEXPECTED\fR is found in \fB${lines[@]}\fR\. On failure, \fIUNEXPECTED\fR, its index in \fB${lines[@]}\fR and \fB$output\fR are displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulti\-line\fR format with the unexpected line highlighted\.
+When \fB\-l\fR is used without \fB<INDEX>\fR, fail if \fIUNEXPECTED\fR is found in \fB${lines[@]}\fR\. On failure, \fIUNEXPECTED\fR, its index in \fB${lines[@]}\fR and \fB$output\fR are displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulti\-line\fR format with the unexpected line highlighted\.
 .
 .IP
 The default, literal matching can be changed to substring and regular expression matching\.
@@ -150,7 +150,7 @@ Report bugs on Bats\' GitHub issue tracker at \fIhttps://github\.com/sstephenson
 Due to a bug in Bats, empty lines are missing from \fB${lines[@]}\fR, causing line indices to change and preventing testing for empty lines when using \fBassert_output\fR and \fBrefute_line\fR\. See PR #93 on Github at \fIhttps://github\.com/sstephenson/bats/pull/93\fR\.
 .
 .SH "COPYRIGHT"
-TODO(ztombol): Find a suitable license\.
+TODO(ztombol): Find a suitable licence\.
 .
 .SH "SEE ALSO"
 \fBbash\fR(1), \fBbats\fR(1), \fBbats\fR(7), \fBregex(7)\fR

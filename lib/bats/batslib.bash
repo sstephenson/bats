@@ -97,8 +97,7 @@ assert_equal() {
 }
 
 # Fail and display an error message if the expected does not match the
-# actual output. The expected output can be specified either by the
-# first parameter or on the standard input.
+# actual output.
 #
 # By default, the expected output is compared against `$output', and the
 # error message contains both values.
@@ -106,9 +105,10 @@ assert_equal() {
 # Option `-l <index>' compares against `${lines[<index>]}'. The error
 # message contains the compared lines and <index>.
 #
-# Option `-L' compares against all lines in `${lines[@]}' until a match
-# is found. If no match is found, the function fails and the error
-# message contains the expected line and `$output'.
+# Option `-l' without `<index>' compares against all lines in
+# `${lines[@]}' until a match is found. If no match is found, the
+# function fails and the error message contains the expected line and
+# `$output'.
 #
 # By default, literal matching is performed. Option `-p' and `-r' change
 # this to partial (substring) and regular expression (extended)
@@ -119,16 +119,14 @@ assert_equal() {
 #   lines
 # Options:
 #   -l <index> - match against the <index>-th element of `${lines[@]}'
-#   -L - match against all elements of `${lines[@]}' until one matches
+#   -l - match against all elements of `${lines[@]}' until one matches
 #   -p - substring match
 #   -r - extended regular expression match
 # Arguments:
-#   $1 - [=STDIN] expected output
+#   $1 - expected output
 # Returns:
 #   0 - expected matches the actual output
 #   1 - otherwise
-# Inputs:
-#   STDIN - [=$1] expected output
 # Outputs:
 #   STDERR - assertion details, on failure
 #            error message, on error
@@ -142,17 +140,15 @@ assert_output() {
   while (( $# > 0 )); do
     case "$1" in
       -l)
-        if (( $# < 2 )) || ! [[ $2 =~ ^([0-9]|[1-9][0-9]+)$ ]]; then
-          echo "\`-l' requires an integer argument" \
-            | batslib_decorate 'ERROR: assert_output' \
-            | flunk
-          return $?
+        if (( $# > 2 )) && [[ $2 =~ ^([0-9]|[1-9][0-9]+)$ ]]; then
+          is_match_line=1
+          local -ri idx="$2"
+          shift
+        else
+          is_match_contained=1;
         fi
-        is_match_line=1
-        local -ri idx="$2"
-        shift 2
+        shift
         ;;
-      -L) is_match_contained=1; shift ;;
       -p) is_mode_partial=1; shift ;;
       -r) is_mode_regex=1; shift ;;
       --) break ;;
@@ -161,7 +157,7 @@ assert_output() {
   done
 
   if (( is_match_line )) && (( is_match_contained )); then
-    echo "\`-l' and \`-L' are mutually exclusive" \
+    echo "\`-l' and \`-l <index>' are mutually exclusive" \
       | batslib_decorate 'ERROR: assert_output' \
       | flunk
     return $?
@@ -175,8 +171,7 @@ assert_output() {
   fi
 
   # Arguments.
-  local expected
-  (( $# == 0 )) && expected="$(cat -)" || expected="$1"
+  local -r expected="$1"
 
   if (( is_mode_regex == 1 )) && [[ '' =~ $expected ]] || (( $? == 2 )); then
     echo "Invalid extended regular expression: \`$expected'" \
@@ -301,8 +296,7 @@ assert_output() {
 }
 
 # Fail and display an error message if the unexpected matches the actual
-# output. The unexpected output can be specified either by the first
-# parameter or on the standard input.
+# output.
 #
 # By default, the unexpected output is compared against `$output', and
 # the error message contains this value.
@@ -310,9 +304,10 @@ assert_output() {
 # Option `-l <index>' compares against `${lines[<index>]}'. The error
 # message contains the compared lines and <index>.
 #
-# Option `-L' compares against all lines in `${lines[@]}' until a match
-# is found. If a match is found, the function fails and the error
-# message contains the unexpected line, its index and `${lines[@]}'.
+# Option `-l' without `<index>' compares against all lines in
+# `${lines[@]}' until a match is found. If a match is found, the
+# function fails and the error message contains the unexpected line, its
+# index and `${lines[@]}'.
 #
 # By default, literal matching is performed. Option `-p' and `-r' change
 # this to partial (substring) and regular expression (extended)
@@ -324,16 +319,14 @@ assert_output() {
 #   lines
 # Options:
 #   -l <index> - match against the <index>-th element of `${lines[@]}'
-#   -L - match against all elements of `${lines[@]}' until one matches
+#   -l - match against all elements of `${lines[@]}' until one matches
 #   -p - substring match
 #   -r - extended regular expression match
 # Arguments:
-#   $1 - [=STDIN] unexpected output
+#   $1 - unexpected output
 # Returns:
 #   0 - unexpected does not match the actual output
 #   1 - otherwise
-# Inputs:
-#   STDIN - [=$1] unexpected output
 # Outputs:
 #   STDERR - assertion details, on failure
 #            error message, on error
@@ -347,15 +340,14 @@ refute_output() {
   while (( $# > 0 )); do
     case "$1" in
       -l)
-        if (( $# < 2 )) || ! [[ $2 =~ ^([0-9]|[1-9][0-9]+)$ ]]; then
-          echo "\`-l' requires an integer argument" \
-            | batslib_decorate 'ERROR: refute_output' \
-            | flunk
-          return $?
+        if (( $# > 2 )) && [[ $2 =~ ^([0-9]|[1-9][0-9]+)$ ]]; then
+          is_match_line=1
+          local -ri idx="$2"
+          shift
+        else
+          is_match_contained=1;
         fi
-        is_match_line=1
-        local -ri idx="$2"
-        shift 2
+        shift
         ;;
       -L) is_match_contained=1; shift ;;
       -p) is_mode_partial=1; shift ;;
@@ -366,7 +358,7 @@ refute_output() {
   done
 
   if (( is_match_line )) && (( is_match_contained )); then
-    echo "\`-l' and \`-L' are mutually exclusive" \
+    echo "\`-l' and \`-l <index>' are mutually exclusive" \
       | batslib_decorate 'ERROR: refute_output' \
       | flunk
     return $?
@@ -380,8 +372,7 @@ refute_output() {
   fi
 
   # Arguments.
-  local unexpected
-  (( $# == 0 )) && unexpected="$(cat -)" || unexpected="$1"
+  local -r unexpected="$1"
 
   if (( is_mode_regex == 1 )) && [[ '' =~ $unexpected ]] || (( $? == 2 )); then
     echo "Invalid extended regular expression: \`$unexpected'" \

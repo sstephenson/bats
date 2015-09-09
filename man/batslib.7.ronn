@@ -81,19 +81,19 @@ recent invocation of `run`.
   are displayed. If either one is longer than one line, both are
   displayed in _mulit-line_ format.
 
-* `assert_output` [-l <INDEX>|-L] [-p|-r] [<EXPECTED>]:
+* `assert_output` [-l [<INDEX>]] [-p|-r] <EXPECTED>:
   Fail if <EXPECTED> does not equal `$output`. On failure both values
   are displayed. If either one is longer than one line, both are
-  displayed in _mulit-line_ format. When no parameters are specified,
-  <EXPECTED> is read from the standard input.
+  displayed in _mulit-line_ format.
 
-  When `-l` is used, fail if <EXPECTED> does not equal the <INDEX>-th
-  element of `${lines[@]}`. On failure, <INDEX>, <EXPECTED> and the
-  actual line are displayed.
+  When `-l <INDEX>` is used, fail if <EXPECTED> does not equal the
+  <INDEX>-th element of `${lines[@]}`. On failure, <INDEX>, <EXPECTED>
+  and the actual line are displayed.
 
-  When `-L` is used, fail if <EXPECTED> is not found in `${lines[@]}`.
-  On failure, <EXPECTED> and `$output` are displayed. If `$output` is
-  longer than one line, it is displayed in _mulit-line_ format.
+  When `-l` is used without `<INDEX>`, fail if <EXPECTED> is not found
+  in `${lines[@]}`. On failure, <EXPECTED> and `$output` are displayed.
+  If `$output` is longer than one line, it is displayed in _mulit-line_
+  format.
 
   The default, literal matching can be changed to substring and regular
   expression matching.
@@ -109,19 +109,20 @@ recent invocation of `run`.
   `${lines[@]}`, causing line indices to change and preventing testing
   for empty lines. See [BUGS][] for more.
 
-* `refute_output` [-l <INDEX>|-L] [-p|-r] [<UNEXPECTED>]:
+* `refute_output` [-l [<INDEX>]] [-p|-r] <UNEXPECTED>:
   Fail if <UNEXPECTED> equals `$output`. On failure, `$output` is
   displayed. If `$output` is longer than one line, it is displayed in
-  _multi-line_ format. When no parameters are specified, <UNEXPECTED> is
-  read from the standard input.
+  _multi-line_ format.
 
-  When `-l` is used, fail if <UNEXPECTED> equals the <INDEX>-th element
-  of `${lines[@]}`. On failure, <INDEX> and <UNEXPECTED> are displayed.
+  When `-l <INDEX>` is used, fail if <UNEXPECTED> equals the <INDEX>-th
+  element of `${lines[@]}`. On failure, <INDEX> and <UNEXPECTED> are
+  displayed.
 
-  When `-L` is used, fail if <UNEXPECTED> is found in `${lines[@]}`. On
-  failure, <UNEXPECTED>, its index in `${lines[@]}` and `$output` are
-  displayed. If `$output` is longer than one line, it is displayed in
-  _multi-line_ format with the unexpected line highlighted.
+  When `-l` is used without `<INDEX>`, fail if <UNEXPECTED> is found in
+  `${lines[@]}`. On failure, <UNEXPECTED>, its index in `${lines[@]}`
+  and `$output` are displayed. If `$output` is longer than one line, it
+  is displayed in _multi-line_ format with the unexpected line
+  highlighted.
 
   The default, literal matching can be changed to substring and regular
   expression matching.
@@ -170,7 +171,7 @@ when using `assert_output` and `refute_line`. See PR \#93 on Github at
 
 ## COPYRIGHT
 
-TODO(ztombol): Find a suitable license.
+TODO(ztombol): Find a suitable licence.
 
 
 ## SEE ALSO
