@@ -63,7 +63,7 @@ otherwise.
 Assertions about exit code and output operate on the results of the most
 recent invocation of `run`.
 
-* `flunk` [<MESSAGE>]:
+* `fail` [<MESSAGE>]:
   Display <MESSAGE> and fail. This function provides a convenient way to
   report various failures. Other test helpers also use it to display
   output on failure. When no parameters are specified, <MESSAGE> is read

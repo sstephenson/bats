@@ -272,7 +272,7 @@ information on failure to help debugging. They return `1` on failure and
 Assertions about exit code and output operate on the results of the most
 recent invocation of `run`.
 
-#### `flunk`
+#### `fail`
 
 Display an error message and fail. This function provides a convenient
 way to report failure in arbitrary situations. You can use it to
@@ -280,16 +280,16 @@ implement your own helpers when the ones available do not meet your
 needs. Other functions use it internally as well.
 
 ```bash
-@test 'flunk()' {
-  flunk 'this test always fails'
+@test 'fail()' {
+  fail 'this test always fails'
 }
 ```
 
 The message can also be specified on the standard input.
 
 ```bash
-@test 'flunk() with pipe' {
-  echo 'this test always fails' | flunk
+@test 'fail() with pipe' {
+  echo 'this test always fails' | fail
 }
 ```
 

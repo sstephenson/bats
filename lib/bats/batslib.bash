@@ -34,7 +34,7 @@ source "${BATS_LIB}/batslib/output.bash"
 #   STDIN - [opt = $@] message to display
 # Outputs:
 #   STDERR - error message
-flunk() {
+fail() {
   (( $# == 0 )) && batslib_err || batslib_err "$@"
   return 1
 }
@@ -68,7 +68,7 @@ assert() {
       batslib_print_kv_single "$width" "${single[@]}"
       batslib_print_kv_single_or_multi "$width" "${may_be_multi[@]}"
     } | batslib_decorate 'assertion failed' \
-      | flunk
+      | fail
   fi
 }
 
@@ -92,7 +92,7 @@ assert_equal() {
         'expected' "$1" \
         'actual'   "$2" \
       | batslib_decorate 'values do not equal' \
-      | flunk
+      | fail
   fi
 }
 
@@ -159,14 +159,14 @@ assert_output() {
   if (( is_match_line )) && (( is_match_contained )); then
     echo "\`-l' and \`-l <index>' are mutually exclusive" \
       | batslib_decorate 'ERROR: assert_output' \
-      | flunk
+      | fail
     return $?
   fi
 
   if (( is_mode_partial )) && (( is_mode_regex )); then
     echo "\`-p' and \`-r' are mutually exclusive" \
       | batslib_decorate 'ERROR: assert_output' \
-      | flunk
+      | fail
     return $?
   fi
 
@@ -176,7 +176,7 @@ assert_output() {
   if (( is_mode_regex == 1 )) && [[ '' =~ $expected ]] || (( $? == 2 )); then
     echo "Invalid extended regular expression: \`$expected'" \
       | batslib_decorate 'ERROR: assert_output' \
-      | flunk
+      | fail
     return $?
   fi
 
@@ -199,7 +199,7 @@ assert_output() {
         batslib_print_kv_single "$width" "${single[@]}"
         batslib_print_kv_single_or_multi "$width" "${may_be_multi[@]}"
       } | batslib_decorate 'no output line matches regular expression' \
-        | flunk
+        | fail
     elif (( is_mode_partial )); then
       local -i idx
       for (( idx = 0; idx < ${#lines[@]}; ++idx )); do
@@ -216,7 +216,7 @@ assert_output() {
         batslib_print_kv_single "$width" "${single[@]}"
         batslib_print_kv_single_or_multi "$width" "${may_be_multi[@]}"
       } | batslib_decorate 'no output line contains substring' \
-        | flunk
+        | fail
     else
       local -i idx
       for (( idx = 0; idx < ${#lines[@]}; ++idx )); do
@@ -233,7 +233,7 @@ assert_output() {
         batslib_print_kv_single "$width" "${single[@]}"
         batslib_print_kv_single_or_multi "$width" "${may_be_multi[@]}"
       } | batslib_decorate 'output does not contain line' \
-        | flunk
+        | fail
     fi
   elif (( is_match_line )); then
     # Specific line.
@@ -244,7 +244,7 @@ assert_output() {
             'regex' "$expected" \
             'line'  "${lines[$idx]}" \
           | batslib_decorate 'regular expression does not match line' \
-          | flunk
+          | fail
       fi
     elif (( is_mode_partial )); then
       if [[ ${lines[$idx]} != *"$expected"* ]]; then
@@ -253,7 +253,7 @@ assert_output() {
             'substring' "$expected" \
             'line'      "${lines[$idx]}" \
           | batslib_decorate 'line does not contain substring' \
-          | flunk
+          | fail
       fi
     else
       if [[ ${lines[$idx]} != "$expected" ]]; then
@@ -262,7 +262,7 @@ assert_output() {
             'expected' "$expected" \
             'actual'   "${lines[$idx]}" \
           | batslib_decorate 'line differs' \
-          | flunk
+          | fail
       fi
     fi
   else
@@ -273,7 +273,7 @@ assert_output() {
             'regex'  "$expected" \
             'output' "$output" \
           | batslib_decorate 'regular expression does not match output' \
-          | flunk
+          | fail
       fi
     elif (( is_mode_partial )); then
       if [[ $output != *"$expected"* ]]; then
@@ -281,7 +281,7 @@ assert_output() {
             'substring' "$expected" \
             'output'    "$output" \
           | batslib_decorate 'output does not contain substring' \
-          | flunk
+          | fail
       fi
     else
       if [[ $output != "$expected" ]]; then
@@ -289,7 +289,7 @@ assert_output() {
             'expected' "$expected" \
             'actual'   "$output" \
           | batslib_decorate 'output differs' \
-          | flunk
+          | fail
       fi
     fi
   fi
@@ -360,14 +360,14 @@ refute_output() {
   if (( is_match_line )) && (( is_match_contained )); then
     echo "\`-l' and \`-l <index>' are mutually exclusive" \
       | batslib_decorate 'ERROR: refute_output' \
-      | flunk
+      | fail
     return $?
   fi
 
   if (( is_mode_partial )) && (( is_mode_regex )); then
     echo "\`-p' and \`-r' are mutually exclusive" \
       | batslib_decorate 'ERROR: refute_output' \
-      | flunk
+      | fail
     return $?
   fi
 
@@ -377,7 +377,7 @@ refute_output() {
   if (( is_mode_regex == 1 )) && [[ '' =~ $unexpected ]] || (( $? == 2 )); then
     echo "Invalid extended regular expression: \`$unexpected'" \
       | batslib_decorate 'ERROR: refute_output' \
-      | flunk
+      | fail
     return $?
   fi
 
@@ -407,7 +407,7 @@ refute_output() {
               batslib_print_kv_multi "${may_be_multi[@]}"
             fi
           } | batslib_decorate 'no line should match the regular expression' \
-            | flunk
+            | fail
           return $?
         fi
       done
@@ -434,7 +434,7 @@ refute_output() {
               batslib_print_kv_multi "${may_be_multi[@]}"
             fi
           } | batslib_decorate 'no line should contain substring' \
-            | flunk
+            | fail
           return $?
         fi
       done
@@ -461,7 +461,7 @@ refute_output() {
               batslib_print_kv_multi "${may_be_multi[@]}"
             fi
           } | batslib_decorate 'line should not be in output' \
-            | flunk
+            | fail
           return $?
         fi
       done
@@ -475,7 +475,7 @@ refute_output() {
             'regex' "$unexpected" \
             'line'  "${lines[$idx]}" \
           | batslib_decorate 'regular expression should not match line' \
-          | flunk
+          | fail
       fi
     elif (( is_mode_partial )); then
       if [[ ${lines[$idx]} == *"$unexpected"* ]]; then
@@ -484,7 +484,7 @@ refute_output() {
             'substring' "$unexpected" \
             'line'      "${lines[$idx]}" \
           | batslib_decorate 'line should not contain substring' \
-          | flunk
+          | fail
       fi
     else
       if [[ ${lines[$idx]} == "$unexpected" ]]; then
@@ -492,7 +492,7 @@ refute_output() {
             'index'      "$idx" \
             'unexpected' "$unexpected" \
           | batslib_decorate 'line should differ' \
-          | flunk
+          | fail
       fi
     fi
   else
@@ -503,7 +503,7 @@ refute_output() {
             'regex'  "$unexpected" \
             'output' "$output" \
           | batslib_decorate 'regular expression should not match output' \
-          | flunk
+          | fail
       fi
     elif (( is_mode_partial )); then
       if [[ $output == *"$unexpected"* ]]; then
@@ -511,14 +511,14 @@ refute_output() {
             'substring' "$unexpected" \
             'output'    "$output" \
           | batslib_decorate 'output should not contain substring' \
-          | flunk
+          | fail
       fi
     else
       if [[ $output == "$unexpected" ]]; then
         batslib_print_kv_single_or_multi 6 \
             'output' "$output" \
           | batslib_decorate 'output equals, but it was expected to differ' \
-          | flunk
+          | fail
       fi
     fi
   fi
@@ -543,7 +543,7 @@ assert_success() {
       batslib_print_kv_single "$width" 'status' "$status"
       batslib_print_kv_single_or_multi "$width" 'output' "$output"
     } | batslib_decorate 'command failed' \
-      | flunk
+      | fail
   fi
 }
 
@@ -569,7 +569,7 @@ assert_failure() {
   if (( status == 0 )); then
     batslib_print_kv_single_or_multi 6 'output' "$output" \
       | batslib_decorate 'command succeeded, but it was expected to fail' \
-      | flunk
+      | fail
   elif (( $# > 0 )) && (( status != expected )); then
     { local -ir width=8
       batslib_print_kv_single "$width" \
@@ -578,6 +578,6 @@ assert_failure() {
       batslib_print_kv_single_or_multi "$width" \
           'output' "$output"
     } | batslib_decorate 'command failed as expected, but status differs' \
-      | flunk
+      | fail
   fi
 }
