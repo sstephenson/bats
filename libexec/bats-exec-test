@@ -90,7 +90,7 @@ bats_test_begin() {
     echo "begin $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION" >&3
   fi
   if [ -w "$BATS_LOG" ]; then
-    echo "[$$] starting: '$BATS_TEST_DESCRIPTION'" >> "$BATS_LOG"
+    echo "[$$] starting '$BATS_TEST_DESCRIPTION'" >> "$BATS_LOG"
     echo "[$$] <<< begin output >>>" >> "$BATS_LOG"
   fi
   setup
