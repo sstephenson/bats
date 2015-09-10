@@ -64,7 +64,9 @@ run() {
   [ -z "$T" ] || set -T
   IFS=$oldIFS
   if [ -w "$BATS_LOG" ]; then
-    echo "$output" >> "$BATS_LOG"
+    if [ ! -z "$output" ]; then
+      echo "$output" >> "$BATS_LOG"
+    fi
   fi
 }
 
