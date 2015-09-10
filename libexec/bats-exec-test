@@ -272,9 +272,11 @@ bats_exit_trap() {
     sed -e "s/^/\[$$\] /" "$BATS_OUT" >> "$BATS_LOG"
     echo "[$$] $to_log" >> "$BATS_LOG"
     # TODO(aje): guard this behind a flag (--verbose, --log-output?)
-    echo "[$$] <<< begin output >>>" >> "$BATS_LOG"
-    echo "$output" >> "$BATS_LOG"
-    echo "[$$] <<< end output >>>" >> "$BATS_LOG"
+    if [ ! -z "$output" ]; then
+      echo "[$$] <<< begin output >>>" >> "$BATS_LOG"
+      echo "$output" >> "$BATS_LOG"
+      echo "[$$] <<< end output >>>" >> "$BATS_LOG"
+    fi
   fi
 
   rm -f "$BATS_OUT"
