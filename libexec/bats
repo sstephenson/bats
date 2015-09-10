@@ -16,11 +16,12 @@ help() {
   echo "  <test> is the path to a Bats test file, or the path to a directory"
   echo "  containing Bats test files."
   echo
-  echo "  -c, --count    Count the number of test cases without running any tests"
-  echo "  -h, --help     Display this help message"
-  echo "  -p, --pretty   Show results in pretty format (default for terminals)"
-  echo "  -t, --tap      Show results in TAP format"
-  echo "  -v, --version  Display the version number"
+  echo "  -c, --count       Count the number of test cases without running any tests"
+  echo "  -h, --help        Display this help message"
+  echo "  -p, --pretty      Show results in pretty format (default for terminals)"
+  echo "  -t, --tap         Show results in TAP format"
+  echo "      --log [FILE]  Combine output and test logs into FILE"
+  echo "  -v, --version     Display the version number"
   echo
   echo "  For more information, see https://github.com/sstephenson/bats"
   echo
@@ -95,6 +96,10 @@ for option in "${options[@]}"; do
     ;;
   "t" | "tap" )
     pretty=""
+    ;;
+  "log" )
+    export BATS_LOG="/tmp/bats.log"
+    touch "$BATS_LOG"
     ;;
   "p" | "pretty" )
     pretty="1"
