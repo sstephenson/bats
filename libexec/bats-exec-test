@@ -275,8 +275,6 @@ bats_exit_trap() {
   fi
 
   if [ -w "$BATS_LOG" ]; then
-    # what the fuck does this line do?
-    sed -e "s/^/\[$$\] /" "$BATS_OUT" >> "$BATS_LOG"
     echo "[$$] <<< end output >>>" >> "$BATS_LOG"
     echo "[$$] $to_log" >> "$BATS_LOG"
   fi
