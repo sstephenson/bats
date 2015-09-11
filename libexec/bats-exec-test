@@ -134,34 +134,36 @@ bats_print_stack_trace() {
   local output=''
 
   for frame in "$@"; do
+    local line=''
     local filename="$(bats_trim_filename "$(bats_frame_filename "$frame")")"
     local lineno="$(bats_frame_lineno "$frame")"
 
     if [ $index -eq 1 ]; then
-      output+="# ("
+      line+="# ("
     else
-      output+="#  "
+      line+="#  "
     fi
 
     local fn="$(bats_frame_function "$frame")"
     if [ "$fn" != "$BATS_TEST_NAME" ]; then
-      output+="from function \`$fn' "
+      line+="from function \`$fn' "
     fi
 
     if [ $index -eq $count ]; then
-      output+="in test file $filename, line $lineno)"
+      line+="in test file $filename, line $lineno)"
     else
-      output+="in file $filename, line $lineno,"
+      line+="in file $filename, line $lineno,"
     fi
 
-    echo "$output"
-
-    if [ -w "$BATS_LOG" ]; then
-      echo "$output" >> "$BATS_LOG"
-    fi
+    echo "$line"
+    output+="$line"
 
     let index+=1
   done
+
+  if [ -w "$BATS_LOG" ]; then
+    echo "$output" >> "$BATS_LOG"
+  fi
 }
 
 bats_print_failed_command() {
