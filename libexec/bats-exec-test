@@ -138,24 +138,19 @@ bats_print_stack_trace() {
     local lineno="$(bats_frame_lineno "$frame")"
 
     if [ $index -eq 1 ]; then
-      # echo -n "# ("
       output+="# ("
     else
-      # echo -n "#  "
       output+="#  "
     fi
 
     local fn="$(bats_frame_function "$frame")"
     if [ "$fn" != "$BATS_TEST_NAME" ]; then
-      # echo -n "from function \`$fn' "
       output+="from function \`$fn' "
     fi
 
     if [ $index -eq $count ]; then
-      # echo "in test file $filename, line $lineno)"
       output+="in test file $filename, line $lineno)"
     else
-      # echo "in file $filename, line $lineno,"
       output+="in file $filename, line $lineno,"
     fi
 
