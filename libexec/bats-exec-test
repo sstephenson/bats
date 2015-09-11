@@ -156,14 +156,12 @@ bats_print_stack_trace() {
     fi
 
     echo "$line"
-    output+="$line"
+    if [ -w "$BATS_LOG" ]; then
+      echo "$line" >> "$BATS_LOG"
+    fi
 
     let index+=1
   done
-
-  if [ -w "$BATS_LOG" ]; then
-    echo "$output" >> "$BATS_LOG"
-  fi
 }
 
 bats_print_failed_command() {
