@@ -264,6 +264,7 @@ bats_teardown_trap() {
 bats_exit_trap() {
   local status
   local skipped
+  local to_log=''
   trap - err exit
 
   skipped=""
