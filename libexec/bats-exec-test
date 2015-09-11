@@ -131,36 +131,38 @@ bats_print_stack_trace() {
   local frame
   local index=1
   local count="${#@}"
-  local log_content=''
+  local output=''
 
   for frame in "$@"; do
     local filename="$(bats_trim_filename "$(bats_frame_filename "$frame")")"
     local lineno="$(bats_frame_lineno "$frame")"
 
     if [ $index -eq 1 ]; then
-      echo -n "# ("
-      log_content+="# ("
+      # echo -n "# ("
+      output+="# ("
     else
-      echo -n "#  "
-      log_content+="#  "
+      # echo -n "#  "
+      output+="#  "
     fi
 
     local fn="$(bats_frame_function "$frame")"
     if [ "$fn" != "$BATS_TEST_NAME" ]; then
-      echo -n "from function \`$fn' "
-      log_content+="from function \`$fn' "
+      # echo -n "from function \`$fn' "
+      output+="from function \`$fn' "
     fi
 
     if [ $index -eq $count ]; then
-      echo "in test file $filename, line $lineno)"
-      log_content+="in test file $filename, line $lineno)"
+      # echo "in test file $filename, line $lineno)"
+      output+="in test file $filename, line $lineno)"
     else
-      echo "in file $filename, line $lineno,"
-      log_content+="in file $filename, line $lineno,"
+      # echo "in file $filename, line $lineno,"
+      output+="in file $filename, line $lineno,"
     fi
 
+    echo "$output"
+
     if [ -w "$BATS_LOG" ]; then
-      echo "$log_content" >> "$BATS_LOG"
+      echo "$output" >> "$BATS_LOG"
     fi
 
     let index+=1
@@ -172,23 +174,22 @@ bats_print_failed_command() {
   local status="$2"
   local filename="$(bats_frame_filename "$frame")"
   local lineno="$(bats_frame_lineno "$frame")"
-  local log_content=''
+  local output=''
 
   local failed_line="$(bats_extract_line "$filename" "$lineno")"
   local failed_command="$(bats_strip_string "$failed_line")"
-  echo -n "#   \`${failed_command}' "
-  log_content+="#   \`${failed_command}' "
+  output+="#   \`${failed_command}' "
 
   if [ $status -eq 1 ]; then
-    echo "failed"
-    log_content+="failed"
+    output+="failed"
   else
-    echo "failed with status $status"
-    log_content+="failed with status $status"
+    output+="failed with status $status"
   fi
 
+  echo "$output"
+
   if [ -w "$BATS_LOG" ]; then
-    echo "$log_content" >> "$BATS_LOG"
+    echo "$output" >> "$BATS_LOG"
   fi
 }
 
