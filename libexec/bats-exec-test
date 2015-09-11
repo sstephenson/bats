@@ -131,7 +131,6 @@ bats_print_stack_trace() {
   local frame
   local index=1
   local count="${#@}"
-  local output=''
 
   for frame in "$@"; do
     local line=''
