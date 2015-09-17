@@ -9,19 +9,19 @@ load test_helper
 }
 
 @test 'assert() <expression>: returns 1 and displays details if <expression> evaluates to FALSE' {
-  run bash -c 'echo "error"; false'
+  run bash -c 'echo "a"; false'
   run assert false
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 5 ]
   [ "${lines[0]}" == '-- assertion failed --' ]
   [ "${lines[1]}" == 'expression : false' ]
   [ "${lines[2]}" == 'status     : 1' ]
-  [ "${lines[3]}" == 'output     : error' ]
+  [ "${lines[3]}" == 'output     : a' ]
   [ "${lines[4]}" == '--' ]
 }
 
-@test "assert() <expression>: displays details in multi-line format if \`\$output' is longer than one line" {
-  run bash -c "echo $'0. error\n1. error'; false"
+@test "assert() <expression>: displays \`\$output' in multi-line format if it is longer than one line" {
+  run bash -c "echo $'a 0\na 1'; false"
   run assert false
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 7 ]
@@ -29,7 +29,7 @@ load test_helper
   [ "${lines[1]}" == 'expression : false' ]
   [ "${lines[2]}" == 'status     : 1' ]
   [ "${lines[3]}" == 'output (2 lines):' ]
-  [ "${lines[4]}" == '  0. error' ]
-  [ "${lines[5]}" == '  1. error' ]
+  [ "${lines[4]}" == '  a 0' ]
+  [ "${lines[5]}" == '  a 1' ]
   [ "${lines[6]}" == '--' ]
 }

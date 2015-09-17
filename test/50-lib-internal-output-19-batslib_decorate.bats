@@ -2,7 +2,7 @@
 
 load test_helper
 
-@test 'batslib_decorate() encloses body in header and footer lines' {
+@test 'batslib_decorate() <title>: encloses the input in a footer line and a header line containing <title>' {
   run bash -c "source '${BATS_LIB}/batslib.bash'; echo 'body' | batslib_decorate 'title'"
   [ "$status" -eq 0 ]
   [ "${#lines[@]}" -eq 3 ]

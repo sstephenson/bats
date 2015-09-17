@@ -18,7 +18,7 @@ load test_helper
   [ "${lines[3]}" == '--' ]
 }
 
-@test "assert_equal() <actual> <expected>: displays details in multi-line format if <actual> is longer than one line" {
+@test 'assert_equal() <actual> <expected>: displays details in multi-line format if <actual> is longer than one line' {
   run assert_equal $'a 0\na 1' 'b'
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 7 ]
@@ -31,7 +31,7 @@ load test_helper
   [ "${lines[6]}" == '--' ]
 }
 
-@test "assert_equal() <actual> <expected>: displays details in multi-line format if <expected> is longer than one line" {
+@test 'assert_equal() <actual> <expected>: displays details in multi-line format if <expected> is longer than one line' {
   run assert_equal 'a' $'b 0\nb 1'
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 7 ]

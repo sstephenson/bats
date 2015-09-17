@@ -2,12 +2,10 @@
 
 load test_helper
 
-@test 'batslib_print_kv_single_or_multi() prints in two-column format if all values are one line long' {
-  local -ar pairs=(
-    'k _1'  'v 1'
-    'k 2 '  'v 2'
-    'k __3' 'v 3'
-  )
+@test 'batslib_print_kv_single_or_multi() <width> <pair...>: displays <pair...> in two-column format if all values are one line long' {
+  local -ar pairs=( 'k _1'  'v 1'
+                    'k 2 '  'v 2'
+                    'k __3' 'v 3' )
   run batslib_print_kv_single_or_multi 5 "${pairs[@]}"
   [ "$status" -eq 0 ]
   [ "${#lines[@]}" == '3' ]
@@ -16,12 +14,10 @@ load test_helper
   [ "${lines[2]}" == 'k __3 : v 3' ]
 }
 
-@test 'batslib_print_kv_single_or_multi() prints in multi-line format if a at least one value is longer than one line' {
-  local -ar pairs=(
-    'k _1'  'v 1'
-    'k 2'  $'v 2-1\nv 2-2'
-    'k __3' 'v 3'
-  )
+@test 'batslib_print_kv_single_or_multi() <width> <pair...>: displays <pair...> in multi-line format if at least one value is longer than one line' {
+  local -ar pairs=( 'k _1'  'v 1'
+                    'k 2'   $'v 2-1\nv 2-2'
+                    'k __3' 'v 3' )
   run batslib_print_kv_single_or_multi 5 "${pairs[@]}"
   [ "$status" -eq 0 ]
   [ "${#lines[@]}" == '7' ]

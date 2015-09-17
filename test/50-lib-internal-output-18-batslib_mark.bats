@@ -2,7 +2,7 @@
 
 load test_helper
 
-@test 'batslib_mark() highlights a single line' {
+@test 'batslib_mark() <mark> <index>: marks the <index>-th line of the input with <mark>' {
   run bash -c "source '${BATS_LIB}/batslib.bash'; printf ' a\n b\n c\n' | batslib_mark '>' 0"
   [ "$status" -eq 0 ]
   [ "${#lines[@]}" -eq 3 ]
@@ -11,7 +11,7 @@ load test_helper
   [ "${lines[2]}" == ' c' ]
 }
 
-@test 'batslib_mark() highlights lines when indices are in ascending order' {
+@test 'batslib_mark() <mark> <index...>: marks multiple lines when <index...> is in ascending order' {
   run bash -c "source '${BATS_LIB}/batslib.bash'; printf ' a\n b\n c\n' | batslib_mark '>' 1 2"
   [ "$status" -eq 0 ]
   [ "${#lines[@]}" -eq 3 ]
@@ -20,16 +20,17 @@ load test_helper
   [ "${lines[2]}" == '>c' ]
 }
 
-@test 'batslib_mark() highlights lines when indices are in random order' {
-  run bash -c "source '${BATS_LIB}/batslib.bash'; printf ' a\n b\n c\n' | batslib_mark '>' 2 1"
+@test 'batslib_mark() <mark> <index...>: marks multiple lines when <index...> is in random order' {
+  run bash -c "source '${BATS_LIB}/batslib.bash'; printf ' a\n b\n c\n d\n' | batslib_mark '>' 2 1 3"
   [ "$status" -eq 0 ]
-  [ "${#lines[@]}" -eq 3 ]
+  [ "${#lines[@]}" -eq 4 ]
   [ "${lines[0]}" == ' a' ]
   [ "${lines[1]}" == '>b' ]
   [ "${lines[2]}" == '>c' ]
+  [ "${lines[3]}" == '>d' ]
 }
 
-@test 'batslib_mark() ignores duplicate line indices' {
+@test 'batslib_mark() <mark> <index...>: ignores duplicate indices' {
   run bash -c "source '${BATS_LIB}/batslib.bash'; printf ' a\n b\n c\n' | batslib_mark '>' 1 2 1"
   [ "$status" -eq 0 ]
   [ "${#lines[@]}" -eq 3 ]
@@ -38,7 +39,7 @@ load test_helper
   [ "${lines[2]}" == '>c' ]
 }
 
-@test 'batslib_mark() outputs the input untouched if the marking string is the empty string' {
+@test 'batslib_mark() <mark> <index...>: outputs the input untouched if <mark> is the empty string' {
   run bash -c "source '${BATS_LIB}/batslib.bash'; printf ' a\n b\n c\n' | batslib_mark '' 1"
   [ "$status" -eq 0 ]
   [ "${#lines[@]}" -eq 3 ]
@@ -47,7 +48,7 @@ load test_helper
   [ "${lines[2]}" == ' c' ]
 }
 
-@test 'batslib_mark() highlights the last line when it is not terminated by a newline' {
+@test 'batslib_mark() <mark> <index>: marks the last line when it is not terminated by a newline' {
   run bash -c "source '${BATS_LIB}/batslib.bash'; printf ' a\n b\n c' | batslib_mark '>' 2"
   [ "$status" -eq 0 ]
   [ "${#lines[@]}" -eq 3 ]
@@ -56,7 +57,7 @@ load test_helper
   [ "${lines[2]}" == '>c' ]
 }
 
-@test 'batslib_mark() replaces the line with the marking string if the line is shorter or equally long' {
+@test 'batslib_mark() <mark> <index>: does not truncate <mark> if it is longer than the marked line' {
   run bash -c "source '${BATS_LIB}/batslib.bash'; printf '\n' | batslib_mark '>' 0"
   [ "$status" -eq 0 ]
   [ "${#lines[@]}" -eq 1 ]

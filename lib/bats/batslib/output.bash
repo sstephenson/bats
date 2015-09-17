@@ -6,20 +6,19 @@
 # helper functions.
 #
 
-# Print an error message to the standard error. The message is specified
-# either by positional parameters or on the standard input (by piping or
-# redirection).
+# Print a message to the standard error. When no parameters are
+# specified, the message is read from the standard input.
 #
 # Globals:
 #   none
 # Arguments:
-#   $@ - [opt = STDIN] message to print
+#   $@ - [=STDIN] message
 # Returns:
 #   none
 # Inputs:
-#   STDIN - [opt = $@] message to print
+#   STDIN - [=$@] message
 # Outputs:
-#   STDERR - error message
+#   STDERR - message
 batslib_err() {
   { if (( $# > 0 )); then
       echo "$@"
@@ -29,9 +28,9 @@ batslib_err() {
   } >&2
 }
 
-# Counts the number of lines in the given text.
+# Count the number of lines in the given string.
 #
-# TODO(ztombol): Remove this notice and fix tests after Bats merged #93!
+# TODO(ztombol): Fix tests and remove this note after #93 is resolved!
 # NOTE: Due to a bug in Bats, `batslib_count_lines "$output"' does not
 #       give the same result as `${#lines[@]}' when the output contains
 #       empty lines.
@@ -40,11 +39,11 @@ batslib_err() {
 # Globals:
 #   none
 # Arguments:
-#   $1 - text
+#   $1 - string
 # Returns:
 #   none
 # Outputs:
-#   STDOUT - number of lines in given text
+#   STDOUT - number of lines
 batslib_count_lines() {
   local -i n_lines=0
   local line
@@ -54,14 +53,14 @@ batslib_count_lines() {
   echo "$n_lines"
 }
 
-# Determine whether all parameters are single-line strings.
+# Determine whether all strings are single-line.
 #
 # Globals:
 #   none
 # Arguments:
-#   $@ - strings to test
+#   $@ - strings
 # Returns:
-#   0 - all parameters are single-line strings
+#   0 - all strings are single-line
 #   1 - otherwise
 batslib_is_single_line() {
   for string in "$@"; do
@@ -71,14 +70,16 @@ batslib_is_single_line() {
 }
 
 # Determine the length of the longest key that has a single-line value.
-# Useful in determining the column width for printing key-value pairs in
-# a two-column format when some keys may have multi-line values and thus
-# should be excluded.
+#
+# This function is useful in determining the correct width of the key
+# column in two-column format when some keys may have multi-line values
+# and thus should be excluded.
 #
 # Globals:
 #   none
 # Arguments:
-#   $@ - strings to test
+#   $odd - key
+#   $even - value of the previous key
 # Returns:
 #   none
 # Outputs:
@@ -93,23 +94,23 @@ batslib_get_max_single_line_key_width() {
   echo "$max_len"
 }
 
-# Print key-value pairs in two-column format. The first column contains
-# the keys. Its width is specified with the first positional parameter,
-# usually acquired using `batslib_get_max_single_line_key_width()', to
-# nicely line up the values in the second column. The rest of the
-# parameters are used to supply the key-value pairs. Every even-numbered
-# parameter is a key and the following parameter is its value.
+# Print key-value pairs in two-column format.
+#
+# Keys are displayed in the first column, and their corresponding values
+# in the second. To evenly line up values, the key column is fixed-width
+# and its width is specified with the first parameter (possibly computed
+# using `batslib_get_max_single_line_key_width').
 #
 # Globals:
 #   none
 # Arguments:
-#   $1 - column width
+#   $1 - width of key column
 #   $even - key
 #   $odd - value of the previous key
 # Returns:
 #   none
 # Outputs:
-#   STDOUT - key-value pairs in two-column format
+#   STDOUT - formatted key-value pairs
 batslib_print_kv_single() {
   local -ir col_width="$1"; shift
   while (( $# != 0 )); do
@@ -118,10 +119,12 @@ batslib_print_kv_single() {
   done
 }
 
-# Print key-value pairs in multi-line format. First, the key and the
-# number of lines in the value is printed. Next, the value on a separate
-# line. Every odd-numbered parameter is a key and the following
-# parameters is its value.
+# Print key-value pairs in multi-line format.
+#
+# The key is displayed first with the number of lines of its
+# corresponding value in parenthesis. Next, starting on the next line,
+# the value is displayed. For better readability, it is recommended to
+# indent values using `batslib_prefix'.
 #
 # Globals:
 #   none
@@ -131,7 +134,7 @@ batslib_print_kv_single() {
 # Returns:
 #   none
 # Outputs:
-#   STDOUT - key-value pairs in multi-line format
+#   STDOUT - formatted key-value pairs
 batslib_print_kv_multi() {
   while (( $# != 0 )); do
     printf '%s (%d lines):\n' "$1" "$( batslib_count_lines "$2" )"
@@ -140,24 +143,27 @@ batslib_print_kv_multi() {
   done
 }
 
-# Print all key-value pairs in either two-column or multi-line format.
-# If all values are one line long, all pairs are printed in two-column
-# format using `batslib_print_kv_single()'. Otherwise, they are printed
-# in multi-line format using `batslib_print_kv_multi()' after each line
-# of all values being prefixed with two spaces.
+# Print all key-value pairs in either two-column or multi-line format
+# depending on whether all values are single-line.
+#
+# If all values are single-line, print all pairs in two-column format
+# with the specified key column width (identical to using
+# `batslib_print_kv_single').
+#
+# Otherwise, print all pairs in multi-line format after indenting values
+# with two spaces for readability (identical to using `batslib_prefix'
+# and `batslib_print_kv_multi')
 #
 # Globals:
 #   none
 # Arguments:
-#   $1 - column width for two-column format
+#   $1 - width of key column (for two-column format)
 #   $even - key
 #   $odd - value of the previous key
 # Returns:
 #   none
 # Outputs:
-#   STDOUT - key-value pairs in two-column format, if all values are
-#            single-line
-#            key-value pairs in multi-line format, otherwise
+#   STDOUT - formatted key-value pairs
 batslib_print_kv_single_or_multi() {
   local -ir width="$1"; shift
   local -a pairs=( "$@" )
@@ -179,16 +185,16 @@ batslib_print_kv_single_or_multi() {
   fi
 }
 
-# Prefix each line of the input with an arbitrary string.
+# Prefix each line read from the standard input with the given string.
 #
 # Globals:
 #   none
 # Arguments:
-#   $1 - [opt = '  '] prefix string
+#   $1 - [=  ] prefix string
 # Returns:
 #   none
 # Inputs:
-#   STDIN - lines to prefix
+#   STDIN - lines
 # Outputs:
 #   STDOUT - prefixed lines
 batslib_prefix() {
@@ -199,19 +205,21 @@ batslib_prefix() {
   done
 }
 
-# Mark select lines of the input by overwriting their first few
-# characters with an arbitrary string. Usually, the input is indented by
-# spaces first using `batslib_prefix()'.
+# Mark select lines of the text read from the standard input by
+# overwriting their beginning with the given string.
+#
+# Usually the input is indented by a few spaces using `batslib_prefix'
+# first.
 #
 # Globals:
 #   none
 # Arguments:
 #   $1 - marking string
-#   $@ - zero-based indices of lines to mark
+#   $@ - indices (zero-based) of lines to mark
 # Returns:
 #   none
 # Inputs:
-#   STDIN - lines to work on
+#   STDIN - lines
 # Outputs:
 #   STDOUT - lines after marking
 batslib_mark() {
@@ -232,10 +240,10 @@ batslib_mark() {
   done
 }
 
-# Enclose the input in header and footer lines. The header contains an
-# arbitrary title specified with the first positional parameter. The
-# output is preceded and followed by an additional newline to make it
-# stand out more.
+# Enclose the input text in header and footer lines.
+#
+# The header contains the given string as title. The output is preceded
+# and followed by an additional newline to make it stand out more.
 #
 # Globals:
 #   none
@@ -244,9 +252,9 @@ batslib_mark() {
 # Returns:
 #   none
 # Inputs:
-#   STDIN - text to enclose
+#   STDIN - text
 # Outputs:
-#   STDOUT - enclosed text
+#   STDOUT - decorated text
 batslib_decorate() {
   echo
   echo "-- $1 --"

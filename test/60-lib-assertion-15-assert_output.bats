@@ -41,7 +41,7 @@ load test_helper
   [ "${lines[6]}" == '--' ]
 }
 
-@test "assert_output() <expected>: displays details in multi-line format if <expected> is longer than one line" {
+@test 'assert_output() <expected>: displays details in multi-line format if <expected> is longer than one line' {
   run echo 'b'
   run assert_output $'a 0\na 1'
   [ "$status" -eq 1 ]
@@ -143,7 +143,7 @@ load test_helper
   [ "${lines[6]}" == '--' ]
 }
 
-@test "assert_output() -r <regex>: displays details in multi-line format if <regex> is longer than one line" {
+@test 'assert_output() -r <regex>: displays details in multi-line format if <regex> is longer than one line' {
   run echo 'b'
   run assert_output -r $'.*a\nb.*'
   [ "$status" -eq 1 ]
@@ -256,7 +256,7 @@ load test_helper
   [ "${lines[3]}" == '--' ]
 }
 
-@test "assert_output() -l <expected>: displays \`\$output' in multi-line format if necessary" {
+@test "assert_output() -l <expected>: displays \`\$output' in multi-line format if it is longer than oen line" {
   run echo $'b 0\nb 1'
   run assert_output -l 'a'
   [ "$status" -eq 1 ]
@@ -277,14 +277,14 @@ load test_helper
 
 # Partial matching: `-p <partial>'.
 
-@test "assert_output() -l -p <partial>: returns 0 if <partial> is a substring in at least one line in \`\${lines[@]}'" {
+@test "assert_output() -l -p <partial>: returns 0 if <partial> is a substring in any line in \`\${lines[@]}'" {
   run echo $'a\nabc\nc'
   run assert_output -l -p 'b'
   [ "$status" -eq 0 ]
   [ "${#lines[@]}" -eq 0 ]
 }
 
-@test "assert_output() -l -p <partial>: returns 1 and displays details if <partial> is not a substring in any line in \`\${lines[@]}'" {
+@test "assert_output() -l -p <partial>: returns 1 and displays details if <partial> is not a substring in any lines in \`\${lines[@]}'" {
   run echo 'b'
   run assert_output -l -p 'a'
   [ "$status" -eq 1 ]
@@ -295,7 +295,7 @@ load test_helper
   [ "${lines[3]}" == '--' ]
 }
 
-@test "assert_output() -l -p <partial>: displays details in multi-line format if necessary" {
+@test "assert_output() -l -p <partial>: displays \`\$output' in multi-line format if it is longer than one line" {
   run echo $'b 0\nb 1'
   run assert_output -l -p 'a'
   [ "$status" -eq 1 ]
@@ -328,7 +328,7 @@ load test_helper
   [ "${lines[3]}" == '--' ]
 }
 
-@test 'assert_output() -l -r <regex>: displays details in multi-line format if necessary' {
+@test "assert_output() -l -r <regex>: displays \`\$output' in multi-line format if longer than one line" {
   run echo $'b 0\nb 1'
   run assert_output -l -r '.*a.*'
   [ "$status" -eq 1 ]
@@ -364,7 +364,7 @@ load test_helper
   [ "${lines[2]}" == '--' ]
 }
 
-@test "assert_output() -r <regex>: returns 1 and displays an error message if <regex> is not a valid extended regular expression" {
+@test 'assert_output() -r <regex>: returns 1 and displays an error message if <regex> is not a valid extended regular expression' {
   run assert_output -r '[.*'
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 3 ]

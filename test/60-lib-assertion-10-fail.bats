@@ -2,18 +2,13 @@
 
 load test_helper
 
-@test 'fail() returns 1' {
-  run fail ''
-  [ "$status" -eq 1 ]
-}
-
-@test 'fail() prints positional parameters' {
+@test 'fail() <message>: returns 1 and displays <message>' {
   run fail 'message'
   [ "$status" -eq 1 ]
   [ "$output" == 'message' ]
 }
 
-@test 'fail() prints STDIN if no positional parameters are specified' {
+@test 'fail(): reads <message> from STDIN' {
   run bash -c "source '${BATS_LIB}/batslib.bash'; echo 'message' | fail"
   [ "$status" -eq 1 ]
   [ "$output" == 'message' ]

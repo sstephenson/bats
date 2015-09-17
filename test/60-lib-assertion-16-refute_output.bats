@@ -26,7 +26,7 @@ load test_helper
   [ "${lines[2]}" == '--' ]
 }
 
-@test "refute_output() <unexpected>: displays details in multi-line format if necessary" {
+@test 'refute_output() <unexpected>: displays details in multi-line format if necessary' {
   run echo $'a 0\na 1'
   run refute_output $'a 0\na 1'
   [ "$status" -eq 1 ]
@@ -64,7 +64,7 @@ load test_helper
   [ "${lines[3]}" == '--' ]
 }
 
-@test "refute_output() -p <partial>: displays details in multi-line format if necessary" {
+@test 'refute_output() -p <partial>: displays details in multi-line format if necessary' {
   run echo $'a 0\na 1'
   run refute_output -p 'a'
   [ "$status" -eq 1 ]
@@ -98,7 +98,7 @@ load test_helper
   [ "${lines[3]}" == '--' ]
 }
 
-@test "refute_output() -r <regex>: displays details in multi-line format if necessary" {
+@test 'refute_output() -r <regex>: displays details in multi-line format if necessary' {
   run echo $'a 0\na 1'
   run refute_output -r '.*a.*'
   [ "$status" -eq 1 ]
@@ -132,8 +132,8 @@ load test_helper
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 4 ]
   [ "${lines[0]}" == '-- line should differ --' ]
-  [ "${lines[1]}" == 'index      : 1' ]
-  [ "${lines[2]}" == 'unexpected : b' ]
+  [ "${lines[1]}" == 'index : 1' ]
+  [ "${lines[2]}" == 'line  : b' ]
   [ "${lines[3]}" == '--' ]
 }
 
@@ -211,7 +211,7 @@ load test_helper
   [ "${lines[4]}" == '--' ]
 }
 
-@test "refute_output() -l <unexpected>: displays details in multi-line format if necessary" {
+@test 'refute_output() -l <unexpected>: displays details in multi-line format if necessary' {
   run echo $'a\nb\nc'
   run refute_output -l 'b'
   [ "$status" -eq 1 ]
@@ -241,7 +241,7 @@ load test_helper
   [ "${#lines[@]}" -eq 0 ]
 }
 
-@test "refute_output() -l -p <partial>: returns 1 and displays details if <partial> is a substring in at least one line in \`\${lines[@]}'" {
+@test "refute_output() -l -p <partial>: returns 1 and displays details if <partial> is a substring in any line in \`\${lines[@]}'" {
   run echo 'a'
   run refute_output -l -p 'a'
   [ "$status" -eq 1 ]
@@ -253,7 +253,7 @@ load test_helper
   [ "${lines[4]}" == '--' ]
 }
 
-@test "refute_output() -l -p <partial>: displays details in multi-line format if necessary" {
+@test 'refute_output() -l -p <partial>: displays details in multi-line format if necessary' {
   run echo $'a\nabc\nc'
   run refute_output -l -p 'b'
   [ "$status" -eq 1 ]
@@ -327,7 +327,7 @@ load test_helper
   [ "${lines[2]}" == '--' ]
 }
 
-@test "refute_output() -r <regex>: returns 1 and displays an error message if <regex> is not a valid extended regular expression" {
+@test 'refute_output() -r <regex>: returns 1 and displays an error message if <regex> is not a valid extended regular expression' {
   run refute_output -r '[.*'
   [ "$status" -eq 1 ]
   [ "${#lines[@]}" -eq 3 ]

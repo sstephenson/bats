@@ -2,14 +2,14 @@
 
 load test_helper
 
-@test 'batslib_err() prints positional parameters' {
-  run batslib_err 'message'
+@test 'batslib_err() <message...>: displays <message...>' {
+  run batslib_err 'm1' 'm2'
   [ "$status" -eq 0 ]
-  [ "$output" == 'message' ]
+  [ "$output" == 'm1 m2' ]
 }
 
-@test 'batslib_err() prints STDIN when no positional parameters are specified' {
-  run bash -c "source '${BATS_LIB}/batslib.bash'; echo 'message' | batslib_err"
+@test 'batslib_err(): reads <message...> from STDIN' {
+  run bash -c "source '${BATS_LIB}/batslib.bash'; echo 'm1' 'm2' | batslib_err"
   [ "$status" -eq 0 ]
-  [ "$output" == 'message' ]
+  [ "$output" == 'm1 m2' ]
 }

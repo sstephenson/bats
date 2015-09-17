@@ -73,7 +73,7 @@ Assertions about exit code and output operate on the results of the most recent 
 .
 .TP
 \fBfail\fR [\fIMESSAGE\fR]
-Display \fIMESSAGE\fR and fail\. This function provides a convenient way to report various failures\. Other test helpers also use it to display output on failure\. When no parameters are specified, \fIMESSAGE\fR is read from the standard input\.
+Display \fIMESSAGE\fR and fail\. This function provides a convenient way to report various failures\. When no parameters are specified, \fIMESSAGE\fR is read from the standard input\.
 .
 .TP
 \fBassert\fR \fIEXPRESSION\fR
@@ -83,18 +83,29 @@ Fail if \fIEXPRESSION\fR evaluates to false\. On failure, \fIEXPRESSION\fR, \fB$
 \fBNote:\fR \fIEXPRESSION\fR must be a simple command\. Compound commands, such as \fB[[\fR, can be used only when executed with \fBbash \-c\fR\.
 .
 .TP
-\fBassert_equal\fR \fIEXPECTED\fR \fIACTUAL\fR
-Fail if \fIEXPECTED\fR and \fIACTUAL\fR do not equal\. On failure both values are displayed\. If either one is longer than one line, both are displayed in \fImulit\-line\fR format\.
+\fBassert_equal\fR \fIACTUAL\fR \fIEXPECTED\fR
+Fail if \fIACTUAL\fR and \fIEXPECTED\fR do not equal\. On failure, both values are displayed\. If either one is longer than one line, both are displayed in \fImulti\-line\fR format\.
+.
+.TP
+\fBassert_success\fR
+Fail if \fB$status\fR is not \fB0\fR\. On failure, \fB$status\fR and \fB$output\fR are displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulti\-line\fR format\.
+.
+.TP
+\fBassert_failure\fR [\fISTATUS\fR]
+Fail if \fB$status\fR is \fB0\fR\. On failure, \fB$output\fR is displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulti\-line\fR format\.
+.
+.IP
+When \fISTATUS\fR is specified, fail if it does not equal \fB$status\fR\. On failure, \fISTATUS\fR, \fB$status\fR and \fB$output\fR are displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulti\-line\fR format\.
 .
 .TP
 \fBassert_output\fR [\-l [\fIINDEX\fR]] [\-p|\-r] \fIEXPECTED\fR
-Fail if \fIEXPECTED\fR does not equal \fB$output\fR\. On failure both values are displayed\. If either one is longer than one line, both are displayed in \fImulit\-line\fR format\.
+Fail if \fIEXPECTED\fR does not equal \fB$output\fR\. On failure, both values are displayed\. If either one is longer than one line, both are displayed in \fImulti\-line\fR format\.
 .
 .IP
 When \fB\-l <INDEX>\fR is used, fail if \fIEXPECTED\fR does not equal the \fIINDEX\fR\-th element of \fB${lines[@]}\fR\. On failure, \fIINDEX\fR, \fIEXPECTED\fR and the actual line are displayed\.
 .
 .IP
-When \fB\-l\fR is used without \fB<INDEX>\fR, fail if \fIEXPECTED\fR is not found in \fB${lines[@]}\fR\. On failure, \fIEXPECTED\fR and \fB$output\fR are displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulit\-line\fR format\.
+When \fB\-l\fR is used without \fB<INDEX>\fR, fail if \fIEXPECTED\fR is not found in \fB${lines[@]}\fR\. On failure, \fIEXPECTED\fR and \fB$output\fR are displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulti\-line\fR format\.
 .
 .IP
 The default, literal matching can be changed to substring and regular expression matching\.
@@ -103,7 +114,10 @@ The default, literal matching can be changed to substring and regular expression
 Using \fB\-p\fR enables partial matching, and the assertion fails if \fIEXPECTED\fR as a substring is not found in the output\.
 .
 .IP
-Using \fB\-r\fR enables regular expression matching, and the assertion fails if \fIEXPECTED\fR as an extended regular expression does not match the output\.
+Using \fB\-r\fR enables regular expression matching, and the assertion fails if \fIEXPECTED\fR as an extended regular expression does not match the output\. If \fIEXPECTED\fR is not a valid extended regular expression, an error is displayed\.
+.
+.IP
+Options \fB\-p\fR and \fB\-r\fR are mutually exclusive\. Using them simultaneously results in error\.
 .
 .IP
 \fBNOTE:\fR Due to a bug in Bats, empty lines are discarded from \fB${lines[@]}\fR, causing line indices to change and preventing testing for empty lines\. See \fIBUGS\fR for more\.
@@ -113,7 +127,7 @@ Using \fB\-r\fR enables regular expression matching, and the assertion fails if 
 Fail if \fIUNEXPECTED\fR equals \fB$output\fR\. On failure, \fB$output\fR is displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulti\-line\fR format\.
 .
 .IP
-When \fB\-l <INDEX>\fR is used, fail if \fIUNEXPECTED\fR equals the \fIINDEX\fR\-th element of \fB${lines[@]}\fR\. On failure, \fIINDEX\fR and \fIUNEXPECTED\fR are displayed\.
+When \fB\-l <INDEX>\fR is used, fail if \fIUNEXPECTED\fR equals the \fIINDEX\fR\-th element of \fB${lines[@]}\fR\. On failure, \fIINDEX\fR and \fB${lines[<INDEX>]}\fR are displayed\.
 .
 .IP
 When \fB\-l\fR is used without \fB<INDEX>\fR, fail if \fIUNEXPECTED\fR is found in \fB${lines[@]}\fR\. On failure, \fIUNEXPECTED\fR, its index in \fB${lines[@]}\fR and \fB$output\fR are displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulti\-line\fR format with the unexpected line highlighted\.
@@ -122,24 +136,16 @@ When \fB\-l\fR is used without \fB<INDEX>\fR, fail if \fIUNEXPECTED\fR is found 
 The default, literal matching can be changed to substring and regular expression matching\.
 .
 .IP
-Using \fB\-p\fR enables partial matching, and the assertion fails if \fIUNEXPECTED\fR as a substring is found in the output\. On failure, \fIUNEXPECTED\fR is displayed in addition\.
+Using \fB\-p\fR enables partial matching, and the assertion fails if \fIUNEXPECTED\fR as a substring is found in the output\. On failure, \fIUNEXPECTED\fR is displayed in addition (if not displayed already)\.
 .
 .IP
-Using \fB\-r\fR enables regular expression matching, and the assertion fails if \fIUNEXPECTED\fR as an extended regular expression matches the output\. On failure, \fIUNEXPECTED\fR is displayed in addition\.
+Using \fB\-r\fR enables regular expression matching, and the assertion fails if \fIUNEXPECTED\fR as an extended regular expression matches the output\. On failure, \fIUNEXPECTED\fR is displayed in addition (if not displayed already)\. If \fIUNEXPECTED\fR is not a valid extended regular expression, an error is displayed\.
+.
+.IP
+Options \fB\-p\fR and \fB\-r\fR are mutually exclusive\. Using them simultaneously results in error\.
 .
 .IP
 \fBNOTE:\fR Due to a bug in Bats, empty lines are discarded from \fB${lines[@]}\fR, causing line indices to change and preventing testing for empty lines\. See \fIBUGS\fR for more\.
-.
-.TP
-\fBassert_success\fR
-Fail if \fB$status\fR is not \fB0\fR\. On failure \fB$status\fR and \fB$output\fR are displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulit\-line\fR format\.
-.
-.TP
-\fBassert_failure\fR [\fIEXPECTED\fR]
-Fail if \fB$status\fR is \fB0\fR\. On failure \fB$output\fR is displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulit\-line\fR format\.
-.
-.IP
-When \fIEXPECTED\fR is specified, fail if it does not equal \fB$status\fR\. On failure \fIEXPECTED\fR, \fB$status\fR and \fB$output\fR are displayed\.
 .
 .SH "BUGS"
 .

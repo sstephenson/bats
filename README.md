@@ -303,6 +303,10 @@ this test always fails
 
 Fail if the given expression evaluates to false.
 
+***Note:*** *The expression must be a simple command. [Compound
+commands](https://www.gnu.org/software/bash/manual/bash.html#Compound-Commands),
+such as `[[`, can be used only when executed with `bash -c`.
+
 ```bash
 @test 'assert()' {
   run touch '/var/log/test.log'
@@ -310,11 +314,8 @@ Fail if the given expression evaluates to false.
 }
 ```
 
-***Note:*** *The expression must be a simple command. [Compound
-commands](https://www.gnu.org/software/bash/manual/bash.html#Compound-Commands),
-such as `[[`, can be used only when executed with `bash -c`.
-
-On failure the failed expression, `$status` and `$output` are displayed.
+On failure, the failed expression, `$status` and `$output` are
+displayed.
 
 ```
 -- assertion failed --
@@ -338,7 +339,7 @@ not equal.
 }
 ```
 
-On failure the expected and actual values are displayed.
+On failure, the expected and actual values are displayed.
 
 ```
 -- values do not equal --
@@ -356,17 +357,17 @@ Fail if `$status` is not 0.
 
 ```bash
 @test 'assert_success() status only' {
-  run bash -c "echo 'have'; exit 1"
+  run bash -c "echo 'Error!'; exit 1"
   assert_success
 }
 ```
 
-On failure `$status` and `$output` are displayed.
+On failure, `$status` and `$output` are displayed.
 
 ```
 -- command failed --
 status : 1
-output : have
+output : Error!
 --
 ```
 
@@ -379,16 +380,16 @@ Fail if `$status` is 0.
 
 ```bash
 @test 'assert_failure() status only' {
-  run echo 'have'
+  run echo 'Success!'
   assert_failure
 }
 ```
 
-On failure `$output` is displayed.
+On failure, `$output` is displayed.
 
 ```
 -- command succeeded, but it was expected to fail --
-output : have
+output : Success!
 --
 ```
 
@@ -402,18 +403,18 @@ expected status specified by the parameter.
 
 ```bash
 @test 'assert_failure() with expected status' {
-  run bash -c "echo 'error'; exit 1"
+  run bash -c "echo 'Error!'; exit 1"
   assert_failure 2
 }
 ```
 
-On failure the expected and actual status, and `$output` are displayed.
+On failure, the expected and actual status, and `$output` are displayed.
 
 ```
 -- command failed as expected, but status differs --
 expected : 2
 actual   : 1
-output   : error
+output   : Error!
 --
 ```
 
@@ -453,13 +454,13 @@ If either value is longer than one line both are displayed in
 
 ##### Matching a specific line
 
-***Note:*** *Due to a [bug in Bats][bats-93], empty lines are discarded
-from `${lines[@]}`, causing line indices to change and preventing
-testing for empty lines.*
-
 When `-l <index>` is used, only the line specified by its `index` in
 `${lines[@]}` is matched, and the assertion fails if it does not equal
 the expected line.
+
+***Note:*** *Due to a [bug in Bats][bats-93], empty lines are discarded
+from `${lines[@]}`, causing line indices to change and preventing
+testing for empty lines.*
 
 ```bash
 @test 'assert_output() specific line' {
@@ -478,17 +479,17 @@ actual   : have-1
 --
 ```
 
-##### Line found in output
+##### Looking for line in output
+
+When `-l` is used without the `<index>` argument, fail if the expected
+line is not found in `${lines[@]}`.
 
 ***Note:*** *Due to a [bug in Bats][bats-93], empty lines are discarded
 from `${lines[@]}`, causing line indices to change and preventing
 testing for empty lines.*
 
-When `-l` is used without `<index>`, fail if the expected line is not
-found in `${lines[@]}`.
-
 ```bash
-@test 'assert_output() line found in output' {
+@test 'assert_output() looking for line' {
   run echo $'have-0\nhave-1\nhave-2'
   assert_output -l 'want'
 }
@@ -518,12 +519,21 @@ a substring can not be found in the output.
 ```bash
 @test 'assert_output() partial matching' {
   run echo 'ERROR: no such file or directory'
-  assert_output -p 'ERROR'
+  assert_output -p 'SUCCESS'
 }
 ```
 
-This option can be used with `-l` as well, and does not change the set
-of information displayed on failure.
+This option does not change the set if information displayed on failure.
+
+```
+-- output does not contain substring --
+substring : SUCCESS
+output    : ERROR: no such file or directory
+--
+```
+
+This option is mutually exclusive with regular expression matching (`-r`).
+When used simultaneously, an error is displayed.
 
 ##### Regular expression matching
 
@@ -533,13 +543,25 @@ extended regular expression does not match the output.
 
 ```bash
 @test 'assert_output() regular expression matching' {
-  run echo 'Foobar v0.1.0'
+  run echo 'Foobar 0.1.0'
   assert_output -r '^Foobar v[0-9]+\.[0-9]+\.[0-9]$'
 }
 ```
 
-This option can be used with `-l` as well, and does not change the set
-of information displayed on failure.
+This option does not change the set if information displayed on failure.
+
+```
+-- regular expression does not match output --
+regex  : ^Foobar v[0-9]+\.[0-9]+\.[0-9]$
+output : Foobar 0.1.0
+--
+```
+
+When the specified extended regular expression is invalid, an error is
+displayed.
+
+This option is mutually exclusive with partial matching (`-p`). When
+used simultaneously, an error is displayed.
 
 #### `refute_output`
 
@@ -563,7 +585,7 @@ it equals the unexpected output.
 }
 ```
 
-On failure, the unexpected output is displayed.
+On failure, `$output` is displayed.
 
 ```
 -- output equals, but it was expected to differ --
@@ -576,13 +598,13 @@ format.
 
 ##### Matching a specific line
 
+When `-l <index>` is used, only the line specified by its `index` in
+`${lines[@]}` is matched, and the assertion fails if it equals the
+unexpected line.
+
 ***Note:*** *Due to a [bug in Bats][bats-93], empty lines are discarded
 from `${lines[@]}`, causing line indices to change and preventing
 testing for empty lines.*
-
-When `-l <index>` is used, only the line specified by its `index` in
-`${lines[@]}` is matched, and the assertion fails if it equals the
-expected line.
 
 ```bash
 @test 'refute_output() specific line' {
@@ -595,22 +617,22 @@ On failure, the index, and the unexpected line are displayed.
 
 ```
 -- line should differ --
-index      : 1
-unexpected : want-1
+index : 1
+line  : want-1
 --
 ```
 
-##### Line found in output
+##### Looking for line in output
+
+When `-l` is used without the `<index>` argument, fail if the unexpected
+line is found in `${lines[@]}`.
 
 ***Note:*** *Due to a [bug in Bats][bats-93], empty lines are discarded
 from `${lines[@]}`, causing line indices to change and preventing
 testing for empty lines.*
 
-When `-l` is used without `<index>`, fail if the unexpected line is
-found in `${lines[@]}`.
-
 ```bash
-@test 'refute_output() line found in output' {
+@test 'refute_output() looking for line' {
   run echo $'have-0\nwant\nhave-2'
   refute_output -l 'want'
 }
@@ -636,8 +658,8 @@ If `$output` is not longer than one line, it is displayed in
 ##### Partial matching
 
 Partial matching, enabled using `-p`, provides more flexibility than the
-default literal matching. The assertion fails if the unexpected output as
-a substring can be found in the output.
+default literal matching. The assertion fails if the unexpected output
+as a substring can be found in the output.
 
 ```bash
 @test 'refute_output() partial matching' {
@@ -646,7 +668,8 @@ a substring can be found in the output.
 }
 ```
 
-On failure, this option displays the substring in addition.
+On failure, the substring is displayed in addition (if not already
+displayed by other options).
 
 ```
 -- output should not contain substring --
@@ -655,13 +678,14 @@ output    : ERROR: no such file or directory
 --
 ```
 
-This option can be used with `-l` as well.
+This option is mutually exclusive with regular expression matching (`-r`).
+When used simultaneously, an error is displayed.
 
 ##### Regular expression matching
 
 Regular expression matching, enabled using `-r`, provides the most
-flexibility. The assertion fails if the expected output specified as an
-extended regular expression does not match the output.
+flexibility. The assertion fails if the unexpected output specified as
+an extended regular expression matches the output.
 
 ```bash
 @test 'refute_output() regular expression matching' {
@@ -670,7 +694,8 @@ extended regular expression does not match the output.
 }
 ```
 
-On failure, this option displays the regular expression in addition.
+On failure, the regular expression is displayed in addition (if not
+already displayed by other options).
 
 ```
 -- regular expression should not match output --
@@ -679,7 +704,11 @@ output : Foobar v0.1.0
 --
 ```
 
-This option can be used with `-l` as well.
+When the specified extended regular expression is invalid, an error is
+displayed.
+
+This option is mutually exclusive with partial matching (`-p`). When
+used simultaneously, an error is displayed.
 
 [bats-93]: https://github.com/sstephenson/bats/pull/93
 

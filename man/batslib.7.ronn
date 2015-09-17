@@ -65,9 +65,8 @@ recent invocation of `run`.
 
 * `fail` [<MESSAGE>]:
   Display <MESSAGE> and fail. This function provides a convenient way to
-  report various failures. Other test helpers also use it to display
-  output on failure. When no parameters are specified, <MESSAGE> is read
-  from the standard input.
+  report various failures. When no parameters are specified, <MESSAGE>
+  is read from the standard input.
 
 * `assert` <EXPRESSION>:
   Fail if <EXPRESSION> evaluates to false. On failure, <EXPRESSION>,
@@ -77,14 +76,28 @@ recent invocation of `run`.
   such as `[[`, can be used only when executed with `bash -c`.
 
 * `assert_equal` <ACTUAL> <EXPECTED>:
-  Fail if <ACTUAL> and <EXPECTED> do not equal. On failure both values
+  Fail if <ACTUAL> and <EXPECTED> do not equal. On failure, both values
   are displayed. If either one is longer than one line, both are
-  displayed in _mulit-line_ format.
+  displayed in _multi-line_ format.
+
+* `assert_success`:
+  Fail if `$status` is not `0`. On failure, `$status` and `$output` are
+  displayed. If `$output` is longer than one line, it is displayed in
+  _multi-line_ format.
+
+* `assert_failure` [<STATUS>]:
+  Fail if `$status` is `0`. On failure, `$output` is displayed. If
+  `$output` is longer than one line, it is displayed in _multi-line_
+  format.
+
+  When <STATUS> is specified, fail if it does not equal `$status`. On
+  failure, <STATUS>, `$status` and `$output` are displayed. If `$output`
+  is longer than one line, it is displayed in _multi-line_ format.
 
 * `assert_output` [-l [<INDEX>]] [-p|-r] <EXPECTED>:
-  Fail if <EXPECTED> does not equal `$output`. On failure both values
+  Fail if <EXPECTED> does not equal `$output`. On failure, both values
   are displayed. If either one is longer than one line, both are
-  displayed in _mulit-line_ format.
+  displayed in _multi-line_ format.
 
   When `-l <INDEX>` is used, fail if <EXPECTED> does not equal the
   <INDEX>-th element of `${lines[@]}`. On failure, <INDEX>, <EXPECTED>
@@ -92,7 +105,7 @@ recent invocation of `run`.
 
   When `-l` is used without `<INDEX>`, fail if <EXPECTED> is not found
   in `${lines[@]}`. On failure, <EXPECTED> and `$output` are displayed.
-  If `$output` is longer than one line, it is displayed in _mulit-line_
+  If `$output` is longer than one line, it is displayed in _multi-line_
   format.
 
   The default, literal matching can be changed to substring and regular
@@ -103,7 +116,11 @@ recent invocation of `run`.
 
   Using `-r` enables regular expression matching, and the assertion
   fails if <EXPECTED> as an extended regular expression does not match
-  the output.
+  the output. If <EXPECTED> is not a valid extended regular expression,
+  an error is displayed.
+
+  Options `-p` and `-r` are mutually exclusive. Using them
+  simultaneously results in error.
 
   **NOTE:** Due to a bug in Bats, empty lines are discarded from
   `${lines[@]}`, causing line indices to change and preventing testing
@@ -115,8 +132,8 @@ recent invocation of `run`.
   _multi-line_ format.
 
   When `-l <INDEX>` is used, fail if <UNEXPECTED> equals the <INDEX>-th
-  element of `${lines[@]}`. On failure, <INDEX> and <UNEXPECTED> are
-  displayed.
+  element of `${lines[@]}`. On failure, <INDEX> and `${lines[<INDEX>]}`
+  are displayed.
 
   When `-l` is used without `<INDEX>`, fail if <UNEXPECTED> is found in
   `${lines[@]}`. On failure, <UNEXPECTED>, its index in `${lines[@]}`
@@ -129,28 +146,20 @@ recent invocation of `run`.
 
   Using `-p` enables partial matching, and the assertion fails if
   <UNEXPECTED> as a substring is found in the output. On failure,
-  <UNEXPECTED> is displayed in addition.
+  <UNEXPECTED> is displayed in addition (if not displayed already).
 
   Using `-r` enables regular expression matching, and the assertion
   fails if <UNEXPECTED> as an extended regular expression matches the
-  output. On failure, <UNEXPECTED> is displayed in addition.
+  output. On failure, <UNEXPECTED> is displayed in addition (if not
+  displayed already). If <UNEXPECTED> is not a valid extended regular
+  expression, an error is displayed.
+
+  Options `-p` and `-r` are mutually exclusive. Using them
+  simultaneously results in error.
 
   **NOTE:** Due to a bug in Bats, empty lines are discarded from
   `${lines[@]}`, causing line indices to change and preventing testing
   for empty lines. See [BUGS][] for more.
-
-* `assert_success`:
-  Fail if `$status` is not `0`. On failure `$status` and `$output` are
-  displayed. If `$output` is longer than one line, it is displayed in
-  _mulit-line_ format.
-
-* `assert_failure` [<EXPECTED>]:
-  Fail if `$status` is `0`. On failure `$output` is displayed. If
-  `$output` is longer than one line, it is displayed in _mulit-line_
-  format.
-
-  When <EXPECTED> is specified, fail if it does not equal `$status`. On
-  failure <EXPECTED>, `$status` and `$output` are displayed.
 
 
 ## BUGS

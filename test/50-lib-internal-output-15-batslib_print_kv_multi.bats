@@ -2,12 +2,10 @@
 
 load test_helper
 
-@test 'batslib_print_kv_multi() prints keys and values on separate lines' {
-  local -ar pairs=(
-    'k _1'  'v 1'
-    'k 2'  $'v 2-1\nv 2-2'
-    'k __3' 'v 3'
-  )
+@test 'batslib_print_kv_multi() <pair...>: displays <pair...> in multi-line format' {
+  local -ar pairs=( 'k _1'  'v 1'
+                    'k 2'   $'v 2-1\nv 2-2'
+                    'k __3' 'v 3' )
   run batslib_print_kv_multi "${pairs[@]}"
   [ "$status" -eq 0 ]
   [ "${#lines[@]}" == '7' ]
