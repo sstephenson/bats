@@ -76,8 +76,8 @@ recent invocation of `run`.
   **Note:** <EXPRESSION> must be a simple command. Compound commands,
   such as `[[`, can be used only when executed with `bash -c`.
 
-* `assert_equal` <EXPECTED> <ACTUAL>:
-  Fail if <EXPECTED> and <ACTUAL> do not equal. On failure both values
+* `assert_equal` <ACTUAL> <EXPECTED>:
+  Fail if <ACTUAL> and <EXPECTED> do not equal. On failure both values
   are displayed. If either one is longer than one line, both are
   displayed in _mulit-line_ format.
 

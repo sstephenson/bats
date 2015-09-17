@@ -329,14 +329,12 @@ format.
 
 #### `assert_equal`
 
-Fail if the two parameters, expected and actual value respectively, do
+Fail if the two parameters, actual and expected value respectively, do
 not equal.
 
 ```bash
 @test 'assert_equal()' {
-  local expected='want'
-  local actual='have'
-  assert_equal "$expected" "$actual"
+  assert_equal 'have' 'want'
 }
 ```
 
