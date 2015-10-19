@@ -2,7 +2,7 @@
 set -e
 
 resolve_link() {
-  $(type -p greadlink readlink | head -1) "$1"
+  type -t readlink > /dev/null && readlink "$1"
 }
 
 abs_dirname() {
