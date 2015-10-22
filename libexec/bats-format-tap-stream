@@ -18,8 +18,14 @@ else
   exec cat
 fi
 
+if type -t tput > /dev/null; then
+  COLUMNS_CMD='tput cols'
+else
+  COLUMNS_CMD='echo 80'
+fi
+
 update_screen_width() {
-  screen_width="$(type -t tput > /dev/null && tput cols || echo 80)"
+  screen_width="$( $COLUMNS_CMD )"
   count_column_left=$(( $screen_width - $count_column_width ))
 }
 
