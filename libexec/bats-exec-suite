@@ -25,12 +25,21 @@ if [ -n "$count_only_flag" ]; then
   exit
 fi
 
+if [ -z "$TMPDIR" ]; then
+  BATS_TMPDIR='/tmp'
+else
+  BATS_TMPDIR=${TMPDIR%/}
+fi
+
+INDEX_STATUS="$BATS_TMPDIR/bats.$$.indstat"
+trap 'code=$?; rm -f "$INDEX_STATUS"; exit $code' exit
+
 echo "1..$count"
 status=0
 offset=0
 for filename in "$@"; do
   index=0
-  {
+  bats-exec-test $extended_syntax_flag "$filename" | {
     IFS= read -r # 1..n
     while IFS= read -r line; do
       case "$line" in
@@ -48,7 +57,9 @@ for filename in "$@"; do
         ;;
       esac
     done
-  } < <( bats-exec-test $extended_syntax_flag "$filename" )
+    echo $index $status > "$INDEX_STATUS"
+  }
+  IFS=' ' read -r index status < "$INDEX_STATUS"
   offset=$(($offset + $index))
 done
 
