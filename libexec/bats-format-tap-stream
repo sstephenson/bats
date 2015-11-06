@@ -18,7 +18,7 @@ else
   exec cat
 fi
 
-if type -t tput > /dev/null; then
+if [ "$TERM" != msys ] && type -t tput > /dev/null; then
   COLUMNS_CMD='tput cols'
 else
   COLUMNS_CMD='echo 80'
@@ -41,7 +41,7 @@ begin() {
   go_to_column 1
 }
 
-if [[ $OSTYPE != *msys* ]]; then
+if [[ $TERM != msys ]]; then
   PASS_SYMBOL='✓'
   FAIL_SYMBOL='✗'
 else

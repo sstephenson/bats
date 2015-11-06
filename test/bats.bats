@@ -246,17 +246,17 @@ fixtures bats
   [ "${lines[1]}" = "Good day to you" ]
 }
 
-@test "pretty formatter uses different symbols on MS Windows" {
-  OSTYPE=msys run bats --pretty "$FIXTURE_ROOT/passing_and_failing.bats"
-  windows_pass=${lines[0]}
-  windows_fail=${lines[1]}
+@test "pretty formatter uses different symbols in MSYS terminal" {
+  TERM=msys run bats --pretty "$FIXTURE_ROOT/passing_and_failing.bats"
+  msys_pass=${lines[0]}
+  msys_fail=${lines[1]}
 
-  OSTYPE=other run bats --pretty "$FIXTURE_ROOT/passing_and_failing.bats"
+  TERM=other run bats --pretty "$FIXTURE_ROOT/passing_and_failing.bats"
   default_pass=${lines[0]}
   default_fail=${lines[1]}
 
-  [ "$windows_pass" != "$default_pass" ]
-  [ "$windows_fail" != "$default_fail" ]
+  [ "$msys_pass" != "$default_pass" ]
+  [ "$msys_fail" != "$default_fail" ]
 }
 
 @test "single-line tests" {
