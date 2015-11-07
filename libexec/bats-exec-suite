@@ -53,4 +53,5 @@ for filename in "$@"; do
 EOF
   offset=$(($offset + $index))
 done
+
 exit "$status"
