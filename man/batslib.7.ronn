@@ -185,4 +185,4 @@ TODO(ztombol): Find a suitable licence.
 
 ## SEE ALSO
 
-`bash`(1), `bats`(1), `bats`(7), `regex(7)`
+`bash`(1), `bats`(1), `bats`(7), `regex`(7)

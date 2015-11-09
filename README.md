@@ -205,8 +205,7 @@ case.
 in the test file.
 * `$BATS_TMPDIR` is the location to a directory that may be used to
 store temporary files.
-* `$BATS_LIB` is the directory in which the standard libraries are
-located.
+* `$BATS_LIB` is the directory in which the Standard Library is located.
 
 
 ## Standard library
