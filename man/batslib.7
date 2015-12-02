@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "BATSLIB" "7" "November 2015" "" ""
+.TH "BATSLIB" "7" "December 2015" "" ""
 .
 .SH "NAME"
 \fBbatslib\fR \- Bats Standard Library of Test Helpers
@@ -98,51 +98,77 @@ Fail if \fB$status\fR is \fB0\fR\. On failure, \fB$output\fR is displayed\. If \
 When \fISTATUS\fR is specified, fail if it does not equal \fB$status\fR\. On failure, \fISTATUS\fR, \fB$status\fR and \fB$output\fR are displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulti\-line\fR format\.
 .
 .TP
-\fBassert_output\fR [\-l [\fIINDEX\fR]] [\-p|\-r] \fIEXPECTED\fR
+\fBassert_output\fR [\-p|\-\-partial|\-r|\-\-regexp] \fIEXPECTED\fR
 Fail if \fIEXPECTED\fR does not equal \fB$output\fR\. On failure, both values are displayed\. If either one is longer than one line, both are displayed in \fImulti\-line\fR format\.
 .
 .IP
-When \fB\-l <INDEX>\fR is used, fail if \fIEXPECTED\fR does not equal the \fIINDEX\fR\-th element of \fB${lines[@]}\fR\. On failure, \fIINDEX\fR, \fIEXPECTED\fR and the actual line are displayed\.
+The default, literal matching can be changed to partial and regular expression matching\.
 .
 .IP
-When \fB\-l\fR is used without \fB<INDEX>\fR, fail if \fIEXPECTED\fR is not found in \fB${lines[@]}\fR\. On failure, \fIEXPECTED\fR and \fB$output\fR are displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulti\-line\fR format\.
+The \fB\-\-partial\fR (\fB\-p\fR) option enables partial matching\. The assertion fails if \fIEXPECTED\fR as a substring is not found in the output\.
+.
+.IP
+The \fB\-\-regexp\fR (\fB\-r\fR) option enables regular expression matching\. The assertion fails if \fIEXPECTED\fR as an extended regular expression does not match the output\. If \fIEXPECTED\fR is not a valid extended regular expression, an error is displayed\.
+.
+.IP
+Partial and regular expression matching is mutually exclusive\. Using them simultaneously results in error\.
+.
+.TP
+\fBrefute_output\fR [\-p|\-\-partial|\-r|\-\-regexp] \fIUNEXPECTED\fR
+Fail if \fIUNEXPECTED\fR equals \fB$output\fR\. On failure, \fB$output\fR is displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulti\-line\fR format\.
+.
+.IP
+The default, literal matching can be changed to partial and regular expression matching\.
+.
+.IP
+The \fB\-\-partial\fR (\fB\-p\fR) option enables partial matching\. The assertion fails if \fIUNEXPECTED\fR as a substring is found in the output\. On failure, \fIUNEXPECTED\fR is displayed in addition\.
+.
+.IP
+The \fB\-\-regexp\fR (\fB\-r\fR) option enables regular expression matching\. The assertion fails if \fIUNEXPECTED\fR as an extended regular expression matches the output\. On failure, \fIUNEXPECTED\fR is displayed in addition\. If \fIUNEXPECTED\fR is not a valid extended regular expression, an error is displayed\.
+.
+.IP
+Partial and regular expression matching is mutually exclusive\. Using them simultaneously results in error\.
+.
+.TP
+\fBassert_line\fR [\-n \fIIDX\fR|\-\-index \fIIDX\fR] [\-p|\-\-partial|\-r|\-\-regexp] \fIEXPECTED\fR
+Fail if \fIEXPECTED\fR does not equal any element of \fB${lines[@]}\fR\. On failure, \fIEXPECTED\fR and \fB${lines[@]}\fR are displayed\. If \fB${lines[@]}\fR is longer than one line, it is displayed in \fImulti\-line\fR format\.
+.
+.IP
+When the \fB\-\-index <IDX>\fR (\fB\-n <IDX>\fR) option is used, only the \fIIDX\fR\-th line is compared\. The assertion fails if \fIEXPECTED\fR does not equal \fB${lines[<IDX>]}\fR\. On failure, \fIIDX\fR and the compared lines are displayed\.
 .
 .IP
 The default, literal matching can be changed to substring and regular expression matching\.
 .
 .IP
-Using \fB\-p\fR enables partial matching, and the assertion fails if \fIEXPECTED\fR as a substring is not found in the output\.
+The \fB\-\-partial\fR (\fB\-p\fR) option enables partial matching\. A match fails if \fIEXPECTED\fR as a substring is not found in the matched string\.
 .
 .IP
-Using \fB\-r\fR enables regular expression matching, and the assertion fails if \fIEXPECTED\fR as an extended regular expression does not match the output\. If \fIEXPECTED\fR is not a valid extended regular expression, an error is displayed\.
+The \fB\-\-regexp\fR (\fB\-r\fR) option enables regular expression matching\. A match fails if \fIEXPECTED\fR as an extended regular expression does not match the matched line\. If \fIEXPECTED\fR is not a valid extended regular expression, an error is displayed\.
 .
 .IP
-Options \fB\-p\fR and \fB\-r\fR are mutually exclusive\. Using them simultaneously results in error\.
+Partial and regular expression matching is mutually exclusive\. Using them simultaneously results in error\.
 .
 .IP
 \fBNOTE:\fR Due to a bug in Bats, empty lines are discarded from \fB${lines[@]}\fR, causing line indices to change and preventing testing for empty lines\. See \fIBUGS\fR for more\.
 .
 .TP
-\fBrefute_output\fR [\-l [\fIINDEX\fR]] [\-p|\-r] \fIUNEXPECTED\fR
-Fail if \fIUNEXPECTED\fR equals \fB$output\fR\. On failure, \fB$output\fR is displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulti\-line\fR format\.
+\fBrefute_line\fR [\-n \fIIDX\fR|\-\-index \fIIDX\fR] [\-p|\-\-partial|\-r|\-\-regexp] \fIUNEXPECTED\fR
+Fail if \fIUNEXPECTED\fR does equals an element of \fB${lines[@]}\fR\. On failure, \fIUNEXPECTED\fR, the index of the first match and \fB${lines[@]}\fR are displayed\. If \fB${lines[@]}\fR is longer than one line, it is displayed in \fImulti\-line\fR format and the matching line is highlighted\.
 .
 .IP
-When \fB\-l <INDEX>\fR is used, fail if \fIUNEXPECTED\fR equals the \fIINDEX\fR\-th element of \fB${lines[@]}\fR\. On failure, \fIINDEX\fR and \fB${lines[<INDEX>]}\fR are displayed\.
-.
-.IP
-When \fB\-l\fR is used without \fB<INDEX>\fR, fail if \fIUNEXPECTED\fR is found in \fB${lines[@]}\fR\. On failure, \fIUNEXPECTED\fR, its index in \fB${lines[@]}\fR and \fB$output\fR are displayed\. If \fB$output\fR is longer than one line, it is displayed in \fImulti\-line\fR format with the unexpected line highlighted\.
+When the \fB\-\-index <IDX>\fR (\fB\-n <IDX>\fR) option is used, only the \fIIDX\fR\-th line is compared\. The assertion fails if \fIUNEXPECTED\fR equals \fB${lines[<IDX>]}\fR\. On failure, \fIIDX\fR and \fIUNEXPECTED\fR are displayed\.
 .
 .IP
 The default, literal matching can be changed to substring and regular expression matching\.
 .
 .IP
-Using \fB\-p\fR enables partial matching, and the assertion fails if \fIUNEXPECTED\fR as a substring is found in the output\. On failure, \fIUNEXPECTED\fR is displayed in addition (if not displayed already)\.
+The \fB\-\-partial\fR (\fB\-p\fR) option enables partial matching\. A match fails if \fIUNEXPECTED\fR as a substring is found in the matched string\. When used with `\-\-index \fIidx\fR\', the unexpected substring is also displayed on failure\.
 .
 .IP
-Using \fB\-r\fR enables regular expression matching, and the assertion fails if \fIUNEXPECTED\fR as an extended regular expression matches the output\. On failure, \fIUNEXPECTED\fR is displayed in addition (if not displayed already)\. If \fIUNEXPECTED\fR is not a valid extended regular expression, an error is displayed\.
+The \fB\-\-regexp\fR (\fB\-r\fR) option enables regular expression matching\. A match fails if \fIUNEXPECTED\fR as an extended regular expression matches the matched line\. When used with \fB\-\-index <idx>\fR, the regular expression is also displayed\. If \fIUNEXPECTED\fR is not a valid extended regular expression, an error is displayed\.
 .
 .IP
-Options \fB\-p\fR and \fB\-r\fR are mutually exclusive\. Using them simultaneously results in error\.
+Partial and regular expression matching is mutually exclusive\. Using them simultaneously results in error\.
 .
 .IP
 \fBNOTE:\fR Due to a bug in Bats, empty lines are discarded from \fB${lines[@]}\fR, causing line indices to change and preventing testing for empty lines\. See \fIBUGS\fR for more\.

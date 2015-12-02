@@ -94,68 +94,100 @@ recent invocation of `run`.
   failure, <STATUS>, `$status` and `$output` are displayed. If `$output`
   is longer than one line, it is displayed in _multi-line_ format.
 
-* `assert_output` [-l [<INDEX>]] [-p|-r] <EXPECTED>:
+* `assert_output` [-p|--partial|-r|--regexp] <EXPECTED>:
   Fail if <EXPECTED> does not equal `$output`. On failure, both values
   are displayed. If either one is longer than one line, both are
   displayed in _multi-line_ format.
 
-  When `-l <INDEX>` is used, fail if <EXPECTED> does not equal the
-  <INDEX>-th element of `${lines[@]}`. On failure, <INDEX>, <EXPECTED>
-  and the actual line are displayed.
+  The default, literal matching can be changed to partial and regular
+  expression matching.
 
-  When `-l` is used without `<INDEX>`, fail if <EXPECTED> is not found
-  in `${lines[@]}`. On failure, <EXPECTED> and `$output` are displayed.
-  If `$output` is longer than one line, it is displayed in _multi-line_
-  format.
+  The `--partial` (`-p`) option enables partial matching. The assertion
+  fails if <EXPECTED> as a substring is not found in the output.
+
+  The `--regexp` (`-r`) option enables regular expression matching. The
+  assertion fails if <EXPECTED> as an extended regular expression does
+  not match the output. If <EXPECTED> is not a valid extended regular
+  expression, an error is displayed.
+
+  Partial and regular expression matching is mutually exclusive. Using
+  them simultaneously results in error.
+
+* `refute_output` [-p|--partial|-r|--regexp] <UNEXPECTED>:
+  Fail if <UNEXPECTED> equals `$output`. On failure, `$output` is
+  displayed. If `$output` is longer than one line, it is displayed in
+  _multi-line_ format.
+
+  The default, literal matching can be changed to partial and regular
+  expression matching.
+
+  The `--partial` (`-p`) option enables partial matching. The assertion
+  fails if <UNEXPECTED> as a substring is found in the output. On
+  failure, <UNEXPECTED> is displayed in addition.
+
+  The `--regexp` (`-r`) option enables regular expression matching. The
+  assertion fails if <UNEXPECTED> as an extended regular expression
+  matches the output. On failure, <UNEXPECTED> is displayed in addition.
+  If <UNEXPECTED> is not a valid extended regular expression, an error
+  is displayed.
+
+  Partial and regular expression matching is mutually exclusive. Using
+  them simultaneously results in error.
+
+* `assert_line` [-n <IDX>|--index <IDX>] [-p|--partial|-r|--regexp] <EXPECTED>:
+  Fail if <EXPECTED> does not equal any element of `${lines[@]}`. On
+  failure, <EXPECTED> and `${lines[@]}` are displayed. If `${lines[@]}`
+  is longer than one line, it is displayed in _multi-line_ format.
+
+  When the `--index <IDX>` (`-n <IDX>`) option is used, only the
+  <IDX>-th line is compared. The assertion fails if <EXPECTED> does not
+  equal `${lines[<IDX>]}`. On failure, <IDX> and the compared lines are
+  displayed.
 
   The default, literal matching can be changed to substring and regular
   expression matching.
 
-  Using `-p` enables partial matching, and the assertion fails if
-  <EXPECTED> as a substring is not found in the output.
+  The `--partial` (`-p`) option enables partial matching. A match fails
+  if <EXPECTED> as a substring is not found in the matched string.
 
-  Using `-r` enables regular expression matching, and the assertion
-  fails if <EXPECTED> as an extended regular expression does not match
-  the output. If <EXPECTED> is not a valid extended regular expression,
-  an error is displayed.
+  The `--regexp` (`-r`) option enables regular expression matching. A
+  match fails if <EXPECTED> as an extended regular expression does not
+  match the matched line. If <EXPECTED> is not a valid extended regular
+  expression, an error is displayed.
 
-  Options `-p` and `-r` are mutually exclusive. Using them
-  simultaneously results in error.
+  Partial and regular expression matching is mutually exclusive. Using
+  them simultaneously results in error.
 
   **NOTE:** Due to a bug in Bats, empty lines are discarded from
   `${lines[@]}`, causing line indices to change and preventing testing
   for empty lines. See [BUGS][] for more.
 
-* `refute_output` [-l [<INDEX>]] [-p|-r] <UNEXPECTED>:
-  Fail if <UNEXPECTED> equals `$output`. On failure, `$output` is
-  displayed. If `$output` is longer than one line, it is displayed in
-  _multi-line_ format.
+* `refute_line` [-n <IDX>|--index <IDX>] [-p|--partial|-r|--regexp] <UNEXPECTED>:
+  Fail if <UNEXPECTED> does equals an element of `${lines[@]}`. On
+  failure, <UNEXPECTED>, the index of the first match and `${lines[@]}`
+  are displayed.  If `${lines[@]}` is longer than one line, it is
+  displayed in _multi-line_ format and the matching line is highlighted.
 
-  When `-l <INDEX>` is used, fail if <UNEXPECTED> equals the <INDEX>-th
-  element of `${lines[@]}`. On failure, <INDEX> and `${lines[<INDEX>]}`
-  are displayed.
-
-  When `-l` is used without `<INDEX>`, fail if <UNEXPECTED> is found in
-  `${lines[@]}`. On failure, <UNEXPECTED>, its index in `${lines[@]}`
-  and `$output` are displayed. If `$output` is longer than one line, it
-  is displayed in _multi-line_ format with the unexpected line
-  highlighted.
+  When the `--index <IDX>` (`-n <IDX>`) option is used, only the
+  <IDX>-th line is compared. The assertion fails if <UNEXPECTED> equals
+  `${lines[<IDX>]}`. On failure, <IDX> and <UNEXPECTED> are displayed.
 
   The default, literal matching can be changed to substring and regular
   expression matching.
 
-  Using `-p` enables partial matching, and the assertion fails if
-  <UNEXPECTED> as a substring is found in the output. On failure,
-  <UNEXPECTED> is displayed in addition (if not displayed already).
+  The `--partial` (`-p`) option enables partial matching. A match fails
+  if <UNEXPECTED> as a substring is found in the matched string. When
+  used with `--index <idx>', the unexpected substring is also displayed
+  on failure.
 
-  Using `-r` enables regular expression matching, and the assertion
-  fails if <UNEXPECTED> as an extended regular expression matches the
-  output. On failure, <UNEXPECTED> is displayed in addition (if not
-  displayed already). If <UNEXPECTED> is not a valid extended regular
-  expression, an error is displayed.
+  The `--regexp` (`-r`) option enables regular expression matching. A
+  match fails if <UNEXPECTED> as an extended regular expression matches
+  the matched line. When used with `--index <idx>`, the regular
+  expression is also displayed. If <UNEXPECTED> is not a valid extended
+  regular expression, an error is displayed.
 
-  Options `-p` and `-r` are mutually exclusive. Using them
-  simultaneously results in error.
+  Partial and regular expression matching is mutually exclusive. Using
+  them simultaneously results in error.
 
   **NOTE:** Due to a bug in Bats, empty lines are discarded from
   `${lines[@]}`, causing line indices to change and preventing testing

@@ -422,15 +422,15 @@ format.
 
 #### `assert_output`
 
-This functions helps to verify that a command or function produces the
-correct output. It can match the entire output, a specific line, and
-even look for a line in the output. Matching can be literal, partial or
-regular expression.
+This function helps to verify that a command or function produces the
+correct output by checking that the specified expected output matches
+the actual output. Matching can be literal (default), partial or regular
+expression. This function is the logical complement of `refute_output`.
 
-##### Matching the entire output
+##### Literal matching
 
-By default, the entire `$output` is matched, and the assertion fails if
-it does not equal the expected output.
+By default, literal matching is performed. The assertion fails if
+`$output` does not equal the expected output.
 
 ```bash
 @test 'assert_output()' {
@@ -439,7 +439,7 @@ it does not equal the expected output.
 }
 ```
 
-On failure, the expected and actual outputs are displayed.
+On failure, the expected and actual output are displayed.
 
 ```
 -- output differs --
@@ -451,50 +451,180 @@ actual   : have
 If either value is longer than one line both are displayed in
 *multi-line* format.
 
-##### Matching a specific line
+##### Partial matching
 
-When `-l <index>` is used, only the line specified by its `index` in
-`${lines[@]}` is matched, and the assertion fails if it does not equal
-the expected line.
-
-***Note:*** *Due to a [bug in Bats][bats-93], empty lines are discarded
-from `${lines[@]}`, causing line indices to change and preventing
-testing for empty lines.*
+Partial matching can be enabled with the `--partial` option (`-p` for
+short). When used, the assertion fails if the expected *substring* is
+not found in `$output`.
 
 ```bash
-@test 'assert_output() specific line' {
-  run echo $'have-0\nhave-1\nhave-2'
-  assert_output -l 1 'want-1'
+@test 'assert_output() partial matching' {
+  run echo 'ERROR: no such file or directory'
+  assert_output --partial 'SUCCESS'
 }
 ```
 
-On failure, the index, and the expected and actual line are displayed.
+On failure, the substring and the output are displayed.
 
 ```
--- line differs --
-index    : 1
-expected : want-1
-actual   : have-1
+-- output does not contain substring --
+substring : SUCCESS
+output    : ERROR: no such file or directory
 --
 ```
 
-##### Looking for line in output
+This option and regular expression matching (`--regexp` or `-e`) are
+mutually exclusive. An error is displayed when used simultaneously.
 
-When `-l` is used without the `<index>` argument, fail if the expected
-line is not found in `${lines[@]}`.
+##### Regular expression matching
 
-***Note:*** *Due to a [bug in Bats][bats-93], empty lines are discarded
-from `${lines[@]}`, causing line indices to change and preventing
-testing for empty lines.*
+Regular expression matching can be enabled with the `--regexp` option
+(`-e` for short). When used, the assertion fails if the *extended
+regular expression* does not match `$output`.
+
+*Note: The anchors `^` and `$` bind to the beginning and the end of the
+entire output (not individual lines), respectively.*
 
 ```bash
-@test 'assert_output() looking for line' {
-  run echo $'have-0\nhave-1\nhave-2'
-  assert_output -l 'want'
+@test 'assert_output() regular expression matching' {
+  run echo 'Foobar 0.1.0'
+  assert_output --regexp '^Foobar v[0-9]+\.[0-9]+\.[0-9]$'
 }
 ```
 
-On failure, the expected line and `$output` are displayed.
+On failure, the regular expression and the output are displayed.
+
+```
+-- regular expression does not match output --
+regexp : ^Foobar v[0-9]+\.[0-9]+\.[0-9]$
+output : Foobar 0.1.0
+--
+```
+
+An error is displayed if the specified extended regular expression is
+invalid.
+
+This option and partial matching (`--partial` or `-p`) are mutually
+exclusive. An error is displayed when used simultaneously.
+
+#### `refute_output`
+
+This function helps to verify that a command or function produces the
+correct output by checking that the specified unexpected output does not
+match the actual output. Matching can be literal (default), partial or
+regular expression. This function is the logical complement of
+`assert_output`.
+
+
+##### Literal matching
+
+By default, literal matching is performed. The assertion fails if
+`$output` equals the unexpected output.
+
+```bash
+@test 'refute_output()' {
+  run echo 'want'
+  refute_output 'want'
+}
+```
+
+On failure, the output is displayed.
+
+```
+-- output equals, but it was expected to differ --
+output : want
+--
+```
+
+If output is longer than one line it is displayed in *multi-line*
+format.
+
+##### Partial matching
+
+Partial matching can be enabled with the `--partial` option (`-p` for
+short). When used, the assertion fails if the unexpected *substring* is
+found in `$output`.
+
+```bash
+@test 'refute_output() partial matching' {
+  run echo 'ERROR: no such file or directory'
+  refute_output --partial 'ERROR'
+}
+```
+
+On failure, the substring and the output are displayed.
+
+```
+-- output should not contain substring --
+substring : ERROR
+output    : ERROR: no such file or directory
+--
+```
+
+This option and regular expression matching (`--regexp` or `-e`) are
+mutually exclusive. An error is displayed when used simultaneously.
+
+##### Regular expression matching
+
+Regular expression matching can be enabled with the `--regexp` option
+(`-e` for short). When used, the assertion fails if the *extended
+regular expression* matches `$output`.
+
+*Note: The anchors `^` and `$` bind to the beginning and the end of the
+entire output (not individual lines), respectively.*
+
+```bash
+@test 'refute_output() regular expression matching' {
+  run echo 'Foobar v0.1.0'
+  refute_output --regexp '^Foobar v[0-9]+\.[0-9]+\.[0-9]$'
+}
+```
+
+On failure, the regular expression and the output are displayed.
+
+```
+-- regular expression should not match output --
+regexp : ^Foobar v[0-9]+\.[0-9]+\.[0-9]$
+output : Foobar v0.1.0
+--
+```
+
+An error is displayed if the specified extended regular expression is
+invalid.
+
+This option and partial matching (`--partial` or `-p`) are mutually
+exclusive. An error is displayed when used simultaneously.
+
+#### `assert_line`
+
+Similarly to `assert_output`, this function helps to verify that a
+command or function produces the correct output. It checks that the
+expected line appears in the output (default) or in a specific line of
+it. Matching can be literal (default), partial or regular expression.
+This function is the logical complement of `refute_line`.
+
+***Warning:*** *Due to a [bug in Bats][bats-93], empty lines are
+discarded from `${lines[@]}`, causing line indices to change and
+preventing testing for empty lines.*
+
+[bats-93]: https://github.com/sstephenson/bats/pull/93
+
+##### Looking for a line in the output
+
+By default, the entire output is searched for the expected line. The
+assertion fails if the expected line is not found in `${lines[@]}`.
+
+```bash
+@test 'assert_line() looking for line' {
+  run echo $'have-0\nhave-1\nhave-2'
+  assert_line 'want'
+}
+```
+
+On failure, the expected line and the output are displayed.
+
+***Warning:*** *The output displayed does not contain empty lines. See
+the Warning above for more.*
 
 ```
 -- output does not contain line --
@@ -506,139 +636,126 @@ output (3 lines):
 --
 ```
 
-If `$output` is not longer than one line, it is displayed in
-*two-column* format.
-
-##### Partial matching
-
-Partial matching, enabled using `-p`, provides more flexibility than the
-default literal matching. The assertion fails if the expected output as
-a substring can not be found in the output.
-
-```bash
-@test 'assert_output() partial matching' {
-  run echo 'ERROR: no such file or directory'
-  assert_output -p 'SUCCESS'
-}
-```
-
-This option does not change the set if information displayed on failure.
-
-```
--- output does not contain substring --
-substring : SUCCESS
-output    : ERROR: no such file or directory
---
-```
-
-This option is mutually exclusive with regular expression matching (`-r`).
-When used simultaneously, an error is displayed.
-
-##### Regular expression matching
-
-Regular expression matching, enabled using `-r`, provides the most
-flexibility. The assertion fails if the expected output specified as an
-extended regular expression does not match the output.
-
-```bash
-@test 'assert_output() regular expression matching' {
-  run echo 'Foobar 0.1.0'
-  assert_output -r '^Foobar v[0-9]+\.[0-9]+\.[0-9]$'
-}
-```
-
-This option does not change the set if information displayed on failure.
-
-```
--- regular expression does not match output --
-regex  : ^Foobar v[0-9]+\.[0-9]+\.[0-9]$
-output : Foobar 0.1.0
---
-```
-
-When the specified extended regular expression is invalid, an error is
-displayed.
-
-This option is mutually exclusive with partial matching (`-p`). When
-used simultaneously, an error is displayed.
-
-#### `refute_output`
-
-Similarly to `assert_output`, this function also helps to verify that a
-command or function produces the correct output. `refute_output` is the
-logical complement of `assert_output`. Instead of testing that the
-output matches the expected output, `refute_output` tests that the
-output does not match the unexpected output. It can match the entire
-output, a specific line, and even look for a line in the output.
-Matching can be literal, partial or regular expression.
-
-##### Matching the entire output
-
-By default, the entire `$output` is matched, and the assertion fails if
-it equals the unexpected output.
-
-```bash
-@test 'refute_output()' {
-  run echo 'want'
-  refute_output 'want'
-}
-```
-
-On failure, `$output` is displayed.
-
-```
--- output equals, but it was expected to differ --
-output : want
---
-```
-
-If `$output` is longer than one line, it is displayed in *multi-line*
+If output is not longer than one line, it is displayed in *two-column*
 format.
 
 ##### Matching a specific line
 
-When `-l <index>` is used, only the line specified by its `index` in
-`${lines[@]}` is matched, and the assertion fails if it equals the
-unexpected line.
-
-***Note:*** *Due to a [bug in Bats][bats-93], empty lines are discarded
-from `${lines[@]}`, causing line indices to change and preventing
-testing for empty lines.*
+When the `--index <idx>` option is used (`-n <idx>` for short) , the
+expected line is matched only against the line identified by the given
+index. The assertion fails if the expected line does not equal
+`${lines[<idx>]}`.
 
 ```bash
-@test 'refute_output() specific line' {
-  run echo $'have-0\nwant-1\nhave-2'
-  refute_output -l 1 'want-1'
+@test 'assert_line() specific line' {
+  run echo $'have-0\nhave-1\nhave-2'
+  assert_line --index 1 'want-1'
 }
 ```
 
-On failure, the index, and the unexpected line are displayed.
+On failure, the index and the compared lines are displayed.
 
 ```
--- line should differ --
-index : 1
-line  : want-1
+-- line differs --
+index    : 1
+expected : want-1
+actual   : have-1
 --
 ```
 
-##### Looking for line in output
+##### Partial matching
 
-When `-l` is used without the `<index>` argument, fail if the unexpected
-line is found in `${lines[@]}`.
-
-***Note:*** *Due to a [bug in Bats][bats-93], empty lines are discarded
-from `${lines[@]}`, causing line indices to change and preventing
-testing for empty lines.*
+Partial matching can be enabled with the `--partial` option (`-p` for
+short). When used, a match fails if the expected *substring* is not
+found in the matched line.
 
 ```bash
-@test 'refute_output() looking for line' {
-  run echo $'have-0\nwant\nhave-2'
-  refute_output -l 'want'
+@test 'assert_line() partial matching' {
+  run echo $'have 1\nhave 2\nhave 3'
+  assert_line --partial 'want'
 }
 ```
 
-On failure, the unexpected line, its index in `${lines[@]}` and
-`$output` with the unexpected line highlighted are displayed.
+On failure, the same details are displayed as for literal matching,
+except that the substring replaces the expected line.
+
+```
+-- no output line contains substring --
+substring : want
+output (3 lines):
+  have 1
+  have 2
+  have 3
+--
+```
+
+This option and regular expression matching (`--regexp` or `-e`) are
+mutually exclusive. An error is displayed when used simultaneously.
+
+##### Regular expression matching
+
+Regular expression matching can be enabled with the `--regexp` option
+(`-e` for short). When used, a match fails if the *extended regular
+expression* does not match the line being tested.
+
+*Note: As expected, the anchors `^` and `$` bind to the beginning and
+the end of the matched line, respectively.*
+
+```bash
+@test 'assert_line() regular expression matching' {
+  run echo $'have-0\nhave-1\nhave-2'
+  assert_line --index 1 --regexp '^want-[0-9]$'
+}
+```
+
+On failure, the same details are displayed as for literal matching,
+except that the regular expression replaces the expected line.
+
+```
+-- regular expression does not match line --
+index  : 1
+regexp : ^want-[0-9]$
+line   : have-1
+--
+```
+
+An error is displayed if the specified extended regular expression is
+invalid.
+
+This option and partial matching (`--partial` or `-p`) are mutually
+exclusive. An error is displayed when used simultaneously.
+
+#### `refute_line`
+
+Similarly to `refute_output`, this function helps to verify that a
+command or function produces the correct output. It checks that the
+unexpected line does not appear in the output (default) or in a specific
+line of it. Matching can be literal (default), partial or regular
+expression. This function is the logical complement of `assert_line`.
+
+***Warning:*** *Due to a [bug in Bats][bats-93], empty lines are
+discarded from `${lines[@]}`, causing line indices to change and
+preventing testing for empty lines.*
+
+[bats-93]: https://github.com/sstephenson/bats/pull/93
+
+##### Looking for a line in the output
+
+By default, the entire output is searched for the unexpected line. The
+assertion fails if the unexpected line is found in `${lines[@]}`.
+
+```bash
+@test 'refute_line() looking for line' {
+  run echo $'have-0\nwant\nhave-2'
+  refute_line 'want'
+}
+```
+
+On failure, the unexpected line, the index of its first match and the
+output with the matching line highlighted are displayed.
+
+***Warning:*** *The output displayed does not contain empty lines. See
+the Warning above for more.*
 
 ```
 -- line should not be in output --
@@ -651,65 +768,96 @@ output (3 lines):
 --
 ```
 
-If `$output` is not longer than one line, it is displayed in
-*two-column* format without highlighting.
+If output is not longer than one line, it is displayed in *two-column*
+format.
+
+##### Matching a specific line
+
+When the `--index <idx>` option is used (`-n <idx>` for short) , the
+unexpected line is matched only against the line identified by the given
+index. The assertion fails if the unexpected line equals
+`${lines[<idx>]}`.
+
+```bash
+@test 'refute_line() specific line' {
+  run echo $'have-0\nwant-1\nhave-2'
+  refute_line --index 1 'want-1'
+}
+```
+
+On failure, the index and the unexpected line are displayed.
+
+```
+-- line should differ --
+index : 1
+line  : want-1
+--
+```
 
 ##### Partial matching
 
-Partial matching, enabled using `-p`, provides more flexibility than the
-default literal matching. The assertion fails if the unexpected output
-as a substring can be found in the output.
+Partial matching can be enabled with the `--partial` option (`-p` for
+short). When used, a match fails if the unexpected *substring* is found
+in the matched line.
 
 ```bash
-@test 'refute_output() partial matching' {
-  run echo 'ERROR: no such file or directory'
-  refute_output -p 'ERROR'
+@test 'refute_line() partial matching' {
+  run echo $'have 1\nwant 2\nhave 3'
+  refute_line --partial 'want'
 }
 ```
 
-On failure, the substring is displayed in addition (if not already
-displayed by other options).
+On failure, in addition to the details of literal matching, the
+substring is also displayed. When used with `--index <idx>` the
+substring replaces the unexpected line.
 
 ```
--- output should not contain substring --
-substring : ERROR
-output    : ERROR: no such file or directory
+-- no line should contain substring --
+substring : want
+index     : 1
+output (3 lines):
+  have 1
+> want 2
+  have 3
 --
 ```
 
-This option is mutually exclusive with regular expression matching (`-r`).
-When used simultaneously, an error is displayed.
+This option and regular expression matching (`--regexp` or `-e`) are
+mutually exclusive. An error is displayed when used simultaneously.
 
 ##### Regular expression matching
 
-Regular expression matching, enabled using `-r`, provides the most
-flexibility. The assertion fails if the unexpected output specified as
-an extended regular expression matches the output.
+Regular expression matching can be enabled with the `--regexp` option
+(`-e` for short). When used, a match fails if the *extended regular
+expression* matches the line being tested.
+
+*Note: As expected, the anchors `^` and `$` bind to the beginning and
+the end of the matched line, respectively.*
 
 ```bash
-@test 'refute_output() regular expression matching' {
-  run echo 'Foobar v0.1.0'
-  refute_output -r '^Foobar v[0-9]+\.[0-9]+\.[0-9]$'
+@test 'refute_line() regular expression matching' {
+  run echo $'Foobar v0.1.0\nRelease date: 2015-11-29'
+  refute_line --index 0 --regexp '^Foobar v[0-9]+\.[0-9]+\.[0-9]$'
 }
 ```
 
-On failure, the regular expression is displayed in addition (if not
-already displayed by other options).
+On failure, in addition to the details of literal matching, the regular
+expression is also displayed. When used with `--index <idx>` the regular
+expression replaces the unexpected line.
 
 ```
--- regular expression should not match output --
-regex  : ^Foobar v[0-9]+\.[0-9]+\.[0-9]$
-output : Foobar v0.1.0
+-- regular expression should not match line --
+index  : 0
+regexp : ^Foobar v[0-9]+\.[0-9]+\.[0-9]$
+line   : Foobar v0.1.0
 --
 ```
 
-When the specified extended regular expression is invalid, an error is
-displayed.
+An error is displayed if the specified extended regular expression is
+invalid.
 
-This option is mutually exclusive with partial matching (`-p`). When
-used simultaneously, an error is displayed.
-
-[bats-93]: https://github.com/sstephenson/bats/pull/93
+This option and partial matching (`--partial` or `-p`) are mutually
+exclusive. An error is displayed when used simultaneously.
 
 
 ## Installing Bats from source

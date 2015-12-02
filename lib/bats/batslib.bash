@@ -154,37 +154,27 @@ assert_failure() {
   fi
 }
 
-# Fail and display details if the expected does not match the actual
-# output or a fragment of it.
+# Fail and display details if `$output' does not match the expected
+# output.
 #
-# By default, the entire output is matched. The assertion fails if the
+# By default, literal matching is performed. The assertion fails if the
 # expected output does not equal `$output'. Details include both values.
 #
-# When `-l <index>' is used, only the <index>-th line is matched. The
-# assertion fails if the expected line does not equal
-# `${lines[<index>}'. Details include the compared lines and <index>.
+# Option `--partial' enables partial matching. The assertion fails if
+# the expected substring cannot be found in `$output'.
 #
-# When `-l' is used without the <index> argument, the output is searched
-# for the expected line. The expected line is matched against each line
-# in `${lines[@]}'. If no match is found the assertion fails. Details
-# include the expected line and `$output'.
+# Option `--regexp' enables regular expression matching. The assertion
+# fails if the extended regular expression does not match `$output'. An
+# invalid regular expression causes an error to be displayed.
 #
-# By default, literal matching is performed. Options `-p' and `-r'
-# enable partial (i.e. substring) and extended regular expression
-# matching, respectively. Specifying an invalid extended regular
-# expression with `-r' displays an error.
-#
-# Options `-p' and `-r' are mutually exclusive. When used
-# simultaneously, an error is displayed.
+# It is an error to use partial and regular expression matching
+# simultaneously.
 #
 # Globals:
 #   output
-#   lines
 # Options:
-#   -l <index> - match against the <index>-th element of `${lines[@]}'
-#   -l - search `${lines[@]}' for the expected line
-#   -p - partial matching
-#   -r - extended regular expression matching
+#   -p, --partial - partial matching
+#   -e, --regexp - extended regular expression matching
 # Arguments:
 #   $1 - expected output
 # Returns:
@@ -194,40 +184,21 @@ assert_failure() {
 #   STDERR - details, on failure
 #            error message, on error
 assert_output() {
-  local -i is_match_line=0
-  local -i is_match_contained=0
   local -i is_mode_partial=0
-  local -i is_mode_regex=0
+  local -i is_mode_regexp=0
 
   # Handle options.
   while (( $# > 0 )); do
     case "$1" in
-      -l)
-        if (( $# > 2 )) && [[ $2 =~ ^([0-9]|[1-9][0-9]+)$ ]]; then
-          is_match_line=1
-          local -ri idx="$2"
-          shift
-        else
-          is_match_contained=1;
-        fi
-        shift
-        ;;
-      -p) is_mode_partial=1; shift ;;
-      -r) is_mode_regex=1; shift ;;
+      -p|--partial) is_mode_partial=1; shift ;;
+      -e|--regexp) is_mode_regexp=1; shift ;;
       --) break ;;
       *) break ;;
     esac
   done
 
-  if (( is_match_line )) && (( is_match_contained )); then
-    echo "\`-l' and \`-l <index>' are mutually exclusive" \
-      | batslib_decorate 'ERROR: assert_output' \
-      | fail
-    return $?
-  fi
-
-  if (( is_mode_partial )) && (( is_mode_regex )); then
-    echo "\`-p' and \`-r' are mutually exclusive" \
+  if (( is_mode_partial )) && (( is_mode_regexp )); then
+    echo "\`--partial' and \`--regexp' are mutually exclusive" \
       | batslib_decorate 'ERROR: assert_output' \
       | fail
     return $?
@@ -236,23 +207,256 @@ assert_output() {
   # Arguments.
   local -r expected="$1"
 
-  if (( is_mode_regex == 1 )) && [[ '' =~ $expected ]] || (( $? == 2 )); then
-    echo "Invalid extended regular expression: \`$expected'" \
-      | batslib_decorate 'ERROR: assert_output' \
+  # Matching.
+  if (( is_mode_regexp )); then
+    if [[ '' =~ $expected ]] || (( $? == 2 )); then
+      echo "Invalid extended regular expression: \`$expected'" \
+        | batslib_decorate 'ERROR: assert_output' \
+        | fail
+      return $?
+    fi
+    if ! [[ $output =~ $expected ]]; then
+      batslib_print_kv_single_or_multi 6 \
+          'regexp'  "$expected" \
+          'output' "$output" \
+        | batslib_decorate 'regular expression does not match output' \
+        | fail
+    fi
+  elif (( is_mode_partial )); then
+    if [[ $output != *"$expected"* ]]; then
+      batslib_print_kv_single_or_multi 9 \
+          'substring' "$expected" \
+          'output'    "$output" \
+        | batslib_decorate 'output does not contain substring' \
+        | fail
+    fi
+  else
+    if [[ $output != "$expected" ]]; then
+      batslib_print_kv_single_or_multi 8 \
+          'expected' "$expected" \
+          'actual'   "$output" \
+        | batslib_decorate 'output differs' \
+        | fail
+    fi
+  fi
+}
+
+# Fail and display details if `$output' matches the unexpected output.
+#
+# By default, literal matching is performed. The assertion fails if the
+# unexpected output equals `$output'. Details include `$output'.
+#
+# Option `--partial' enables partial matching. The assertion fails if
+# the unexpected substring is found in `$output'. The unexpected
+# substring is added to details.
+#
+# Option `--regexp' enables regular expression matching. The assertion
+# fails if the extended regular expression does matches `$output'. The
+# regular expression is added to details. An invalid regular expression
+# causes an error to be displayed.
+#
+# It is an error to use partial and regular expression matching
+# simultaneously.
+#
+# Globals:
+#   output
+# Options:
+#   -p, --partial - partial matching
+#   -e, --regexp - extended regular expression matching
+# Arguments:
+#   $1 - unexpected output
+# Returns:
+#   0 - unexpected matches the actual output
+#   1 - otherwise
+# Outputs:
+#   STDERR - details, on failure
+#            error message, on error
+refute_output() {
+  local -i is_mode_partial=0
+  local -i is_mode_regexp=0
+
+  # Handle options.
+  while (( $# > 0 )); do
+    case "$1" in
+      -p|--partial) is_mode_partial=1; shift ;;
+      -e|--regexp) is_mode_regexp=1; shift ;;
+      --) break ;;
+      *) break ;;
+    esac
+  done
+
+  if (( is_mode_partial )) && (( is_mode_regexp )); then
+    echo "\`--partial' and \`--regexp' are mutually exclusive" \
+      | batslib_decorate 'ERROR: refute_output' \
+      | fail
+    return $?
+  fi
+
+  # Arguments.
+  local -r unexpected="$1"
+
+  if (( is_mode_regexp == 1 )) && [[ '' =~ $unexpected ]] || (( $? == 2 )); then
+    echo "Invalid extended regular expression: \`$unexpected'" \
+      | batslib_decorate 'ERROR: refute_output' \
       | fail
     return $?
   fi
 
   # Matching.
-  if (( is_match_contained )); then
-    # Line contained in output.
-    if (( is_mode_regex )); then
+  if (( is_mode_regexp )); then
+    if [[ $output =~ $unexpected ]] || (( $? == 0 )); then
+      batslib_print_kv_single_or_multi 6 \
+          'regexp'  "$unexpected" \
+          'output' "$output" \
+        | batslib_decorate 'regular expression should not match output' \
+        | fail
+    fi
+  elif (( is_mode_partial )); then
+    if [[ $output == *"$unexpected"* ]]; then
+      batslib_print_kv_single_or_multi 9 \
+          'substring' "$unexpected" \
+          'output'    "$output" \
+        | batslib_decorate 'output should not contain substring' \
+        | fail
+    fi
+  else
+    if [[ $output == "$unexpected" ]]; then
+      batslib_print_kv_single_or_multi 6 \
+          'output' "$output" \
+        | batslib_decorate 'output equals, but it was expected to differ' \
+        | fail
+    fi
+  fi
+}
+
+# Fail and display details if the expected line is not found in the
+# output (default) or in a specific line of it.
+#
+# By default, the entire output is searched for the expected line. The
+# expected line is matched against every element of `${lines[@]}'. If no
+# match is found, the assertion fails. Details include the expected line
+# and `${lines[@]}'.
+#
+# When `--index <idx>' is specified, only the <idx>-th line is matched.
+# If the expected line does not match `${lines[<idx>]}', the assertion
+# fails. Details include <idx> and the compared lines.
+#
+# By default, literal matching is performed. A literal match fails if
+# the expected string does not equal the matched string.
+#
+# Option `--partial' enables partial matching. A partial match fails if
+# the expected substring is not found in the target string.
+#
+# Option `--regexp' enables regular expression matching. A regular
+# expression match fails if the extended regular expression does not
+# match the target string. An invalid regular expression causes an error
+# to be displayed.
+#
+# It is an error to use partial and regular expression matching
+# simultaneously.
+#
+# Mandatory arguments to long options are mandatory for short options
+# too.
+#
+# Globals:
+#   output
+#   lines
+# Options:
+#   -n, --index <idx> - match the <idx>-th line
+#   -p, --partial - partial matching
+#   -e, --regexp - extended regular expression matching
+# Arguments:
+#   $1 - expected line
+# Returns:
+#   0 - match found
+#   1 - otherwise
+# Outputs:
+#   STDERR - details, on failure
+#            error message, on error
+# FIXME(ztombol): Display `${lines[@]}' instead of `$output'!
+assert_line() {
+  local -i is_match_line=0
+  local -i is_mode_partial=0
+  local -i is_mode_regexp=0
+
+  # Handle options.
+  while (( $# > 0 )); do
+    case "$1" in
+      -n|--index)
+        if (( $# < 2 )) || ! [[ $2 =~ ^([0-9]|[1-9][0-9]+)$ ]]; then
+          echo "\`--index' requires an integer argument: \`$2'" \
+            | batslib_decorate 'ERROR: assert_line' \
+            | fail
+          return $?
+        fi
+        is_match_line=1
+        local -ri idx="$2"
+        shift 2
+        ;;
+      -p|--partial) is_mode_partial=1; shift ;;
+      -e|--regexp) is_mode_regexp=1; shift ;;
+      --) break ;;
+      *) break ;;
+    esac
+  done
+
+  if (( is_mode_partial )) && (( is_mode_regexp )); then
+    echo "\`--partial' and \`--regexp' are mutually exclusive" \
+      | batslib_decorate 'ERROR: assert_line' \
+      | fail
+    return $?
+  fi
+
+  # Arguments.
+  local -r expected="$1"
+
+  if (( is_mode_regexp == 1 )) && [[ '' =~ $expected ]] || (( $? == 2 )); then
+    echo "Invalid extended regular expression: \`$expected'" \
+      | batslib_decorate 'ERROR: assert_line' \
+      | fail
+    return $?
+  fi
+
+  # Matching.
+  if (( is_match_line )); then
+    # Specific line.
+    if (( is_mode_regexp )); then
+      if ! [[ ${lines[$idx]} =~ $expected ]]; then
+        batslib_print_kv_single 6 \
+            'index' "$idx" \
+            'regexp' "$expected" \
+            'line'  "${lines[$idx]}" \
+          | batslib_decorate 'regular expression does not match line' \
+          | fail
+      fi
+    elif (( is_mode_partial )); then
+      if [[ ${lines[$idx]} != *"$expected"* ]]; then
+        batslib_print_kv_single 9 \
+            'index'     "$idx" \
+            'substring' "$expected" \
+            'line'      "${lines[$idx]}" \
+          | batslib_decorate 'line does not contain substring' \
+          | fail
+      fi
+    else
+      if [[ ${lines[$idx]} != "$expected" ]]; then
+        batslib_print_kv_single 8 \
+            'index'    "$idx" \
+            'expected' "$expected" \
+            'actual'   "${lines[$idx]}" \
+          | batslib_decorate 'line differs' \
+          | fail
+      fi
+    fi
+  else
+    # Contained in output.
+    if (( is_mode_regexp )); then
       local -i idx
       for (( idx = 0; idx < ${#lines[@]}; ++idx )); do
         [[ ${lines[$idx]} =~ $expected ]] && return 0
       done
       { local -ar single=(
-          'regex'  "$expected"
+          'regexp'  "$expected"
         )
         local -ar may_be_multi=(
           'output' "$output"
@@ -298,146 +502,87 @@ assert_output() {
       } | batslib_decorate 'output does not contain line' \
         | fail
     fi
-  elif (( is_match_line )); then
-    # Specific line.
-    if (( is_mode_regex )); then
-      if ! [[ ${lines[$idx]} =~ $expected ]]; then
-        batslib_print_kv_single 5 \
-            'index' "$idx" \
-            'regex' "$expected" \
-            'line'  "${lines[$idx]}" \
-          | batslib_decorate 'regular expression does not match line' \
-          | fail
-      fi
-    elif (( is_mode_partial )); then
-      if [[ ${lines[$idx]} != *"$expected"* ]]; then
-        batslib_print_kv_single 9 \
-            'index'     "$idx" \
-            'substring' "$expected" \
-            'line'      "${lines[$idx]}" \
-          | batslib_decorate 'line does not contain substring' \
-          | fail
-      fi
-    else
-      if [[ ${lines[$idx]} != "$expected" ]]; then
-        batslib_print_kv_single 8 \
-            'index'    "$idx" \
-            'expected' "$expected" \
-            'actual'   "${lines[$idx]}" \
-          | batslib_decorate 'line differs' \
-          | fail
-      fi
-    fi
-  else
-    # Entire output.
-    if (( is_mode_regex )); then
-      if ! [[ $output =~ $expected ]]; then
-        batslib_print_kv_single_or_multi 6 \
-            'regex'  "$expected" \
-            'output' "$output" \
-          | batslib_decorate 'regular expression does not match output' \
-          | fail
-      fi
-    elif (( is_mode_partial )); then
-      if [[ $output != *"$expected"* ]]; then
-        batslib_print_kv_single_or_multi 9 \
-            'substring' "$expected" \
-            'output'    "$output" \
-          | batslib_decorate 'output does not contain substring' \
-          | fail
-      fi
-    else
-      if [[ $output != "$expected" ]]; then
-        batslib_print_kv_single_or_multi 8 \
-            'expected' "$expected" \
-            'actual'   "$output" \
-          | batslib_decorate 'output differs' \
-          | fail
-      fi
-    fi
   fi
 }
 
-# Fail and display details if the unexpected matches the actual output
-# or a fragment of it.
+# Fail and display details if the unexpected line is found in the output
+# (default) or in a specific line of it.
 #
-# By default, the entire output is matched. The assertion fails if the
-# unexpected output equals `$output'. Details include `$output'.
+# By default, the entire output is searched for the unexpected line. The
+# unexpected line is matched against every element of `${lines[@]}'. If
+# a match is found, the assertion fails. Details include the unexpected
+# line, the index of the first match and `${lines[@]}' with the matching
+# line highlighted if `${lines[@]}' is longer than one line.
 #
-# When `-l <index>' is used, only the <index>-th line is matched. The
-# assertion fails if the unexpected line equals `${lines[<index>}'.
-# Details include the compared line and <index>.
+# When `--index <idx>' is specified, only the <idx>-th line is matched.
+# If the unexpected line matches `${lines[<idx>]}', the assertion fails.
+# Details include <idx> and the unexpected line.
 #
-# When `-l' is used without the <index> argument, the output is searched
-# for the unexpected line. The unexpected line is matched against each
-# line in `${lines[<index>]}'. If a match is found the assertion fails.
-# Details include the unexpected line, the index where it was found and
-# `$output' (with the unexpected line highlighted in it if `$output` is
-# longer than one line).
+# By default, literal matching is performed. A literal match fails if
+# the unexpected string does not equal the matched string.
 #
-# By default, literal matching is performed. Options `-p' and `-r'
-# enable partial (i.e. substring) and extended regular expression
-# matching, respectively. On failure, the substring or the regular
-# expression is added to the details (if not already displayed).
-# Specifying an invalid extended regular expression with `-r' displays
-# an error.
+# Option `--partial' enables partial matching. A partial match fails if
+# the unexpected substring is found in the target string. When used with
+# `--index <idx>', the unexpected substring is also displayed on
+# failure.
 #
-# Options `-p' and `-r' are mutually exclusive. When used
-# simultaneously, an error is displayed.
+# Option `--regexp' enables regular expression matching. A regular
+# expression match fails if the extended regular expression matches the
+# target string. When used with `--index <idx>', the regular expression
+# is also displayed on failure. An invalid regular expression causes an
+# error to be displayed.
+#
+# It is an error to use partial and regular expression matching
+# simultaneously.
+#
+# Mandatory arguments to long options are mandatory for short options
+# too.
 #
 # Globals:
 #   output
 #   lines
 # Options:
-#   -l <index> - match against the <index>-th element of `${lines[@]}'
-#   -l - search `${lines[@]}' for the unexpected line
-#   -p - partial matching
-#   -r - extended regular expression matching
+#   -n, --index <idx> - match the <idx>-th line
+#   -p, --partial - partial matching
+#   -e, --regexp - extended regular expression matching
 # Arguments:
-#   $1 - unexpected output
+#   $1 - unexpected line
 # Returns:
-#   0 - unexpected matches the actual output
+#   0 - match not found
 #   1 - otherwise
 # Outputs:
 #   STDERR - details, on failure
 #            error message, on error
-refute_output() {
+# FIXME(ztombol): Display `${lines[@]}' instead of `$output'!
+refute_line() {
   local -i is_match_line=0
-  local -i is_match_contained=0
   local -i is_mode_partial=0
-  local -i is_mode_regex=0
+  local -i is_mode_regexp=0
 
   # Handle options.
   while (( $# > 0 )); do
     case "$1" in
-      -l)
-        if (( $# > 2 )) && [[ $2 =~ ^([0-9]|[1-9][0-9]+)$ ]]; then
-          is_match_line=1
-          local -ri idx="$2"
-          shift
-        else
-          is_match_contained=1;
+      -n|--index)
+        if (( $# < 2 )) || ! [[ $2 =~ ^([0-9]|[1-9][0-9]+)$ ]]; then
+          echo "\`--index' requires an integer argument: \`$2'" \
+            | batslib_decorate 'ERROR: refute_line' \
+            | fail
+          return $?
         fi
-        shift
+        is_match_line=1
+        local -ri idx="$2"
+        shift 2
         ;;
-      -L) is_match_contained=1; shift ;;
-      -p) is_mode_partial=1; shift ;;
-      -r) is_mode_regex=1; shift ;;
+      -p|--partial) is_mode_partial=1; shift ;;
+      -e|--regexp) is_mode_regexp=1; shift ;;
       --) break ;;
       *) break ;;
     esac
   done
 
-  if (( is_match_line )) && (( is_match_contained )); then
-    echo "\`-l' and \`-l <index>' are mutually exclusive" \
-      | batslib_decorate 'ERROR: refute_output' \
-      | fail
-    return $?
-  fi
-
-  if (( is_mode_partial )) && (( is_mode_regex )); then
-    echo "\`-p' and \`-r' are mutually exclusive" \
-      | batslib_decorate 'ERROR: refute_output' \
+  if (( is_mode_partial )) && (( is_mode_regexp )); then
+    echo "\`--partial' and \`--regexp' are mutually exclusive" \
+      | batslib_decorate 'ERROR: refute_line' \
       | fail
     return $?
   fi
@@ -445,22 +590,51 @@ refute_output() {
   # Arguments.
   local -r unexpected="$1"
 
-  if (( is_mode_regex == 1 )) && [[ '' =~ $unexpected ]] || (( $? == 2 )); then
+  if (( is_mode_regexp == 1 )) && [[ '' =~ $unexpected ]] || (( $? == 2 )); then
     echo "Invalid extended regular expression: \`$unexpected'" \
-      | batslib_decorate 'ERROR: refute_output' \
+      | batslib_decorate 'ERROR: refute_line' \
       | fail
     return $?
   fi
 
   # Matching.
-  if (( is_match_contained )); then
+  if (( is_match_line )); then
+    # Specific line.
+    if (( is_mode_regexp )); then
+      if [[ ${lines[$idx]} =~ $unexpected ]] || (( $? == 0 )); then
+        batslib_print_kv_single 6 \
+            'index' "$idx" \
+            'regexp' "$unexpected" \
+            'line'  "${lines[$idx]}" \
+          | batslib_decorate 'regular expression should not match line' \
+          | fail
+      fi
+    elif (( is_mode_partial )); then
+      if [[ ${lines[$idx]} == *"$unexpected"* ]]; then
+        batslib_print_kv_single 9 \
+            'index'     "$idx" \
+            'substring' "$unexpected" \
+            'line'      "${lines[$idx]}" \
+          | batslib_decorate 'line should not contain substring' \
+          | fail
+      fi
+    else
+      if [[ ${lines[$idx]} == "$unexpected" ]]; then
+        batslib_print_kv_single 5 \
+            'index' "$idx" \
+            'line'  "${lines[$idx]}" \
+          | batslib_decorate 'line should differ' \
+          | fail
+      fi
+    fi
+  else
     # Line contained in output.
-    if (( is_mode_regex )); then
+    if (( is_mode_regexp )); then
       local -i idx
       for (( idx = 0; idx < ${#lines[@]}; ++idx )); do
         if [[ ${lines[$idx]} =~ $unexpected ]]; then
           { local -ar single=(
-              'regex'  "$unexpected"
+              'regexp'  "$unexpected"
               'index'  "$idx"
             )
             local -a may_be_multi=(
@@ -536,61 +710,6 @@ refute_output() {
           return $?
         fi
       done
-    fi
-  elif (( is_match_line )); then
-    # Specific line.
-    if (( is_mode_regex )); then
-      if [[ ${lines[$idx]} =~ $unexpected ]] || (( $? == 0 )); then
-        batslib_print_kv_single 5 \
-            'index' "$idx" \
-            'regex' "$unexpected" \
-            'line'  "${lines[$idx]}" \
-          | batslib_decorate 'regular expression should not match line' \
-          | fail
-      fi
-    elif (( is_mode_partial )); then
-      if [[ ${lines[$idx]} == *"$unexpected"* ]]; then
-        batslib_print_kv_single 9 \
-            'index'     "$idx" \
-            'substring' "$unexpected" \
-            'line'      "${lines[$idx]}" \
-          | batslib_decorate 'line should not contain substring' \
-          | fail
-      fi
-    else
-      if [[ ${lines[$idx]} == "$unexpected" ]]; then
-        batslib_print_kv_single 5 \
-            'index' "$idx" \
-            'line'  "${lines[$idx]}" \
-          | batslib_decorate 'line should differ' \
-          | fail
-      fi
-    fi
-  else
-    # Entire output.
-    if (( is_mode_regex )); then
-      if [[ $output =~ $unexpected ]] || (( $? == 0 )); then
-        batslib_print_kv_single_or_multi 6 \
-            'regex'  "$unexpected" \
-            'output' "$output" \
-          | batslib_decorate 'regular expression should not match output' \
-          | fail
-      fi
-    elif (( is_mode_partial )); then
-      if [[ $output == *"$unexpected"* ]]; then
-        batslib_print_kv_single_or_multi 9 \
-            'substring' "$unexpected" \
-            'output'    "$output" \
-          | batslib_decorate 'output should not contain substring' \
-          | fail
-      fi
-    else
-      if [[ $output == "$unexpected" ]]; then
-        batslib_print_kv_single_or_multi 6 \
-            'output' "$output" \
-          | batslib_decorate 'output equals, but it was expected to differ' \
-          | fail
-      fi
     fi
   fi
 }
