@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-load test_helper
+load test_helper.bash
 fixtures bats
 
 @test "no arguments prints usage instructions" {
