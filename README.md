@@ -76,7 +76,7 @@ test cases in the file. The first run counts the number of test cases,
 then iterates over the test cases and executes each one in its own
 process.
 
-For more details about how Bats evaluates test files, see 
+For more details about how Bats evaluates test files, see
 [Bats Evaluation Process](https://github.com/sstephenson/bats/wiki/Bats-Evaluation-Process)
 on the wiki.
 
@@ -125,7 +125,7 @@ relative to the location of the current test file. For example, if you
 have a Bats test in `test/foo.bats`, the command
 
 ```bash
-load test_helper
+load test_helper.bash
 ```
 
 will source the script `test/test_helper.bash` in your test file. This
