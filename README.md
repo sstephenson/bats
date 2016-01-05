@@ -289,5 +289,5 @@ on the wiki.
 
 ---
 
-© 2014 Sam Stephenson. Bats is released under an MIT-style license;
+© 2015 Sam Stephenson. Bats is released under an MIT-style license;
 see `LICENSE` for details.
