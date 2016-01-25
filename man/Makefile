@@ -1,10 +1,10 @@
-RONN := ronn
-PAGES := bats.1 bats.7
+RONN := bundle exec ronn
+PAGES := man1/bats.1 man7/bats.7
 
 all: $(PAGES)
 
-bats.1: bats.1.ronn
+man1/bats.1: man1/bats.1.ronn
 	$(RONN) -r $<
 
-bats.7: bats.7.ronn
+man7/bats.7: man7/bats.7.ronn
 	$(RONN) -r $<
