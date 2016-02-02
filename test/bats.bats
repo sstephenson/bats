@@ -161,6 +161,13 @@ fixtures bats
   [ $status -eq 0 ]
 }
 
+@test "load sources scripts by free filename" {
+  HELPER_NAME="test_helper_freename.sh" run bats "$FIXTURE_ROOT/load.bats"
+  [ $status -eq 0 ]
+  HELPER_NAME="test_helper.bash" run bats "$FIXTURE_ROOT/load.bats"
+  [ $status -eq 0 ]
+}
+
 @test "load aborts if the specified script does not exist" {
   HELPER_NAME="nonexistent" run bats "$FIXTURE_ROOT/load.bats"
   [ $status -eq 1 ]
