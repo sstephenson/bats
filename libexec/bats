@@ -8,7 +8,7 @@ version() {
 
 usage() {
   version
-  echo "Usage: bats [-c] [-p | -t] <test> [<test> ...]"
+  echo "Usage: bats [-c] [-p | -t] [-r] [-o <filename>] <test> [<test> ...]"
 }
 
 help() {
