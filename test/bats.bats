@@ -1,6 +1,7 @@
 #!/usr/bin/env bats
 
 load test_helper
+load "$BATS_PREFIX/libexec/common_functions.shrc"
 fixtures bats
 
 @test "no arguments prints usage instructions" {
@@ -280,3 +281,82 @@ fixtures bats
   [ $status -eq 0 ]
   [ "${lines[1]}" = "ok 1 loop_func" ]
 }
+
+@test "default test (in TAP)" {
+  run bats "$FIXTURE_ROOT/echo_output_and_pass.bats"
+
+  [ "${lines[0]}" = "1..1" ]
+  [ "${lines[1]}" = "ok 1 echo output and pass" ]
+}
+
+@test "test with output released (in TAP)" {
+  run bats -r "$FIXTURE_ROOT/echo_output_and_pass.bats"
+
+  [ "${lines[0]}" = "ERROR: Cannot release output of tests to STDOUT and produce TAP output to STDOUT" ]
+}
+
+@test "results directed to file (in TAP)" {
+  TMPFILE=$(createTempFile)
+  run bats -o $TMPFILE  "$FIXTURE_ROOT/echo_output_and_pass.bats"
+
+  cat <<EOF | diff - $TMPFILE
+1..1
+ok 1 echo output and pass
+EOF
+
+  rm -f $TMPFILE
+}
+
+@test "test output released and results directed to file (in TAP)" {
+  TMPFILE=$(createTempFile)
+  run bats -r -o $TMPFILE  "$FIXTURE_ROOT/echo_output_and_pass.bats"
+
+  cat <<EOF | diff - $TMPFILE
+1..1
+ok 1 echo output and pass
+EOF
+
+  rm -f $TMPFILE
+
+  [ "${lines[0]}" = "Something from BATS file" ]
+  [ "${lines[1]}" = "something from shell script" ]
+
+}
+
+@test "default test (in BATS)" {
+  run bats -p "$FIXTURE_ROOT/echo_output_and_pass.bats"
+
+  [ "${lines[2]}" = "1 test, 0 failures" ]
+}
+
+@test "test with output released (in BATS)" {
+  run bats -p -r "$FIXTURE_ROOT/echo_output_and_pass.bats"
+
+  [ "${lines[0]}" = "ERROR: Cannot release output of tests to STDOUT and produce TAP output to STDOUT" ]
+}
+
+@test "results directed to file (in BATS)" {
+  TMPFILE=$(createTempFile)
+  run bats -p -o $TMPFILE  "$FIXTURE_ROOT/echo_output_and_pass.bats"
+
+  ACTUAL_LASTLINE=$(tail -1 $TMPFILE)
+  EXPECTED_LASTLINE="1 test, 0 failures"
+  rm -f $TMPFILE
+
+  [ "$ACTUAL_LASTLINE" = "$EXPECTED_LASTLINE" ]
+}
+
+@test "test output released and results directed to file (in BATS)" {
+  TMPFILE=$(createTempFile)
+  run bats -p -r -o $TMPFILE  "$FIXTURE_ROOT/echo_output_and_pass.bats"
+
+  ACTUAL_LASTLINE=$(tail -1 $TMPFILE)
+  EXPECTED_LASTLINE="1 test, 0 failures"
+
+  rm -f $TMPFILE
+  [ "$ACTUAL_LASTLINE" = "$EXPECTED_LASTLINE" ]
+
+  [ "${lines[0]}" = "Something from BATS file" ]
+  [ "${lines[1]}" = "something from shell script" ]
+}
+

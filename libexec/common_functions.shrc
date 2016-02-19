@@ -1,0 +1,28 @@
+
+function getTmpDir() {
+  local MYTMPDIR
+  if [ -z "$TMPDIR" ]; then
+    MYTMPDIR="/tmp"
+  else
+    MYTMPDIR="${TMPDIR%/}"
+   fi
+
+   echo $MYTMPDIR
+}
+
+# Generate temporary filename
+function createTempFile() {
+    local PID="${1:-$$}"
+    local USETEMPLATE="${2:-1}"    
+    local MYTMPDIR=$(getTmpDir)
+
+    if [[ $USETEMPLATE == 1 ]]; then 
+       # generate idempotent file names 
+       TMPFILE=$(mktemp $MYTMPDIR/bats.$PID.XXXXXX)
+       echo $TMPFILE
+    else
+       # if we are not using a template we can call this function many times and get the same response
+       echo $MYTMPDIR/bats.$PID
+    fi
+}
+
