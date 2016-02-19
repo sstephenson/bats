@@ -48,7 +48,9 @@ for filename in "$@"; do
         ;;
       esac
     done
-  } < <( bats-exec-test $extended_syntax_flag "$filename" )
+  } <<EOF
+    $(bats-exec-test $extended_syntax_flag "$filename")
+EOF
   offset=$(($offset + $index))
 done
 

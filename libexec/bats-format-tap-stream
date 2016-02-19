@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
 set -e
+shopt -s extglob
 
-# Just stream the TAP output (sans extended syntax) if tput is missing
-command -v tput >/dev/null || exec grep -v "^begin "
-
-header_pattern='[0-9]+\.\.[0-9]+'
+header_pattern='*+([0-9])..+([0-9])*'
 IFS= read -r header
 
-if [[ "$header" =~ $header_pattern ]]; then
+if [[ "$header" = $header_pattern ]]; then
   count="${header:3}"
   index=0
   failures=0
@@ -20,8 +18,14 @@ else
   exec cat
 fi
 
+if [ "$TERM" != msys ] && type -t tput > /dev/null; then
+  COLUMNS_CMD='tput cols'
+else
+  COLUMNS_CMD='echo 80'
+fi
+
 update_screen_width() {
-  screen_width="$(tput cols)"
+  screen_width="$( eval $COLUMNS_CMD )"
   count_column_left=$(( $screen_width - $count_column_width ))
 }
 
@@ -37,9 +41,17 @@ begin() {
   go_to_column 1
 }
 
+if [[ $TERM != msys ]]; then
+  PASS_SYMBOL='✓'
+  FAIL_SYMBOL='✗'
+else
+  PASS_SYMBOL='√'
+  FAIL_SYMBOL='×'
+fi
+
 pass() {
   go_to_column 0
-  printf " ✓ %s" "$name"
+  printf " $PASS_SYMBOL %s" "$name"
   advance
 }
 
@@ -54,7 +66,7 @@ skip() {
 fail() {
   go_to_column 0
   set_color 1 bold
-  printf " ✗ %s" "$name"
+  printf " $FAIL_SYMBOL %s" "$name"
   advance
 }
 
@@ -144,10 +156,10 @@ while IFS= read -r line; do
     flush
     ;;
   "ok "* )
-    skip_expr="ok $index # skip (\(([^)]*)\))?"
-    if [[ "$line" =~ $skip_expr ]]; then
+    skip_expr="ok $index # skip*"
+    if [[ "$line" = $skip_expr ]]; then
       let skipped+=1
-      buffer skip "${BASH_REMATCH[2]}"
+      buffer skip "${line//@(*\(|\)*)}"
     else
       buffer pass
     fi
