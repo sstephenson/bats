@@ -284,6 +284,7 @@ fixtures bats
 
 @test "default test (in TAP)" {
   run bats "$FIXTURE_ROOT/echo_output_and_pass.bats"
+  [ "$status" -eq 0 ]
 
   [ "${lines[0]}" = "1..1" ]
   [ "${lines[1]}" = "ok 1 echo output and pass" ]
@@ -291,6 +292,7 @@ fixtures bats
 
 @test "test with output released (in TAP)" {
   run bats -r "$FIXTURE_ROOT/echo_output_and_pass.bats"
+  [ "$status" -eq 1 ]
 
   [ "${lines[0]}" = "ERROR: Cannot release output of tests to STDOUT and produce TAP output to STDOUT" ]
 }
@@ -298,6 +300,7 @@ fixtures bats
 @test "results directed to file (in TAP)" {
   TMPFILE=$(createTempFile)
   run bats -o $TMPFILE  "$FIXTURE_ROOT/echo_output_and_pass.bats"
+  [ "$status" -eq 0 ]
 
   cat <<EOF | diff - $TMPFILE
 1..1
@@ -310,6 +313,7 @@ EOF
 @test "test output released and results directed to file (in TAP)" {
   TMPFILE=$(createTempFile)
   run bats -r -o $TMPFILE  "$FIXTURE_ROOT/echo_output_and_pass.bats"
+  [ "$status" -eq 0 ]
 
   cat <<EOF | diff - $TMPFILE
 1..1
@@ -325,12 +329,14 @@ EOF
 
 @test "default test (in BATS)" {
   run bats -p "$FIXTURE_ROOT/echo_output_and_pass.bats"
+  [ "$status" -eq 0 ]
 
   [ "${lines[2]}" = "1 test, 0 failures" ]
 }
 
 @test "test with output released (in BATS)" {
   run bats -p -r "$FIXTURE_ROOT/echo_output_and_pass.bats"
+  [ "$status" -eq 1 ]
 
   [ "${lines[0]}" = "ERROR: Cannot release output of tests to STDOUT and produce TAP output to STDOUT" ]
 }
@@ -338,6 +344,7 @@ EOF
 @test "results directed to file (in BATS)" {
   TMPFILE=$(createTempFile)
   run bats -p -o $TMPFILE  "$FIXTURE_ROOT/echo_output_and_pass.bats"
+  [ "$status" -eq 0 ]
 
   ACTUAL_LASTLINE=$(tail -1 $TMPFILE)
   EXPECTED_LASTLINE="1 test, 0 failures"
@@ -349,6 +356,7 @@ EOF
 @test "test output released and results directed to file (in BATS)" {
   TMPFILE=$(createTempFile)
   run bats -p -r -o $TMPFILE  "$FIXTURE_ROOT/echo_output_and_pass.bats"
+  [ "$status" -eq 0 ]
 
   ACTUAL_LASTLINE=$(tail -1 $TMPFILE)
   EXPECTED_LASTLINE="1 test, 0 failures"
@@ -357,6 +365,21 @@ EOF
   [ "$ACTUAL_LASTLINE" = "$EXPECTED_LASTLINE" ]
 
   [ "${lines[0]}" = "Something from BATS file" ]
+  [ "${lines[1]}" = "something from shell script" ]
+}
+
+@test "test output released and results directed to file (in BATS) when a test is failing" {
+  TMPFILE=$(createTempFile)
+  run bats -p -r -o $TMPFILE  "$FIXTURE_ROOT/echo_output_and_fail.bats"
+  [ "$status" -eq 1 ]
+
+  ACTUAL_LASTLINE=$(tail -1 $TMPFILE)
+  EXPECTED_LASTLINE="1 test, 1 failure"
+
+  rm -f $TMPFILE
+  [ "$ACTUAL_LASTLINE" = "$EXPECTED_LASTLINE" ]
+
+  [ "${lines[0]}" = "Something from echo_output_and_fail.bats" ]
   [ "${lines[1]}" = "something from shell script" ]
 }
 
