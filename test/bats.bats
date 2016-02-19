@@ -268,8 +268,9 @@ fixtures bats
   run bats "$FIXTURE_ROOT/echo_output_and_pass.bats"
   [ "$status" -eq 0 ]
 
-  [ "${lines[0]}" = "1..1" ]
+  [ "${lines[0]}" = "1..2" ]
   [ "${lines[1]}" = "ok 1 echo output and pass" ]
+  [ "${lines[2]}" = "ok 2 echo output and pass (using run)" ]
 }
 
 @test "test with output released (in TAP)" {
@@ -285,8 +286,9 @@ fixtures bats
   [ "$status" -eq 0 ]
 
   cat <<EOF | diff - $TMPFILE
-1..1
+1..2
 ok 1 echo output and pass
+ok 2 echo output and pass (using run)
 EOF
 
   rm -f $TMPFILE
@@ -298,8 +300,9 @@ EOF
   [ "$status" -eq 0 ]
 
   cat <<EOF | diff - $TMPFILE
-1..1
+1..2
 ok 1 echo output and pass
+ok 2 echo output and pass (using run)
 EOF
 
   rm -f $TMPFILE
@@ -313,7 +316,7 @@ EOF
   run bats -p "$FIXTURE_ROOT/echo_output_and_pass.bats"
   [ "$status" -eq 0 ]
 
-  [ "${lines[2]}" = "1 test, 0 failures" ]
+  [ "${lines[3]}" = "2 tests, 0 failures" ]
 }
 
 @test "test with output released (in BATS)" {
@@ -329,7 +332,7 @@ EOF
   [ "$status" -eq 0 ]
 
   ACTUAL_LASTLINE=$(tail -1 $TMPFILE)
-  EXPECTED_LASTLINE="1 test, 0 failures"
+  EXPECTED_LASTLINE="2 tests, 0 failures"
   rm -f $TMPFILE
 
   [ "$ACTUAL_LASTLINE" = "$EXPECTED_LASTLINE" ]
@@ -341,7 +344,7 @@ EOF
   [ "$status" -eq 0 ]
 
   ACTUAL_LASTLINE=$(tail -1 $TMPFILE)
-  EXPECTED_LASTLINE="1 test, 0 failures"
+  EXPECTED_LASTLINE="2 tests, 0 failures"
 
   rm -f $TMPFILE
   [ "$ACTUAL_LASTLINE" = "$EXPECTED_LASTLINE" ]
