@@ -144,7 +144,7 @@ while IFS= read -r line; do
     flush
     ;;
   "ok "* )
-    skip_expr="ok $index # skip (\(([^)]*)\))?"
+    skip_expr="ok $index (.*) # skip ?(([^)]*))?"
     if [[ "$line" =~ $skip_expr ]]; then
       let skipped+=1
       buffer skip "${BASH_REMATCH[2]}"

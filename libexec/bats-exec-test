@@ -244,11 +244,12 @@ bats_exit_trap() {
   local skipped
   trap - err exit
 
+
   skipped=""
   if [ -n "$BATS_TEST_SKIPPED" ]; then
     skipped=" # skip"
     if [ "1" != "$BATS_TEST_SKIPPED" ]; then
-      skipped+=" ($BATS_TEST_SKIPPED)"
+      skipped+=" $BATS_TEST_SKIPPED"
     fi
   fi
 
@@ -259,7 +260,7 @@ bats_exit_trap() {
     sed -e "s/^/# /" < "$BATS_OUT" >&3
     status=1
   else
-    echo "ok ${BATS_TEST_NUMBER}${skipped} ${BATS_TEST_DESCRIPTION}" >&3
+    echo "ok ${BATS_TEST_NUMBER} ${BATS_TEST_DESCRIPTION}${skipped}" >&3
     status=0
   fi
 
