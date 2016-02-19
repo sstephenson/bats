@@ -170,14 +170,18 @@ fi
 set -o pipefail execfail
 
 if [[ -n $BATS_RELEASE_OUTPUT && -z $BATS_TAPOUT_FILE  ]]; then
-# covers: -r
+  # covers: -r
   echo "ERROR: Cannot release output of tests to STDOUT and produce TAP output to STDOUT"  2>&1
   exit 1
 else
   if [[ -n $BATS_TAPOUT_FILE ]]; then
     # covers: -r -o t.tap || -o t.tap
+    set +e
     "$command" $pass_the_opts $extended_syntax_flag "${filenames[@]}"
+    status=$?
+    set -e
     cat $TMPFILE1 | "$formatter" > $BATS_TAPOUT_FILE
+    exit $status
   else
     # (near) original command: no tapout file, no release to STDOUT - will spew test results on STDOUT
     exec "$command" $pass_the_opts $extended_syntax_flag "${filenames[@]}" | "$formatter"
