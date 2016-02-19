@@ -74,14 +74,23 @@ run() {
   set +e
   set +E
   set +T
-  output="$("$@" 2>&1)"
-  status="$?"
+  if [[ -n $BATS_RELEASE_TESTOUTPUT ]]; then
+    local TMPFILE=$(createTempFile)
+    "$@" > >(tee $TMPFILE) 2>&1
+    status="$?"
+    output=$(cat $TMPFILE)
+    rm -f $TMPFILE
+  else
+    output="$("$@" 2>&1)"
+    status="$?"
+  fi
   oldIFS=$IFS
   IFS=$'\n' lines=($output)
+  IFS=$oldIFS
+
   [ -z "$e" ] || set -e
   [ -z "$E" ] || set -E
   [ -z "$T" ] || set -T
-  IFS=$oldIFS
 }
 
 setup() {
