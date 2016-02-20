@@ -54,6 +54,7 @@ expand_path() {
 
 BATS_LIBEXEC="$(abs_dirname "$0")"
 export BATS_PREFIX="$(abs_dirname "$BATS_LIBEXEC")"
+export BATS_LIB="${BATS_PREFIX}/lib/bats"
 export BATS_CWD="$(abs_dirname .)"
 export PATH="$BATS_LIBEXEC:$PATH"
 

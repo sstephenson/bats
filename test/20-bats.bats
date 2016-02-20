@@ -262,3 +262,7 @@ fixtures bats
   [ $status -eq 0 ]
   [ "${lines[1]}" = "ok 1 loop_func" ]
 }
+
+@test "standard library is loaded automatically" {
+  assert true
+}

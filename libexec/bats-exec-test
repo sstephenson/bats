@@ -331,6 +331,9 @@ bats_evaluate_preprocessed_source() {
 
 exec 3<&1
 
+# Load Standard Library.
+load "${BATS_LIB}/batslib.bash"
+
 if [ "$#" -eq 0 ]; then
   bats_preprocess_source
   bats_evaluate_preprocessed_source
