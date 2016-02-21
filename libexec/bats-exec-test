@@ -26,7 +26,7 @@ else
   shift
 fi
 
-BATS_TEST_DIRNAME="$(dirname "$BATS_TEST_FILENAME")"
+export BATS_TEST_DIRNAME="$(dirname "$BATS_TEST_FILENAME")"
 BATS_TEST_NAMES=()
 
 load() {

@@ -30,12 +30,29 @@ encode_name() {
 }
 
 tests=()
-index=0
-pattern='^ *@test  *([^ ].*)  *\{ *(.*)$'
+index=${1:-0}
+test_pattern='^ *@test  *([^ ].*)  *\{ *(.*)$'
+include_pattern='^ *include  *(.+)$'
 
 while IFS= read -r line; do
   let index+=1
-  if [[ "$line" =~ $pattern ]]; then
+  if [[ "$line" =~ $include_pattern ]]; then
+    name="${BASH_REMATCH[1]}"
+
+    filename="$BATS_TEST_DIRNAME/${name}.bats"
+    if [ "${name:0:1}" = "/" ]; then
+      filename="${name}"
+    fi
+
+    [ -f "$filename" ] || {
+      echo "bats: $filename does not exist" >&2
+      exit 1
+    }
+
+    output="$($0 $index < "${filename}")"
+    let index+=$(echo "$output" | grep -c bats_test_begin)
+    echo "$output"
+  elif [[ "$line" =~ $test_pattern ]]; then
     quoted_name="${BASH_REMATCH[1]}"
     body="${BASH_REMATCH[2]}"
     name="$(eval echo "$quoted_name")"
