@@ -100,6 +100,17 @@ an error message.
 }
 ```
 
+You may also find it useful to pipe commands together. To accomplish this with
+the `run` helper, you will need to wrap the pipe in `bash -c` command:
+
+```bash
+@test "invoking foo displays 3 lines of output" {
+  run bash -c "foo | wc -l"
+  [ "$status" -eq 1 ]
+  [ "$output" -eq 3 ]
+}
+```
+
 The `$status` variable contains the status code of the command, and
 the `$output` variable contains the combined contents of the command's
 standard output and standard error streams.
