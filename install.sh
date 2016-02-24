@@ -19,8 +19,8 @@ abs_dirname() {
   cd "$cwd"
 }
 
-PREFIX="$1"
-if [ -z "$1" ]; then
+PREFIX="${1%/}"
+if [ -z "$PREFIX" ]; then
   { echo "usage: $0 <prefix>"
     echo "  e.g. $0 /usr/local"
   } >&2
