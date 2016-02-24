@@ -31,7 +31,7 @@ encode_name() {
 
 tests=()
 index=0
-pattern='^ *@test  *([^ ].*)  *\{ *(.*)$'
+pattern='^[[:space:]]*@test[[:space:]]+([^ ].*)[[:space:]]+\{ *(.*)$'
 
 while IFS= read -r line; do
   let index+=1
