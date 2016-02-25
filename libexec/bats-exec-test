@@ -63,6 +63,11 @@ run() {
   [ -z "$E" ] || set -E
   [ -z "$T" ] || set -T
   IFS=$oldIFS
+  if [ -w "$BATS_LOG" ]; then
+    if [ ! -z "$output" ]; then
+      echo "$output" >> "$BATS_LOG"
+    fi
+  fi
 }
 
 setup() {
@@ -83,6 +88,10 @@ bats_test_begin() {
   BATS_TEST_DESCRIPTION="$1"
   if [ -n "$BATS_EXTENDED_SYNTAX" ]; then
     echo "begin $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION" >&3
+  fi
+  if [ -w "$BATS_LOG" ]; then
+    echo "[$$] starting '$BATS_TEST_DESCRIPTION'" >> "$BATS_LOG"
+    echo "[$$] <<< begin output >>>" >> "$BATS_LOG"
   fi
   setup
 }
@@ -124,24 +133,30 @@ bats_print_stack_trace() {
   local count="${#@}"
 
   for frame in "$@"; do
+    local line=''
     local filename="$(bats_trim_filename "$(bats_frame_filename "$frame")")"
     local lineno="$(bats_frame_lineno "$frame")"
 
     if [ $index -eq 1 ]; then
-      echo -n "# ("
+      line+="# ("
     else
-      echo -n "#  "
+      line+="#  "
     fi
 
     local fn="$(bats_frame_function "$frame")"
     if [ "$fn" != "$BATS_TEST_NAME" ]; then
-      echo -n "from function \`$fn' "
+      line+="from function \`$fn' "
     fi
 
     if [ $index -eq $count ]; then
-      echo "in test file $filename, line $lineno)"
+      line+="in test file $filename, line $lineno)"
     else
-      echo "in file $filename, line $lineno,"
+      line+="in file $filename, line $lineno,"
+    fi
+
+    echo "$line"
+    if [ -w "$BATS_LOG" ]; then
+      echo "$line" >> "$BATS_LOG"
     fi
 
     let index+=1
@@ -153,15 +168,22 @@ bats_print_failed_command() {
   local status="$2"
   local filename="$(bats_frame_filename "$frame")"
   local lineno="$(bats_frame_lineno "$frame")"
+  local output=''
 
   local failed_line="$(bats_extract_line "$filename" "$lineno")"
   local failed_command="$(bats_strip_string "$failed_line")"
-  echo -n "#   \`${failed_command}' "
+  output+="#   \`${failed_command}' "
 
   if [ $status -eq 1 ]; then
-    echo "failed"
+    output+="failed"
   else
-    echo "failed with status $status"
+    output+="failed with status $status"
+  fi
+
+  echo "$output"
+
+  if [ -w "$BATS_LOG" ]; then
+    echo "$output" >> "$BATS_LOG"
   fi
 }
 
@@ -242,6 +264,7 @@ bats_teardown_trap() {
 bats_exit_trap() {
   local status
   local skipped
+  local to_log=''
   trap - err exit
 
   skipped=""
@@ -252,15 +275,25 @@ bats_exit_trap() {
     fi
   fi
 
+  if [ -w "$BATS_LOG" ]; then
+    echo "[$$] <<< end output >>>" >> "$BATS_LOG"
+  fi
+
   if [ -z "$BATS_TEST_COMPLETED" ] || [ -z "$BATS_TEARDOWN_COMPLETED" ]; then
     echo "not ok $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION" >&3
     bats_print_stack_trace "${BATS_ERROR_STACK_TRACE[@]}" >&3
     bats_print_failed_command "${BATS_ERROR_STACK_TRACE[${#BATS_ERROR_STACK_TRACE[@]}-1]}" "$BATS_ERROR_STATUS" >&3
     sed -e "s/^/# /" < "$BATS_OUT" >&3
     status=1
+    to_log="not ok '$BATS_TEST_DESCRIPTION'"
   else
     echo "ok ${BATS_TEST_NUMBER}${skipped} ${BATS_TEST_DESCRIPTION}" >&3
     status=0
+    to_log="ok '$BATS_TEST_DESCRIPTION'"
+  fi
+
+  if [ -w "$BATS_LOG" ]; then
+    echo "[$$] $to_log" >> "$BATS_LOG"
   fi
 
   rm -f "$BATS_OUT"
