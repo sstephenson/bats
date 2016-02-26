@@ -30,6 +30,11 @@ Bash's `errexit` (`set -e`) option when running test cases. If every
 command in the test case exits with a `0` status code (success), the
 test passes. In this way, each line is an assertion of truth.
 
+## Installation with [bpkg](https://github.com/bpkg/bpkg)
+
+```bash
+$ bpkg install -g sstephenson/bats
+```
 
 ## Running tests
 
