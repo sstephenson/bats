@@ -27,7 +27,12 @@ help() {
 }
 
 resolve_link() {
-  $(type -p greadlink readlink | head -1) "$1"
+  local readlink=$(type -p greadlink readlink | head -1)
+  if [ -x "$readlink" ]; then
+    $readlink "$1"
+  else
+    /usr/bin/perl -le 'print readlink shift' "$1"
+  fi
 }
 
 abs_dirname() {
@@ -55,7 +60,7 @@ expand_path() {
 BATS_LIBEXEC="$(abs_dirname "$0")"
 export BATS_PREFIX="$(abs_dirname "$BATS_LIBEXEC")"
 export BATS_CWD="$(abs_dirname .)"
-export PATH="$BATS_LIBEXEC:$PATH"
+export PATH="$BATS_LIBEXEC:$(getconf PATH 2>/dev/null):$PATH"
 
 options=()
 arguments=()
