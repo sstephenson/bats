@@ -203,7 +203,9 @@ in the test file.
 store temporary files.
 
 
-## Installing Bats from source
+## Installing Bats
+
+### From source
 
 Check out a copy of the Bats repository. Then, either add the Bats
 `bin` directory to your `$PATH`, or run the provided `install.sh`
@@ -216,6 +218,14 @@ Bats. For example, to install Bats into `/usr/local`,
 
 Note that you may need to run `install.sh` with `sudo` if you do not
 have permission to write to the installation prefix.
+
+### Other methods
+
+Other methods of installing Bats may be available for your target environment.
+The following wiki pages describe some alternatives:
+
+ * [Using a package](https://github.com/sstephenson/bats/wiki/Install-Bats-Using-a-Package)
+ * [Using GNU Stow](https://github.com/sstephenson/bats/wiki/Install-Bats-Using-GNU-Stow)
 
 
 ## Support
