@@ -33,7 +33,6 @@ while getopts ":o:cxr" opt; do
 done
 shift $((OPTIND-1))
 
-
 BATS_TEST_FILENAME="$1"
 if [ -z "$BATS_TEST_FILENAME" ]; then
   echo "usage: bats-exec <filename>" >&2

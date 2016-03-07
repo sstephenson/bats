@@ -1,17 +1,38 @@
 #!/usr/bin/env bash
 set -e
 
-count_only_flag=""
-if [ "$1" = "-c" ]; then
-  count_only_flag=1
-  shift
-fi
+source $BATS_LIBEXEC/common_functions.shrc
 
+unset pass_the_opts
+count_only_flag=""
 extended_syntax_flag=""
-if [ "$1" = "-x" ]; then
-  extended_syntax_flag="-x"
-  shift
-fi
+while getopts ":o:cxr" opt; do
+  case $opt in
+    c)
+       count_only_flag=1
+      ;;
+    x)
+      extended_syntax_flag="-x"
+      pass_the_opts="$pass_the_opts -x"
+      ;;
+    o)
+      export BATS_OUTPUT_FILE=$OPTARG
+      pass_the_opts="$pass_the_opts -o $BATS_OUTPUT_FILE"
+      ;;
+    r)
+      pass_the_opts="$pass_the_opts -r"
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
 
 trap "kill 0; exit 1" int
 
@@ -20,36 +41,61 @@ for filename in "$@"; do
   let count+="$(bats-exec-test -c "$filename")"
 done
 
+# Set up the location of TAP output and location of run outputs
+if [[ -n $BATS_OUTPUT_FILE ]]; then
+	# Store output in temp file and overwrite BATS_OUTPUT_FILE with it later
+	TMP_TAP_FILE=$(createTempFile)
+        exec 4>$TMP_TAP_FILE
+else
+        exec 4<&1 # copy STDOUT file descriptor and use that instead of assuming STDOUT as the file descriptor of outputs
+fi
+
 if [ -n "$count_only_flag" ]; then
-  echo "$count"
+  >&4 echo "$count"
   exit
 fi
 
-echo "1..$count"
+>&4 echo "1..$count"
 status=0
 offset=0
 for filename in "$@"; do
   index=0
+    if [[ -n $BATS_OUTPUT_FILE ]]; then
+      echo -n "" > $BATS_OUTPUT_FILE  # zero out the file
+set +e
+      bats-exec-test $pass_the_opts "$filename"
+set -e
+      exec 5<$BATS_OUTPUT_FILE
+    else
+      exec 5< <( bats-exec-test $pass_the_opts "$filename" )
+    fi
+
   {
-    IFS= read -r # 1..n
+    IFS= read -r myline # 1..n
     while IFS= read -r line; do
       case "$line" in
       "begin "* )
         let index+=1
-        echo "${line/ $index / $(($offset + $index)) }"
+        >&4 echo "${line/ $index / $(($offset + $index)) }"
         ;;
       "ok "* | "not ok "* )
         [ -n "$extended_syntax_flag" ] || let index+=1
-        echo "${line/ $index / $(($offset + $index)) }"
+        >&4 echo "${line/ $index / $(($offset + $index)) }"
         [ "${line:0:6}" != "not ok" ] || status=1
         ;;
       * )
-        echo "$line"
+        >&4 echo "$line"
         ;;
       esac
     done
-  } < <( bats-exec-test $extended_syntax_flag "$filename" )
+  } <&5
+
   offset=$(($offset + $index))
 done
+
+if [[ -n $BATS_OUTPUT_FILE ]]; then
+	# move temp file over BATS_OUTPUT_FILE
+	mv -f $TMP_TAP_FILE $BATS_OUTPUT_FILE
+fi
 
 exit "$status"
