@@ -3,17 +3,35 @@ set -e
 set -E
 set -T
 
-BATS_COUNT_ONLY=""
-if [ "$1" = "-c" ]; then
-  BATS_COUNT_ONLY=1
-  shift
-fi
+source common_functions.shrc
 
+BATS_COUNT_ONLY=""
 BATS_EXTENDED_SYNTAX=""
-if [ "$1" = "-x" ]; then
-  BATS_EXTENDED_SYNTAX="$1"
-  shift
-fi
+while getopts ":o:cxr" opt; do
+  case $opt in
+    c)
+      BATS_COUNT_ONLY=1
+      ;;
+    x)
+      BATS_EXTENDED_SYNTAX="-x"
+      ;;
+    o)
+      export BATS_OUTPUT_FILE=$OPTARG
+      ;;
+    r)
+      export BATS_RELEASE_TESTOUTPUT=1
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
 
 BATS_TEST_FILENAME="$1"
 if [ -z "$BATS_TEST_FILENAME" ]; then
@@ -55,14 +73,23 @@ run() {
   set +e
   set +E
   set +T
-  output="$("$@" 2>&1)"
-  status="$?"
+  if [[ -n $BATS_RELEASE_TESTOUTPUT ]]; then
+    local TMPFILE=$(createTempFile)
+    "$@" > >(tee $TMPFILE) 2>&1
+    status="$?"
+    output=$(cat $TMPFILE)
+    rm -f $TMPFILE
+  else
+    output="$("$@" 2>&1)"
+    status="$?"
+  fi
   oldIFS=$IFS
   IFS=$'\n' lines=($output)
+  IFS=$oldIFS
+
   [ -z "$e" ] || set -e
   [ -z "$E" ] || set -E
   [ -z "$T" ] || set -T
-  IFS=$oldIFS
 }
 
 setup() {
@@ -113,7 +140,6 @@ bats_capture_stack_trace() {
       let index+=1
     fi
   done
-
   BATS_SOURCE="$(bats_frame_filename "${BATS_CURRENT_STACK_TRACE[0]}")"
   BATS_LINENO="$(bats_frame_lineno "${BATS_CURRENT_STACK_TRACE[0]}")"
 }
@@ -244,11 +270,12 @@ bats_exit_trap() {
   local skipped
   trap - err exit
 
+
   skipped=""
   if [ -n "$BATS_TEST_SKIPPED" ]; then
     skipped=" # skip"
     if [ "1" != "$BATS_TEST_SKIPPED" ]; then
-      skipped+=" ($BATS_TEST_SKIPPED)"
+      skipped+=" $BATS_TEST_SKIPPED"
     fi
   fi
 
@@ -259,7 +286,7 @@ bats_exit_trap() {
     sed -e "s/^/# /" < "$BATS_OUT" >&3
     status=1
   else
-    echo "ok ${BATS_TEST_NUMBER}${skipped} ${BATS_TEST_DESCRIPTION}" >&3
+    echo "ok ${BATS_TEST_NUMBER} ${BATS_TEST_DESCRIPTION}${skipped}" >&3
     status=0
   fi
 
@@ -268,7 +295,7 @@ bats_exit_trap() {
 }
 
 bats_perform_tests() {
-  echo "1..$#"
+  echo "1..$#" >&3
   test_number=1
   status=0
   for test_name in "$@"; do
@@ -283,7 +310,7 @@ bats_perform_test() {
   if [ "$(type -t "$BATS_TEST_NAME" || true)" = "function" ]; then
     BATS_TEST_NUMBER="$2"
     if [ -z "$BATS_TEST_NUMBER" ]; then
-      echo "1..1"
+      echo "1..1" >&3
       BATS_TEST_NUMBER="1"
     fi
 
@@ -292,23 +319,22 @@ bats_perform_test() {
     trap "bats_debug_trap \"\$BASH_SOURCE\"" debug
     trap "bats_error_trap" err
     trap "bats_teardown_trap" exit
-    "$BATS_TEST_NAME" >>"$BATS_OUT" 2>&1
-    BATS_TEST_COMPLETED=1
 
+    if [[ -n $BATS_RELEASE_TESTOUTPUT ]]; then
+       2>&1 "$BATS_TEST_NAME" > >(tee "$BATS_OUT")
+    else
+      "$BATS_TEST_NAME" >>"$BATS_OUT" 2>&1
+    fi
+    BATS_TEST_COMPLETED=1
   else
     echo "bats: unknown test name \`$BATS_TEST_NAME'" >&2
     exit 1
   fi
 }
 
-if [ -z "$TMPDIR" ]; then
-  BATS_TMPDIR="/tmp"
-else
-  BATS_TMPDIR="${TMPDIR%/}"
-fi
-
-BATS_TMPNAME="$BATS_TMPDIR/bats.$$"
-BATS_PARENT_TMPNAME="$BATS_TMPDIR/bats.$PPID"
+BATS_TMPDIR=$(getTmpDir)
+BATS_TMPNAME=$(createTempFile $$ 0)            # returns same result on each call
+BATS_PARENT_TMPNAME=$(createTempFile $PPID 0)  # ditto
 BATS_OUT="${BATS_TMPNAME}.out"
 
 bats_preprocess_source() {
@@ -329,7 +355,12 @@ bats_evaluate_preprocessed_source() {
   source "$BATS_TEST_SOURCE"
 }
 
-exec 3<&1
+# Set up the location of TAP output and location of run outputs
+if [[ -n $BATS_OUTPUT_FILE ]]; then
+	exec 3>>$BATS_OUTPUT_FILE
+else
+	exec 3<&1 # copy STDOUT file descriptor and use that instead of assuming STDOUT as the file descriptor of outputs
+fi
 
 if [ "$#" -eq 0 ]; then
   bats_preprocess_source
@@ -338,9 +369,9 @@ if [ "$#" -eq 0 ]; then
   if [ -n "$BATS_COUNT_ONLY" ]; then
     echo "${#BATS_TEST_NAMES[@]}"
   else
-    bats_perform_tests "${BATS_TEST_NAMES[@]}"
+    bats_perform_tests "${BATS_TEST_NAMES[@]}" 
   fi
 else
   bats_evaluate_preprocessed_source
-  bats_perform_test "$@"
+  bats_perform_test "$@" 
 fi

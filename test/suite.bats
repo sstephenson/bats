@@ -62,3 +62,33 @@ fixtures suite
   [ "${lines[5]}" = "begin 3 quasi-truth" ]
   [ "${lines[6]}" = "not ok 3 quasi-truth" ]
 }
+
+@test "release output with multiple test files" {
+  TMPFILE=$(createTempFile)
+  run bats -r -o $TMPFILE "$FIXTURE_ROOT/release_output/echo_and_fail.bats" "$FIXTURE_ROOT/release_output/echo_and_pass.bats"
+  [ $status -eq 1 ]
+
+  grep "1..2" $TMPFILE
+  grep "not ok 1 echo and fail" $TMPFILE
+  grep "ok 2 echo and pass" $TMPFILE
+
+  [ "${lines[0]}" = "this is a failing test" ]
+  [ "${lines[1]}" = "this is a passing test" ]
+
+  rm -f $TMPFILE
+}
+
+@test "release output with test suite" {
+  TMPFILE=$(createTempFile)
+  run bats -r -o $TMPFILE "$FIXTURE_ROOT/release_output" 
+  [ $status -eq 1 ]
+
+  grep "1..2" $TMPFILE
+  grep "not ok 1 echo and fail" $TMPFILE
+  grep "ok 2 echo and pass" $TMPFILE
+
+  [ "${lines[0]}" = "this is a failing test" ]
+  [ "${lines[1]}" = "this is a passing test" ]
+
+  rm -f $TMPFILE
+}

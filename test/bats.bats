@@ -1,6 +1,7 @@
 #!/usr/bin/env bats
 
 load test_helper
+load "$BATS_PREFIX/libexec/common_functions.shrc"
 fixtures bats
 
 @test "no arguments prints usage instructions" {
@@ -49,7 +50,16 @@ fixtures bats
 @test "summary passing and skipping tests" {
   run filter_control_sequences bats -p $FIXTURE_ROOT/passing_and_skipping.bats
   [ $status -eq 0 ]
-  [ "${lines[2]}" = "2 tests, 0 failures, 1 skipped" ]
+  [ "${lines[3]}" = "3 tests, 0 failures, 2 skipped" ]
+}
+
+@test "tap passing and skipping tests" {
+  run filter_control_sequences bats --tap $FIXTURE_ROOT/passing_and_skipping.bats
+  [ $status -eq 0 ]
+  [ "${lines[0]}" = "1..3" ]
+  [ "${lines[1]}" = "ok 1 a passing test" ]
+  [ "${lines[2]}" = "ok 2 a skipping test # skip" ]
+  [ "${lines[3]}" = "ok 3 skip test with a reason # skip for a really good reason" ]
 }
 
 @test "summary passing and failing tests" {
@@ -62,6 +72,15 @@ fixtures bats
   run filter_control_sequences bats -p $FIXTURE_ROOT/passing_failing_and_skipping.bats
   [ $status -eq 0 ]
   [ "${lines[5]}" = "3 tests, 1 failure, 1 skipped" ]
+}
+
+@test "tap passing, failing and skipping tests" {
+  run filter_control_sequences bats --tap $FIXTURE_ROOT/passing_failing_and_skipping.bats
+  [ $status -eq 0 ]
+  [ "${lines[0]}" = "1..3" ]
+  [ "${lines[1]}" = "ok 1 a passing test" ]
+  [ "${lines[2]}" = "ok 2 a skipping test # skip" ]
+  [ "${lines[3]}" = "not ok 3 a failing test" ]
 }
 
 @test "one failing test" {
@@ -214,8 +233,8 @@ fixtures bats
 @test "skipped tests" {
   run bats "$FIXTURE_ROOT/skipped.bats"
   [ $status -eq 0 ]
-  [ "${lines[1]}" = "ok 1 # skip a skipped test" ]
-  [ "${lines[2]}" = "ok 2 # skip (a reason) a skipped test with a reason" ]
+  [ "${lines[1]}" = "ok 1 a skipped test # skip" ]
+  [ "${lines[2]}" = "ok 2 a skipped test with a reason # skip a reason" ]
 }
 
 @test "extended syntax" {
@@ -262,3 +281,108 @@ fixtures bats
   [ $status -eq 0 ]
   [ "${lines[1]}" = "ok 1 loop_func" ]
 }
+
+@test "default test (in TAP)" {
+  run bats "$FIXTURE_ROOT/echo_output_and_pass.bats"
+  [ "$status" -eq 0 ]
+
+  [ "${lines[0]}" = "1..2" ]
+  [ "${lines[1]}" = "ok 1 echo output and pass" ]
+  [ "${lines[2]}" = "ok 2 echo output and pass (using run)" ]
+}
+
+@test "test with output released (in TAP)" {
+  run bats -r "$FIXTURE_ROOT/echo_output_and_pass.bats"
+  [ "$status" -eq 1 ]
+
+  [ "${lines[0]}" = "ERROR: Cannot release output of tests to STDOUT and produce TAP output to STDOUT" ]
+}
+
+@test "results directed to file (in TAP)" {
+  TMPFILE=$(createTempFile)
+  run bats -o $TMPFILE  "$FIXTURE_ROOT/echo_output_and_pass.bats"
+  [ "$status" -eq 0 ]
+
+  cat <<EOF | diff - $TMPFILE
+1..2
+ok 1 echo output and pass
+ok 2 echo output and pass (using run)
+EOF
+
+  rm -f $TMPFILE
+}
+
+@test "test output released and results directed to file (in TAP)" {
+  TMPFILE=$(createTempFile)
+  run bats -r -o $TMPFILE  "$FIXTURE_ROOT/echo_output_and_pass.bats"
+  [ "$status" -eq 0 ]
+
+  cat <<EOF | diff - $TMPFILE
+1..2
+ok 1 echo output and pass
+ok 2 echo output and pass (using run)
+EOF
+
+  rm -f $TMPFILE
+
+  [ "${lines[0]}" = "Something from BATS file" ]
+  [ "${lines[1]}" = "something from shell script" ]
+
+}
+
+@test "default test (in BATS)" {
+  run bats -p "$FIXTURE_ROOT/echo_output_and_pass.bats"
+  [ "$status" -eq 0 ]
+
+  [ "${lines[3]}" = "2 tests, 0 failures" ]
+}
+
+@test "test with output released (in BATS)" {
+  run bats -p -r "$FIXTURE_ROOT/echo_output_and_pass.bats"
+  [ "$status" -eq 1 ]
+
+  [ "${lines[0]}" = "ERROR: Cannot release output of tests to STDOUT and produce TAP output to STDOUT" ]
+}
+
+@test "results directed to file (in BATS)" {
+  TMPFILE=$(createTempFile)
+  run bats -p -o $TMPFILE  "$FIXTURE_ROOT/echo_output_and_pass.bats"
+  [ "$status" -eq 0 ]
+
+  ACTUAL_LASTLINE=$(tail -1 $TMPFILE)
+  EXPECTED_LASTLINE="2 tests, 0 failures"
+  rm -f $TMPFILE
+
+  [ "$ACTUAL_LASTLINE" = "$EXPECTED_LASTLINE" ]
+}
+
+@test "test output released and results directed to file (in BATS)" {
+  TMPFILE=$(createTempFile)
+  run bats -p -r -o $TMPFILE  "$FIXTURE_ROOT/echo_output_and_pass.bats"
+  [ "$status" -eq 0 ]
+
+  ACTUAL_LASTLINE=$(tail -1 $TMPFILE)
+  EXPECTED_LASTLINE="2 tests, 0 failures"
+
+  rm -f $TMPFILE
+  [ "$ACTUAL_LASTLINE" = "$EXPECTED_LASTLINE" ]
+
+  [ "${lines[0]}" = "Something from BATS file" ]
+  [ "${lines[1]}" = "something from shell script" ]
+}
+
+@test "test output released and results directed to file (in BATS) when a test is failing" {
+  TMPFILE=$(createTempFile)
+  run bats -p -r -o $TMPFILE  "$FIXTURE_ROOT/echo_output_and_fail.bats"
+  [ "$status" -eq 1 ]
+
+  ACTUAL_LASTLINE=$(tail -1 $TMPFILE)
+  EXPECTED_LASTLINE="1 test, 1 failure"
+
+  rm -f $TMPFILE
+  [ "$ACTUAL_LASTLINE" = "$EXPECTED_LASTLINE" ]
+
+  [ "${lines[0]}" = "Something from echo_output_and_fail.bats" ]
+  [ "${lines[1]}" = "something from shell script" ]
+}
+

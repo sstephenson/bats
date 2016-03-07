@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 set -e
 
+
 version() {
   echo "Bats 0.4.0"
 }
 
 usage() {
   version
-  echo "Usage: bats [-c] [-p | -t] <test> [<test> ...]"
+  echo "Usage: bats [-c] [-p | -t] [-r] [-o <filename>] <test> [<test> ...]"
 }
 
 help() {
@@ -20,6 +21,8 @@ help() {
   echo "  -h, --help     Display this help message"
   echo "  -p, --pretty   Show results in pretty format (default for terminals)"
   echo "  -t, --tap      Show results in TAP format"
+  echo "  -o <filename>  Write test results to <filename>"
+  echo "  -r             Release output from tests to STDOUT"
   echo "  -v, --version  Display the version number"
   echo
   echo "  For more information, see https://github.com/sstephenson/bats"
@@ -52,64 +55,90 @@ expand_path() {
   } || echo "$1"
 }
 
-BATS_LIBEXEC="$(abs_dirname "$0")"
+export BATS_LIBEXEC="$(abs_dirname "$0")"
 export BATS_PREFIX="$(abs_dirname "$BATS_LIBEXEC")"
 export BATS_CWD="$(abs_dirname .)"
 export PATH="$BATS_LIBEXEC:$PATH"
 
-options=()
-arguments=()
-for arg in "$@"; do
-  if [ "${arg:0:1}" = "-" ]; then
-    if [ "${arg:1:1}" = "-" ]; then
-      options[${#options[*]}]="${arg:2}"
-    else
-      index=1
-      while option="${arg:$index:1}"; do
-        [ -n "$option" ] || break
-        options[${#options[*]}]="$option"
-        let index+=1
-      done
-    fi
-  else
-    arguments[${#arguments[*]}]="$arg"
-  fi
-done
+source $BATS_LIBEXEC/common_functions.shrc
 
-unset count_flag pretty
+unset pass_the_opts pretty
 [ -t 0 ] && [ -t 1 ] && pretty="1"
 [ -n "$CI" ] && pretty=""
 
-for option in "${options[@]}"; do
-  case "$option" in
-  "h" | "help" )
-    help
-    exit 0
-    ;;
-  "v" | "version" )
-    version
-    exit 0
-    ;;
-  "c" | "count" )
-    count_flag="-c"
-    ;;
-  "t" | "tap" )
-    pretty=""
-    ;;
-  "p" | "pretty" )
-    pretty="1"
-    ;;
-  * )
-    usage >&2
-    exit 1
-    ;;
+while getopts ":hvctpro:-:" opt; do
+  if [[ $opt == '-' ]]; then
+	case $OPTARG in
+	  'pretty')
+	     opt=p;;
+	  'tap') 
+	     opt=t;;
+	  'help')
+	     opt=h;;
+	  'version')
+	     opt=v;;
+	  *)
+	    if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
+	 	echo "Unknown option --${OPTARG}" >&2
+	    fi
+	    exit 1
+	  ;;
+	esac
+  fi
+  case $opt in
+    h)
+       help
+       exit 0
+       ;;
+    v)
+      version
+      exit 0
+      ;;
+    c)
+      pass_the_opts="$pass_the_opts -c"
+      ;;
+    r)
+      pass_the_opts="$pass_the_opts -r"
+      BATS_RELEASE_OUTPUT=1
+      ;;
+    t)
+      pretty=""
+      ;;
+    p)
+      pretty="1"
+      ;;
+    o)
+      TMPFILE1=$(createTempFile)
+      pass_the_opts="$pass_the_opts -o $TMPFILE1"
+      BATS_TAPOUT_FILE=$OPTARG
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      exit 1
+      ;;
   esac
 done
+shift $((OPTIND-1))
+
+arguments=("${@}") 
 
 if [ "${#arguments[@]}" -eq 0 ]; then
   usage >&2
   exit 1
 fi
+
+bats_exit_trap() {
+	# remove rubbish
+	if [[ -e $TMPFILE1 ]]; then
+		rm -f $TMPFILE1
+	fi
+}
+trap "bats_exit_trap" exit
+
 
 filenames=()
 for filename in "${arguments[@]}"; do
@@ -139,4 +168,22 @@ else
 fi
 
 set -o pipefail execfail
-exec "$command" $count_flag $extended_syntax_flag "${filenames[@]}" | "$formatter"
+
+if [[ -n $BATS_RELEASE_OUTPUT && -z $BATS_TAPOUT_FILE  ]]; then
+  # covers: -r
+  echo "ERROR: Cannot release output of tests to STDOUT and produce TAP output to STDOUT"  2>&1
+  exit 1
+else
+  if [[ -n $BATS_TAPOUT_FILE ]]; then
+    # covers: -r -o t.tap || -o t.tap
+    set +e
+    "$command" $pass_the_opts $extended_syntax_flag "${filenames[@]}"
+    status=$?
+    set -e
+    cat $TMPFILE1 | "$formatter" > $BATS_TAPOUT_FILE
+    exit $status
+  else
+    # (near) original command: no tapout file, no release to STDOUT - will spew test results on STDOUT
+    exec "$command" $pass_the_opts $extended_syntax_flag "${filenames[@]}" | "$formatter"
+  fi
+fi
