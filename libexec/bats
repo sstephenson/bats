@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -e
+# Set priviledged mode, which also discards CDPATH.
+set -p
 
 version() {
   echo "Bats 0.4.0"
