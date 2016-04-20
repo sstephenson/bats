@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+set -e
+
+header_pattern='[0-9]+\.\.[0-9]+'
+IFS= read -r header
+
+if [[ "$header" =~ $header_pattern ]]; then
+  count="${header:3}"
+  index=0
+  failures=0
+  skipped=0
+  name=""
+else
+  # If the first line isn't a TAP plan, print it and pass the rest through
+  printf "%s\n" "$header"
+  exec cat
+fi
+
+header() {
+    printf "\
+<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<testsuite tests=\"${count}\" failures=\"${failures}\" skip=\"${skipped}\">\n"
+}
+
+footer() {
+    printf "</testsuite>\n"
+}
+
+
+pass() {
+    echo "    <testcase classname=\"$class\" name=\"$name\"/>\n"
+}
+
+fail() {
+    echo "\
+    <testcase classname=\"$class\" name=\"$name\">
+        <failure><![CDATA[$1]]></failure>
+    </testcase>\n"
+}
+
+skip() {
+    echo "\
+    <testcase classname=\"$class\" name=\"$name\">
+        <skipped>$1</skipped>
+    </testcase>\n"
+}
+
+_buffer=""
+
+buffer() {
+  _buffer="${_buffer}$("$@")"
+}
+
+flush() {
+  printf "$_buffer"
+  _buffer=""
+}
+
+_buffer_log=""
+log() {
+    _buffer_log="${_buffer_log}\n$1"
+}
+
+flush_log() {
+  if [[ -n "${_buffer_log}" ]]; then
+		buffer fail "${_buffer_log}"
+		_buffer_log=""
+  fi
+}
+
+finish() {
+    flush_log
+    header
+		flush
+		footer
+}
+
+trap finish EXIT
+
+
+while IFS= read -r line; do
+  case "$line" in
+  "suite "*)
+    flush_log
+    suite_expr="suite (.*)"
+    if [[ "$line" =~ $suite_expr ]]; then
+      class="${BASH_REMATCH[1]}"
+    fi
+    ;;
+  "begin "* )
+    flush_log
+    let index+=1
+    name="${line#* $index }"
+    ;;
+  "ok "* )
+    skip_expr="ok $index # skip (\(([^)]*)\))?"
+    if [[ "$line" =~ $skip_expr ]]; then
+      let skipped+=1
+      buffer skip "${BASH_REMATCH[2]}"
+    else
+      buffer pass
+    fi
+    ;;
+  "not ok "* )
+    let failures+=1
+    ;;
+  "# "* )
+    log "${line:2}"
+    ;;
+  esac
+done
+
+
