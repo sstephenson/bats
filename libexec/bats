@@ -57,53 +57,64 @@ export BATS_PREFIX="$(abs_dirname "$BATS_LIBEXEC")"
 export BATS_CWD="$(abs_dirname .)"
 export PATH="$BATS_LIBEXEC:$PATH"
 
-options=()
-arguments=()
-for arg in "$@"; do
-  if [ "${arg:0:1}" = "-" ]; then
-    if [ "${arg:1:1}" = "-" ]; then
-      options[${#options[*]}]="${arg:2}"
-    else
-      index=1
-      while option="${arg:$index:1}"; do
-        [ -n "$option" ] || break
-        options[${#options[*]}]="$option"
-        let index+=1
-      done
-    fi
-  else
-    arguments[${#arguments[*]}]="$arg"
-  fi
-done
-
 unset count_flag pretty
 [ -t 0 ] && [ -t 1 ] && pretty="1"
 [ -n "$CI" ] && pretty=""
 
-for option in "${options[@]}"; do
-  case "$option" in
-  "h" | "help" )
-    help
-    exit 0
-    ;;
-  "v" | "version" )
-    version
-    exit 0
-    ;;
-  "c" | "count" )
-    count_flag="-c"
-    ;;
-  "t" | "tap" )
-    pretty=""
-    ;;
-  "p" | "pretty" )
-    pretty="1"
-    ;;
-  * )
-    usage >&2
-    exit 1
-    ;;
-  esac
+arguments=()
+
+while [[ $# -gt 0 ]]; do
+  arg="$1"
+
+  if [ ! ${arg:0:1} = "-" ]; then
+    arguments[${#arguments[*]}]="$arg"
+    shift
+    continue
+  fi
+
+  options=()
+  pat="^-[a-z][a-z]+"
+  opt_grouped="false" #whether a option is in a group or not
+  if [[ $arg =~ $pat ]]; then
+    index=1
+    while opt="${arg:$index:1}"; do
+      [ -n "$opt" ] || break
+      options[${#options[*]}]="-$opt"
+      let index+=1
+    done
+    opt_grouped="true"
+  else
+    options[${#options[*]}]=$arg
+  fi
+
+  for opt in ${options[@]}; do
+      case $opt in
+      "-h" | "--help" )
+        help
+        exit 0
+        ;;
+      "-v" | "--version" )
+        version
+        exit 0
+        ;;
+      "-c" | "--count" )
+        count_flag="-c"
+        ;;
+      "-t" | "--tap" )
+        pretty=""
+        ;;
+      "-p" | "--pretty" )
+        pretty="1"
+        ;;
+      * )
+        usage >&2
+        exit 1
+        ;;
+      esac
+  done
+
+  shift
+  continue
 done
 
 if [ "${#arguments[@]}" -eq 0 ]; then
