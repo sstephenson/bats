@@ -7,7 +7,7 @@ version() {
 
 usage() {
   version
-  echo "Usage: bats [-c] [-p | -t] [-l <file>] <test> [<test> ...]"
+  echo "Usage: bats [-c] [-p | -t] [-l <file>] [-f <pattern>] <test> [<test> ...]"
 }
 
 help() {
@@ -22,6 +22,7 @@ help() {
   echo "  -t, --tap      Show results in TAP format"
   echo "  -v, --version  Display the version number"
   echo "  -l, --logfile  Print logs to specified file"
+  echo "  -f, --filter   Filter test cases by specified pattern"
   echo
   echo "  For more information, see https://github.com/sstephenson/bats"
   echo
@@ -58,7 +59,7 @@ export BATS_PREFIX="$(abs_dirname "$BATS_LIBEXEC")"
 export BATS_CWD="$(abs_dirname .)"
 export PATH="$BATS_LIBEXEC:$PATH"
 
-unset count_flag pretty log_file
+unset count_flag pretty log_file filter
 [ -t 0 ] && [ -t 1 ] && pretty="1"
 [ -n "$CI" ] && pretty=""
 
@@ -117,6 +118,16 @@ while [[ $# -gt 0 ]]; do
         log_file="$2"
         shift
         ;;
+      "-f" | "--filter" )
+        # Bail out if the option is specified in a group or it's not
+        # given a value
+        if [ "$opt_grouped" = "true" ] || [ "$2" = "" ]; then
+            usage >&2
+            exit 1
+        fi
+        filter="$2"
+        shift
+        ;;
       * )
         usage >&2
         exit 1
@@ -133,6 +144,7 @@ if [ -n "$log_file" ]; then
 fi
 
 export BATS_LOG_FILE="$log_file"
+export BATS_FILTER="$filter"
 
 if [ "${#arguments[@]}" -eq 0 ]; then
   usage >&2
