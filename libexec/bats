@@ -7,7 +7,7 @@ version() {
 
 usage() {
   version
-  echo "Usage: bats [-c] [-p | -t] <test> [<test> ...]"
+  echo "Usage: bats [-c] [-p | -t] [-l <file>] [-f <pattern>] <test> [<test> ...]"
 }
 
 help() {
@@ -21,6 +21,8 @@ help() {
   echo "  -p, --pretty   Show results in pretty format (default for terminals)"
   echo "  -t, --tap      Show results in TAP format"
   echo "  -v, --version  Display the version number"
+  echo "  -l, --logfile  Print logs to specified file"
+  echo "  -f, --filter   Filter test cases by specified pattern"
   echo
   echo "  For more information, see https://github.com/sstephenson/bats"
   echo
@@ -57,54 +59,92 @@ export BATS_PREFIX="$(abs_dirname "$BATS_LIBEXEC")"
 export BATS_CWD="$(abs_dirname .)"
 export PATH="$BATS_LIBEXEC:$PATH"
 
-options=()
-arguments=()
-for arg in "$@"; do
-  if [ "${arg:0:1}" = "-" ]; then
-    if [ "${arg:1:1}" = "-" ]; then
-      options[${#options[*]}]="${arg:2}"
-    else
-      index=1
-      while option="${arg:$index:1}"; do
-        [ -n "$option" ] || break
-        options[${#options[*]}]="$option"
-        let index+=1
-      done
-    fi
-  else
-    arguments[${#arguments[*]}]="$arg"
-  fi
-done
-
-unset count_flag pretty
+unset count_flag pretty log_file filter
 [ -t 0 ] && [ -t 1 ] && pretty="1"
 [ -n "$CI" ] && pretty=""
 
-for option in "${options[@]}"; do
-  case "$option" in
-  "h" | "help" )
-    help
-    exit 0
-    ;;
-  "v" | "version" )
-    version
-    exit 0
-    ;;
-  "c" | "count" )
-    count_flag="-c"
-    ;;
-  "t" | "tap" )
-    pretty=""
-    ;;
-  "p" | "pretty" )
-    pretty="1"
-    ;;
-  * )
-    usage >&2
-    exit 1
-    ;;
-  esac
+arguments=()
+
+while [[ $# -gt 0 ]]; do
+  arg="$1"
+
+  if [ ! ${arg:0:1} = "-" ]; then
+    arguments[${#arguments[*]}]="$arg"
+    shift
+    continue
+  fi
+
+  options=()
+  pat="^-[a-z][a-z]+"
+  opt_grouped="false" #whether a option is in a group or not
+  if [[ $arg =~ $pat ]]; then
+    index=1
+    while opt="${arg:$index:1}"; do
+      [ -n "$opt" ] || break
+      options[${#options[*]}]="-$opt"
+      let index+=1
+    done
+    opt_grouped="true"
+  else
+    options[${#options[*]}]=$arg
+  fi
+
+  for opt in ${options[@]}; do
+      case $opt in
+      "-h" | "--help" )
+        help
+        exit 0
+        ;;
+      "-v" | "--version" )
+        version
+        exit 0
+        ;;
+      "-c" | "--count" )
+        count_flag="-c"
+        ;;
+      "-t" | "--tap" )
+        pretty=""
+        ;;
+      "-p" | "--pretty" )
+        pretty="1"
+        ;;
+      "-l" | "--logfile" )
+        # Bail out if the option is specified in a group or it's not
+        # given a value
+        if [ "$opt_grouped" = "true" ] || [ "$2" = "" ]; then
+            usage >&2
+            exit 1
+        fi
+        log_file="$2"
+        shift
+        ;;
+      "-f" | "--filter" )
+        # Bail out if the option is specified in a group or it's not
+        # given a value
+        if [ "$opt_grouped" = "true" ] || [ "$2" = "" ]; then
+            usage >&2
+            exit 1
+        fi
+        filter="$2"
+        shift
+        ;;
+      * )
+        usage >&2
+        exit 1
+        ;;
+      esac
+  done
+
+  shift
+  continue
 done
+
+if [ -n "$log_file" ]; then
+    echo -n > $log_file
+fi
+
+export BATS_LOG_FILE="$log_file"
+export BATS_FILTER="$filter"
 
 if [ "${#arguments[@]}" -eq 0 ]; then
   usage >&2
