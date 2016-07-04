@@ -30,6 +30,12 @@ Bash's `errexit` (`set -e`) option when running test cases. If every
 command in the test case exits with a `0` status code (success), the
 test passes. In this way, each line is an assertion of truth.
 
+## Installation
+
+You can install this globally with bpkg.
+
+    curl -Lo- http://get.bpkg.io | sudo bash
+    sudo bpkg install gzankevich/bats
 
 ## Running tests
 
