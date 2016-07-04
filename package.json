@@ -1,8 +1,7 @@
 {
   "name": "bats",
-  "version": "v0.4.0",
-  "description": "Bash Automated Testing System",
-  "install": "./install.sh ${PREFIX:-/usr/local}",
-  "scripts": [ "libexec/bats", "libexec/bats-exec-suite", "libexec/bats-exec-test", "libexec/bats-format-tap-stream", "libexec/bats-preprocess", "bin/bats" ]
+  "version": "1.0",
+  "description": "Bats is a TAP-compliant testing framework for Bash. It provides a simple way to verify that the UNIX programs you write behave as expected",
+  "install": "./install.sh",
+  "global": "true"
 }
-
