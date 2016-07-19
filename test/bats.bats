@@ -224,7 +224,7 @@ fixtures bats
   [ "${lines[1]}" = 'begin 1 a failing test' ]
   [ "${lines[2]}" = 'not ok 1 a failing test' ]
   [ "${lines[5]}" = 'begin 2 a passing test' ]
-  [ "${lines[6]}" = 'ok 2 a passing test' ]
+  [ "${lines[6]}" = 'ok 2 a passing test in 0sec' ]
 }
 
 @test "pretty and tap formats" {

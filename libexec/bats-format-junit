@@ -28,19 +28,19 @@ footer() {
 
 
 pass() {
-    echo "    <testcase classname=\"$class\" name=\"$name\"/>\n"
+    echo "    <testcase classname=\"${class}\" name=\"${name}\" time=\"${test_exec_time}\"/>\n"
 }
 
 fail() {
     echo "\
-    <testcase classname=\"$class\" name=\"$name\">
+    <testcase classname=\"${class}\" name=\"${name}\">
         <failure><![CDATA[$1]]></failure>
     </testcase>\n"
 }
 
 skip() {
     echo "\
-    <testcase classname=\"$class\" name=\"$name\">
+    <testcase classname=\"${class}\" name=\"${name}\" time=\"${test_exec_time}\">
         <skipped>$1</skipped>
     </testcase>\n"
 }
@@ -63,20 +63,19 @@ log() {
 
 flush_log() {
   if [[ -n "${_buffer_log}" ]]; then
-		buffer fail "${_buffer_log}"
-		_buffer_log=""
+    buffer fail "${_buffer_log}"
+    _buffer_log=""
   fi
 }
 
 finish() {
-    flush_log
-    header
-		flush
-		footer
+  flush_log
+  header
+  flush
+  footer
 }
 
 trap finish EXIT
-
 
 while IFS= read -r line; do
   case "$line" in
@@ -93,12 +92,17 @@ while IFS= read -r line; do
     name="${line#* $index }"
     ;;
   "ok "* )
-    skip_expr="ok $index # skip (\(([^)]*)\))?"
-    if [[ "$line" =~ $skip_expr ]]; then
+    expr_ok="ok $index (.*) in ([0-9]+)sec"
+    expr_skip="ok $index # skip (.*)"
+    if [[ "$line" =~ $expr_skip ]]; then
       let skipped+=1
       buffer skip "${BASH_REMATCH[2]}"
-    else
+    elif [[ "$line" =~ $expr_ok ]]; then
+      test_exec_time="${BASH_REMATCH[2]}"
       buffer pass
+    else
+      log "Wrong output format: ${line}"
+      let failures+=1
     fi
     ;;
   "not ok "* )
@@ -109,5 +113,4 @@ while IFS= read -r line; do
     ;;
   esac
 done
-
 
