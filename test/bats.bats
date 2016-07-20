@@ -150,6 +150,7 @@ fixtures bats
 }
 
 @test "failing test file outside of BATS_CWD" {
+  unset BATS_LIBEXEC BATS_PREFIX BATS_CWD
   cd "$TMP"
   run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]
