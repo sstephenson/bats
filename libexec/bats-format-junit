@@ -9,6 +9,7 @@ if [[ "$header" =~ $header_pattern ]]; then
   index=0
   failures=0
   skipped=0
+  suitetest_exec_time=0
   name=""
 else
   # If the first line isn't a TAP plan, print it and pass the rest through
@@ -19,7 +20,7 @@ fi
 header() {
     printf "\
 <?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<testsuite tests=\"${count}\" failures=\"${failures}\" skip=\"${skipped}\">\n"
+<testsuite tests=\"${count}\" failures=\"${failures}\" skip=\"${skipped}\" time=\"${suitetest_exec_time}\">\n"
 }
 
 footer() {
@@ -99,6 +100,7 @@ while IFS= read -r line; do
       buffer skip "${BASH_REMATCH[2]}"
     elif [[ "$line" =~ $expr_ok ]]; then
       test_exec_time="${BASH_REMATCH[2]}"
+      suitetest_exec_time=$((suitetest_exec_time + test_exec_time))
       buffer pass
     else
       log "Wrong output format: ${line}"
