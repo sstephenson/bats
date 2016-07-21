@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-header_pattern='[0-9]+\.\.[0-9]+'
 IFS= read -r header
 
 index=0
@@ -32,7 +31,7 @@ pass() {
 
 fail() {
     echo "\
-    <testcase classname=\"${class}\" name=\"${name}\">
+    <testcase classname=\"${class}\" name=\"${name}\" time=\"${test_exec_time}\">
         <failure><![CDATA[$1]]></failure>
     </testcase>\n"
 }
@@ -72,7 +71,7 @@ finish_suite() {
       header
       flush
       footer
-    ) > "TestReport-${class}.xml"
+    ) > "TestReport-${class-case}.xml"
   }
   init_suite
 }
@@ -96,13 +95,14 @@ while IFS= read -r line; do
     ;;
   "ok "* )
     let count+=1
-    expr_ok="ok $index (.*) in ([0-9]+)sec"
+    expr_ok="ok $index .* in ([0-9]+)sec"
     expr_skip="ok $index # skip (.*)"
     if [[ "$line" =~ $expr_skip ]]; then
       let skipped+=1
-      buffer skip "${BASH_REMATCH[2]}"
+      test_exec_time=0
+      buffer skip "${BASH_REMATCH[1]}"
     elif [[ "$line" =~ $expr_ok ]]; then
-      test_exec_time="${BASH_REMATCH[2]}"
+      test_exec_time="${BASH_REMATCH[1]}"
       suitetest_exec_time=$((suitetest_exec_time + test_exec_time))
       buffer pass
     else
@@ -113,6 +113,11 @@ while IFS= read -r line; do
   "not ok "* )
     let count+=1
     let failures+=1
+    expr_notok="not ok $index .* in ([0-9]+)sec"
+    if [[ "$line" =~ $expr_notok ]]; then
+      test_exec_time="${BASH_REMATCH[1]}"
+      suitetest_exec_time=$((suitetest_exec_time + test_exec_time))
+    fi
     ;;
   "# "* )
     log "${line:2}"
