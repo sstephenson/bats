@@ -4,23 +4,21 @@ set -e
 header_pattern='[0-9]+\.\.[0-9]+'
 IFS= read -r header
 
-if [[ "$header" =~ $header_pattern ]]; then
-  count="${header:3}"
-  index=0
+index=0
+
+init_suite() {
+  count=0
   failures=0
   skipped=0
   suitetest_exec_time=0
   name=""
-else
-  # If the first line isn't a TAP plan, print it and pass the rest through
-  printf "%s\n" "$header"
-  exec cat
-fi
+  _buffer=""
+}
 
 header() {
     printf "\
 <?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<testsuite tests=\"${count}\" failures=\"${failures}\" skip=\"${skipped}\" time=\"${suitetest_exec_time}\">\n"
+<testsuite name=\"${class}\" tests=\"${count}\" failures=\"${failures}\" skip=\"${skipped}\" time=\"${suitetest_exec_time}\">\n"
 }
 
 footer() {
@@ -46,8 +44,6 @@ skip() {
     </testcase>\n"
 }
 
-_buffer=""
-
 buffer() {
   _buffer="${_buffer}$("$@")"
 }
@@ -69,19 +65,25 @@ flush_log() {
   fi
 }
 
-finish() {
-  flush_log
-  header
-  flush
-  footer
+finish_suite() {
+  [[ ${count} -gt 0 ]] && {
+    (
+      flush_log
+      header
+      flush
+      footer
+    ) > "TestReport-${class}.xml"
+  }
+  init_suite
 }
 
-trap finish EXIT
+trap finish_suite EXIT
 
 while IFS= read -r line; do
   case "$line" in
   "suite "*)
     flush_log
+    finish_suite
     suite_expr="suite (.*)"
     if [[ "$line" =~ $suite_expr ]]; then
       class="${BASH_REMATCH[1]}"
@@ -93,6 +95,7 @@ while IFS= read -r line; do
     name="${line#* $index }"
     ;;
   "ok "* )
+    let count+=1
     expr_ok="ok $index (.*) in ([0-9]+)sec"
     expr_skip="ok $index # skip (.*)"
     if [[ "$line" =~ $expr_skip ]]; then
@@ -108,6 +111,7 @@ while IFS= read -r line; do
     fi
     ;;
   "not ok "* )
+    let count+=1
     let failures+=1
     ;;
   "# "* )
