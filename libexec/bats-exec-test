@@ -271,7 +271,7 @@ bats_exit_trap() {
     status=0
   fi
 
-  if [[ -n $BATS_RECORD_DURATIONS && -n $BATS_TEST_DURATION ]]; then
+  if [[ -z $BATS_EXTENDED_SYNTAX && -n $BATS_RECORD_DURATIONS && -n $BATS_TEST_DURATION ]]; then
     echo "  ---" >&3
     echo "    duration_ms: $BATS_TEST_DURATION" >&3
     echo "  ..." >&3

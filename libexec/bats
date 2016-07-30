@@ -20,6 +20,7 @@ help() {
   echo "  -h, --help     Display this help message"
   echo "  -p, --pretty   Show results in pretty format (default for terminals)"
   echo "  -t, --tap      Show results in TAP format"
+  echo "  -d             Durations for TAP output with YAML format"
   echo "  -v, --version  Display the version number"
   echo
   echo "  For more information, see https://github.com/sstephenson/bats"
