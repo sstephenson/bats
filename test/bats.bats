@@ -262,3 +262,22 @@ fixtures bats
   [ $status -eq 0 ]
   [ "${lines[1]}" = "ok 1 loop_func" ]
 }
+
+@test "tests with durations" {
+  run bats -d $FIXTURE_ROOT/passing_failing_and_skipping.bats
+  [ "$status" -eq 1 ]
+  
+  [ "${lines[1]}"       =  'ok 1 a passing test' ]
+  [ "${lines[2]}"       =  '  ---' ]
+  [ "${lines[3]:0:17}"  =  '    duration_ms: ' ]
+  [ "${lines[4]}"       =  '  ...' ]
+  [ "${lines[5]}"       =  'ok 2 # skip a skipping test' ]
+  [ "${lines[6]}"       =  '  ---' ]
+  [ "${lines[7]:0:17}"  =  '    duration_ms: ' ]
+  [ "${lines[8]}"       =  '  ...' ]
+  [ "${lines[9]}"       =  'not ok 3 a failing test' ]
+  [ "${lines[10]:0:15}"      =  '# (in test file' ]
+  [ "${lines[12]}"      =  '  ---' ]
+  [ "${lines[13]:0:17}" =  '    duration_ms: ' ]
+  [ "${lines[14]}"      =  '  ...' ]
+}

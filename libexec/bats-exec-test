@@ -15,6 +15,12 @@ if [ "$1" = "-x" ]; then
   shift
 fi
 
+BATS_RECORD_DURATIONS=""
+if [ "$1" = "-d" ]; then
+  BATS_RECORD_DURATIONS=$1
+  shift
+fi
+
 BATS_TEST_FILENAME="$1"
 if [ -z "$BATS_TEST_FILENAME" ]; then
   echo "usage: bats-exec <filename>" >&2
@@ -236,6 +242,8 @@ bats_teardown_trap() {
     BATS_ERROR_STACK_TRACE=( "${BATS_CURRENT_STACK_TRACE[@]}" )
   fi
 
+  BATS_TEST_DURATION=$(( $(date +%s%N) / 1000000 - BATS_TEST_START_TIME ))
+
   bats_exit_trap
 }
 
@@ -263,6 +271,12 @@ bats_exit_trap() {
     status=0
   fi
 
+  if [[ -n $BATS_RECORD_DURATIONS && -n $BATS_TEST_DURATION ]]; then
+    echo "  ---" >&3
+    echo "    duration_ms: $BATS_TEST_DURATION" >&3
+    echo "  ..." >&3
+  fi
+
   rm -f "$BATS_OUT"
   exit "$status"
 }
@@ -272,7 +286,7 @@ bats_perform_tests() {
   test_number=1
   status=0
   for test_name in "$@"; do
-    "$0" $BATS_EXTENDED_SYNTAX "$BATS_TEST_FILENAME" "$test_name" "$test_number" || status=1
+    "$0" $BATS_EXTENDED_SYNTAX $BATS_RECORD_DURATIONS "$BATS_TEST_FILENAME" "$test_name" "$test_number" || status=1
     let test_number+=1
   done
   exit "$status"
@@ -288,10 +302,11 @@ bats_perform_test() {
     fi
 
     BATS_TEST_COMPLETED=""
+    BATS_TEST_START_TIME=$(($(date +%s%N)/1000000))
     BATS_TEARDOWN_COMPLETED=""
     trap "bats_debug_trap \"\$BASH_SOURCE\"" debug
     trap "bats_error_trap" err
-    trap "bats_teardown_trap" exit
+    trap "bats_teardown_trap $BATS_RECORD_DURATIONS" exit
     "$BATS_TEST_NAME" >>"$BATS_OUT" 2>&1
     BATS_TEST_COMPLETED=1
 
