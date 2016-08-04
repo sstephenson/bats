@@ -30,9 +30,13 @@ pass() {
 }
 
 fail() {
-    echo "\
+    printf "\
     <testcase classname=\"${class}\" name=\"${name}\" time=\"${test_exec_time}\">
-        <failure><![CDATA[$1]]></failure>
+        <failure><![CDATA["
+
+    echo -n "${1}"
+
+    printf "]]></failure>
     </testcase>\n"
 }
 
@@ -48,13 +52,14 @@ buffer() {
 }
 
 flush() {
-  printf "$_buffer"
+  echo "${_buffer}"
   _buffer=""
 }
 
 _buffer_log=""
 log() {
-    _buffer_log="${_buffer_log}\n$1"
+  _buffer_log="${_buffer_log}
+$1"
 }
 
 flush_log() {
