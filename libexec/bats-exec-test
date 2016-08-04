@@ -81,6 +81,7 @@ skip() {
 
 bats_test_begin() {
   BATS_TEST_DESCRIPTION="$1"
+  BATS_TEST_START_TIME=${SECONDS}
   if [ -n "$BATS_EXTENDED_SYNTAX" ]; then
     echo "begin $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION" >&3
   fi
@@ -252,14 +253,20 @@ bats_exit_trap() {
     fi
   fi
 
+  if [ -n "${skipped}" ] || [ -z "$BATS_EXTENDED_SYNTAX" ]; then
+      BATS_TEST_TIME=""
+  else
+      BATS_TEST_TIME=" in "$((SECONDS - BATS_TEST_START_TIME))"sec"
+  fi
+
   if [ -z "$BATS_TEST_COMPLETED" ] || [ -z "$BATS_TEARDOWN_COMPLETED" ]; then
-    echo "not ok $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION" >&3
+    echo "not ok $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION${BATS_TEST_TIME}" >&3
     bats_print_stack_trace "${BATS_ERROR_STACK_TRACE[@]}" >&3
     bats_print_failed_command "${BATS_ERROR_STACK_TRACE[${#BATS_ERROR_STACK_TRACE[@]}-1]}" "$BATS_ERROR_STATUS" >&3
     sed -e "s/^/# /" < "$BATS_OUT" >&3
     status=1
   else
-    echo "ok ${BATS_TEST_NUMBER}${skipped} ${BATS_TEST_DESCRIPTION}" >&3
+    echo "ok ${BATS_TEST_NUMBER}${skipped} ${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}" >&3
     status=0
   fi
 

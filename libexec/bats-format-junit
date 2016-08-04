@@ -1,0 +1,132 @@
+#!/usr/bin/env bash
+set -e
+
+IFS= read -r header
+
+index=0
+
+init_suite() {
+  count=0
+  failures=0
+  skipped=0
+  suitetest_exec_time=0
+  name=""
+  _buffer=""
+}
+
+header() {
+    printf "\
+<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<testsuite name=\"${class}\" tests=\"${count}\" failures=\"${failures}\" skip=\"${skipped}\" time=\"${suitetest_exec_time}\">\n"
+}
+
+footer() {
+    printf "</testsuite>\n"
+}
+
+
+pass() {
+    echo "    <testcase classname=\"${class}\" name=\"${name}\" time=\"${test_exec_time}\"/>\n"
+}
+
+fail() {
+    printf "\
+    <testcase classname=\"${class}\" name=\"${name}\" time=\"${test_exec_time}\">
+        <failure><![CDATA["
+
+    echo -n "${1}"
+
+    printf "]]></failure>
+    </testcase>\n"
+}
+
+skip() {
+    echo "\
+    <testcase classname=\"${class}\" name=\"${name}\" time=\"${test_exec_time}\">
+        <skipped>$1</skipped>
+    </testcase>\n"
+}
+
+buffer() {
+  _buffer="${_buffer}$("$@")"
+}
+
+flush() {
+  echo "${_buffer}"
+  _buffer=""
+}
+
+_buffer_log=""
+log() {
+  _buffer_log="${_buffer_log}
+$1"
+}
+
+flush_log() {
+  if [[ -n "${_buffer_log}" ]]; then
+    buffer fail "${_buffer_log}"
+    _buffer_log=""
+  fi
+}
+
+finish_suite() {
+  [[ ${count} -gt 0 ]] && {
+    (
+      flush_log
+      header
+      flush
+      footer
+    ) > "TestReport-${class-case}.xml"
+  }
+  init_suite
+}
+
+trap finish_suite EXIT
+
+while IFS= read -r line; do
+  case "$line" in
+  "suite "*)
+    flush_log
+    finish_suite
+    suite_expr="suite (.*)"
+    if [[ "$line" =~ $suite_expr ]]; then
+      class="${BASH_REMATCH[1]}"
+    fi
+    ;;
+  "begin "* )
+    flush_log
+    let index+=1
+    name="${line#* $index }"
+    ;;
+  "ok "* )
+    let count+=1
+    expr_ok="ok $index .* in ([0-9]+)sec"
+    expr_skip="ok $index # skip (.*)"
+    if [[ "$line" =~ $expr_skip ]]; then
+      let skipped+=1
+      test_exec_time=0
+      buffer skip "${BASH_REMATCH[1]}"
+    elif [[ "$line" =~ $expr_ok ]]; then
+      test_exec_time="${BASH_REMATCH[1]}"
+      suitetest_exec_time=$((suitetest_exec_time + test_exec_time))
+      buffer pass
+    else
+      log "Wrong output format: ${line}"
+      let failures+=1
+    fi
+    ;;
+  "not ok "* )
+    let count+=1
+    let failures+=1
+    expr_notok="not ok $index .* in ([0-9]+)sec"
+    if [[ "$line" =~ $expr_notok ]]; then
+      test_exec_time="${BASH_REMATCH[1]}"
+      suitetest_exec_time=$((suitetest_exec_time + test_exec_time))
+    fi
+    ;;
+  "# "* )
+    log "${line:2}"
+    ;;
+  esac
+done
+

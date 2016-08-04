@@ -20,6 +20,8 @@ help() {
   echo "  -h, --help     Display this help message"
   echo "  -p, --pretty   Show results in pretty format (default for terminals)"
   echo "  -t, --tap      Show results in TAP format"
+  echo "  -x, --extended Show results in extended TAP format"
+  echo "  -u, --junit    Show results in JUnit format, hudson compatible"
   echo "  -v, --version  Display the version number"
   echo
   echo "  For more information, see https://github.com/sstephenson/bats"
@@ -52,9 +54,9 @@ expand_path() {
   } || echo "$1"
 }
 
-BATS_LIBEXEC="$(abs_dirname "$0")"
-export BATS_PREFIX="$(abs_dirname "$BATS_LIBEXEC")"
-export BATS_CWD="$(abs_dirname .)"
+BATS_LIBEXEC="${BATS_LIBEXEC-$(abs_dirname "$0")}"
+export BATS_PREFIX="${BATS_PREFIX-$(abs_dirname "$BATS_LIBEXEC")}"
+export BATS_CWD="${BATS_CWD-$(abs_dirname .)}"
 export PATH="$BATS_LIBEXEC:$PATH"
 
 options=()
@@ -93,11 +95,18 @@ for option in "${options[@]}"; do
   "c" | "count" )
     count_flag="-c"
     ;;
+  "x" | "extended" )
+    pretty=""
+    extended_syntax_flag="-x"
+    ;;
   "t" | "tap" )
     pretty=""
     ;;
   "p" | "pretty" )
     pretty="1"
+    ;;
+  "u" | "junit" )
+    junit="1"
     ;;
   * )
     usage >&2
@@ -130,11 +139,13 @@ else
   command="bats-exec-suite"
 fi
 
-if [ -n "$pretty" ]; then
+if [ -n "$junit" ]; then
+  extended_syntax_flag="-x"
+  formatter="bats-format-junit"
+elif [ -n "$pretty" ]; then
   extended_syntax_flag="-x"
   formatter="bats-format-tap-stream"
 else
-  extended_syntax_flag=""
   formatter="cat"
 fi
 
