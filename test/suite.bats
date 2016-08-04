@@ -62,5 +62,5 @@ fixtures suite
   [ "${lines[5]}" = "begin 2 more truth" ]
   [ "${lines[6]}" = "ok 2 more truth in 0sec" ]
   [ "${lines[7]}" = "begin 3 quasi-truth" ]
-  [ "${lines[8]}" = "not ok 3 quasi-truth" ]
+  [ "${lines[8]}" = "not ok 3 quasi-truth in 0sec" ]
 }
