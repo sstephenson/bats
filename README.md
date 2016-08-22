@@ -61,6 +61,19 @@ You can force TAP output from a terminal by invoking Bats with the
     ok 1 addition using bc
     ok 2 addition using dc
 
+Additionally, using the -d parameter, you can time your tests and output the test durations in a common TAP extension format: YAML-ish.  Use this in conjuction with the [Jenkins TAP Plugin](https://wiki.jenkins-ci.org/display/JENKINS/TAP+Plugin) to display your test times!
+
+    $ bats --tap -d addition.bats
+    1..2
+    ok 1 addition using bc
+      ---
+        duration_ms: 21
+      ...
+    ok 2 addition using dc
+      ---
+        duration_ms: 22
+      ...
+
 ### Test suites
 
 You can invoke the `bats` interpreter with multiple test file
