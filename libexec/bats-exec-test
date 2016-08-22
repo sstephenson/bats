@@ -230,6 +230,18 @@ bats_error_trap() {
   trap - debug
 }
 
+
+get_mills_since_epoch() {
+  local ms_since_epoch=$(date +%s%N)
+  if [[ "$ms_since_epoch" == *N ]]; then
+        ms_since_epoch=$(( $(date +%s) * 1000 ))
+  else
+        ms_since_epoch=$(( ms_since_epoch / 1000000 ))
+  fi
+
+  echo $ms_since_epoch
+}
+
 bats_teardown_trap() {
   trap "bats_exit_trap" exit
   local status=0
@@ -242,7 +254,7 @@ bats_teardown_trap() {
     BATS_ERROR_STACK_TRACE=( "${BATS_CURRENT_STACK_TRACE[@]}" )
   fi
 
-  BATS_TEST_DURATION=$(( $(date +%s%N) / 1000000 - BATS_TEST_START_TIME ))
+  BATS_TEST_DURATION=$(( $(get_mills_since_epoch) - BATS_TEST_START_TIME ))
 
   bats_exit_trap
 }
@@ -302,7 +314,7 @@ bats_perform_test() {
     fi
 
     BATS_TEST_COMPLETED=""
-    BATS_TEST_START_TIME=$(($(date +%s%N)/1000000))
+    BATS_TEST_START_TIME=$(get_mills_since_epoch)
     BATS_TEARDOWN_COMPLETED=""
     trap "bats_debug_trap \"\$BASH_SOURCE\"" debug
     trap "bats_error_trap" err
