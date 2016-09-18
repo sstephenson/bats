@@ -12,6 +12,7 @@ if [[ "$header" =~ $header_pattern ]]; then
   index=0
   failures=0
   skipped=0
+  todo=0
   name=""
   count_column_width=$(( ${#count} * 2 + 2 ))
 else
@@ -51,6 +52,14 @@ skip() {
   advance
 }
 
+todo() {
+  local reason="$1"
+  [ -z "$reason" ] || reason=": $reason"
+  go_to_column 0
+  printf " - %s (todo%s)" "$name" "$reason"
+  advance
+}
+
 fail() {
   go_to_column 0
   set_color 1 bold
@@ -68,6 +77,10 @@ summary() {
   printf "\n%d test%s" "$count" "$(plural "$count")"
 
   printf ", %d failure%s" "$failures" "$(plural "$failures")"
+
+  if [ "$todo" -gt 0 ]; then
+    printf ", %d todo" "$todo"
+  fi
 
   if [ "$skipped" -gt 0 ]; then
     printf ", %d skipped" "$skipped"
@@ -144,13 +157,18 @@ while IFS= read -r line; do
     flush
     ;;
   "ok "* )
+    todo_expr="ok $index # TODO (\(([^)]*)\))?"
+    if [[ "$line" =~ $todo_expr ]]; then
+      let todo+=1
+      buffer todo "${BASH_REMATCH[2]}"
+    else
     skip_expr="ok $index # skip (\(([^)]*)\))?"
     if [[ "$line" =~ $skip_expr ]]; then
       let skipped+=1
       buffer skip "${BASH_REMATCH[2]}"
     else
       buffer pass
-    fi
+    fi; fi
     ;;
   "not ok "* )
     let failures+=1

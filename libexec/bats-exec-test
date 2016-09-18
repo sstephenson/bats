@@ -79,6 +79,25 @@ skip() {
   exit 0
 }
 
+TODO() {
+  BATS_TEST_TODO=${1:-1}
+  BATS_TEST_COMPLETED=1
+  exit 0
+}
+
+diag() {
+  BATS_TEST_DIAGNOSTICS=1
+  echo "$1" >>"$BATS_OUT"
+}
+
+fail() {
+  if test -n "$1" 
+  then
+    echo "Failed: $1" >>"$BATS_OUT"
+  fi
+  exit 0
+}
+
 bats_test_begin() {
   BATS_TEST_DESCRIPTION="$1"
   if [ -n "$BATS_EXTENDED_SYNTAX" ]; then
@@ -245,6 +264,12 @@ bats_exit_trap() {
   trap - err exit
 
   skipped=""
+  if [ -n "$BATS_TEST_TODO" ]; then
+    skipped=" # TODO"
+    if [ "1" != "$BATS_TEST_TODO" ]; then
+      skipped+=" ($BATS_TEST_TODO)"
+    fi
+  fi
   if [ -n "$BATS_TEST_SKIPPED" ]; then
     skipped=" # skip"
     if [ "1" != "$BATS_TEST_SKIPPED" ]; then
@@ -260,6 +285,10 @@ bats_exit_trap() {
     status=1
   else
     echo "ok ${BATS_TEST_NUMBER}${skipped} ${BATS_TEST_DESCRIPTION}" >&3
+    if test -n "$BATS_TEST_DIAGNOSTICS" -a -s "$BATS_OUT"
+    then
+      sed -e "s/^/# /" < "$BATS_OUT" >&3
+    fi
     status=0
   fi
 

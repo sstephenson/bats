@@ -52,6 +52,12 @@ fixtures bats
   [ "${lines[2]}" = "2 tests, 0 failures, 1 skipped" ]
 }
 
+@test "summary passing and todo tests" {
+  run filter_control_sequences bats -p $FIXTURE_ROOT/passing_and_todo.bats
+  [ $status -eq 0 ]
+  [ "${lines[2]}" = "2 tests, 0 failures, 1 todo" ]
+}
+
 @test "summary passing and failing tests" {
   run filter_control_sequences bats -p $FIXTURE_ROOT/failing_and_passing.bats
   [ $status -eq 0 ]
@@ -216,6 +222,13 @@ fixtures bats
   [ $status -eq 0 ]
   [ "${lines[1]}" = "ok 1 # skip a skipped test" ]
   [ "${lines[2]}" = "ok 2 # skip (a reason) a skipped test with a reason" ]
+}
+
+@test "todo tests" {
+  run bats "$FIXTURE_ROOT/todos.bats"
+  [ $status -eq 0 ]
+  [ "${lines[1]}" = "ok 1 # TODO a todo test" ]
+  [ "${lines[2]}" = "ok 2 # TODO (a reason) a todo test with a reason" ]
 }
 
 @test "extended syntax" {
