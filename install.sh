@@ -31,7 +31,7 @@ BATS_ROOT="$(abs_dirname "$0")"
 mkdir -p "$PREFIX"/{bin,libexec,share/man/man{1,7}}
 cp -R "$BATS_ROOT"/bin/* "$PREFIX"/bin
 cp -R "$BATS_ROOT"/libexec/* "$PREFIX"/libexec
-cp "$BATS_ROOT"/man/bats.1 "$PREFIX"/share/man/man1
-cp "$BATS_ROOT"/man/bats.7 "$PREFIX"/share/man/man7
+cp "$BATS_ROOT"/man/man1/bats.1 "$PREFIX"/share/man/man1
+cp "$BATS_ROOT"/man/man7/bats.7 "$PREFIX"/share/man/man7
 
 echo "Installed Bats to $PREFIX/bin/bats"
