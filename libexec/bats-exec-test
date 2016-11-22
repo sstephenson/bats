@@ -28,6 +28,7 @@ fi
 
 BATS_TEST_DIRNAME="$(dirname "$BATS_TEST_FILENAME")"
 BATS_TEST_NAMES=()
+BATS_PLUGIN_DIR="$HOME/.bats/plugins"
 
 load() {
   local name="$1"
@@ -45,6 +46,29 @@ load() {
   }
 
   source "${filename}"
+}
+
+load_plugin() {
+  local plugin_path="$BATS_PLUGIN_DIR/$1/$1.plugin.bats"
+  [ -f "$plugin_path" ] || {
+    echo "bats: plugin $1 does not exist" >&2
+    exit 1
+  }
+
+  source "$plugin_path"
+}
+
+load_batsrc() {
+  local local_batsrc_file="$(echo "$BATS_TEST_DIRNAME" \
+    | grep -o '.*/test')/.batsrc"
+  local global_batsrc_file="$HOME/.batsrc"
+  local batsrc
+  for batsrc in $local_batsrc_file $global_batsrc_file; do
+    if [ -f $batsrc ]; then
+      source $batsrc
+      break
+    fi
+  done
 }
 
 run() {
@@ -328,6 +352,8 @@ bats_evaluate_preprocessed_source() {
   fi
   source "$BATS_TEST_SOURCE"
 }
+
+load_batsrc
 
 exec 3<&1
 
