@@ -71,7 +71,7 @@ includes a convenient `load` command for sourcing a Bash source file
 relative to the location of the current test file. For example, if you
 have a Bats test in `test/foo.bats`, the command
 
-    load test_helper
+    load test_helper.bash
 
 will source the script `test/test_helper.bash` in your test file. This
 can be useful for sharing functions to set up your environment or load

@@ -1,4 +1,4 @@
-load "test_helper"
+load "test_helper.bash"
 
 @test "failing helper function" {
   true
