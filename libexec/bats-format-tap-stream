@@ -99,14 +99,14 @@ clear_to_end_of_line() {
 
 advance() {
   clear_to_end_of_line
-  echo
+  printf "\n"
   clear_color
 }
 
 set_color() {
   local color="$1"
   local weight="$2"
-  printf "\x1B[%d;%dm" $(( 30 + $color )) "$( [ "$weight" = "bold" ] && echo 1 || echo 22 )"
+  printf "\x1B[%d;%dm" $(( 30 + $color )) "$( [ "$weight" = "bold" ] && printf "1\n" || printf "22\n" )"
 }
 
 clear_color() {
@@ -114,7 +114,7 @@ clear_color() {
 }
 
 plural() {
-  [ "$1" -eq 1 ] || echo "s"
+  [ "$1" -eq 1 ] || printf "s\n"
 }
 
 _buffer=""

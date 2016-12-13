@@ -1,19 +1,19 @@
 @test "success writing to stdout" {
-  echo "success stdout 1"
-  echo "success stdout 2"
+  printf "success stdout 1\n"
+  printf "success stdout 2\n"
 }
 
 @test "success writing to stderr" {
-  echo "success stderr" >&2
+  printf "success stderr\n" >&2
 }
 
 @test "failure writing to stdout" {
-  echo "failure stdout 1"
-  echo "failure stdout 2"
+  printf "failure stdout 1\n"
+  printf "failure stdout 2\n"
   false
 }
 
 @test "failure writing to stderr" {
-  echo "failure stderr" >&2
+  printf "failure stderr\n" >&2
   false
 }

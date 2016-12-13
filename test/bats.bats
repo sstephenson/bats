@@ -1,4 +1,4 @@
-#!/usr/bin/env bats
+#!../libexec/bats
 
 load test_helper
 fixtures bats
