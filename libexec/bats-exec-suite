@@ -21,11 +21,11 @@ for filename in "$@"; do
 done
 
 if [ -n "$count_only_flag" ]; then
-  echo "$count"
+  printf "$count\n"
   exit
 fi
 
-echo "1..$count"
+printf "1..$count\n"
 status=0
 offset=0
 for filename in "$@"; do
@@ -36,15 +36,15 @@ for filename in "$@"; do
       case "$line" in
       "begin "* )
         let index+=1
-        echo "${line/ $index / $(($offset + $index)) }"
+        printf "${line/ $index / $(($offset + $index)) }\n"
         ;;
       "ok "* | "not ok "* )
         [ -n "$extended_syntax_flag" ] || let index+=1
-        echo "${line/ $index / $(($offset + $index)) }"
+        printf "${line/ $index / $(($offset + $index)) }\n"
         [ "${line:0:6}" != "not ok" ] || status=1
         ;;
       * )
-        echo "$line"
+        printf "$line\n"
         ;;
       esac
     done

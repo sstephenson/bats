@@ -1,7 +1,7 @@
 LOG="$TMP/teardown.log"
 
 teardown() {
-  echo "$BATS_TEST_NAME" >> "$LOG"
+  printf "$BATS_TEST_NAME\n" >> "$LOG"
 }
 
 @test "one" {

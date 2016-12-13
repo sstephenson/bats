@@ -16,7 +16,7 @@ if [[ "$header" =~ $header_pattern ]]; then
   count_column_width=$(( ${#count} * 2 + 2 ))
 else
   # If the first line isn't a TAP plan, print it and pass the rest through
-  printf "%s\n" "$header"
+  printf "%s" "$header\n"
   exec cat
 fi
 

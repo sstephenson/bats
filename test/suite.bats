@@ -1,4 +1,4 @@
-#!/usr/bin/env bats
+#!../libexec/bats
 
 load test_helper
 fixtures suite
@@ -30,25 +30,25 @@ fixtures suite
   run bats "$FIXTURE_ROOT/multiple"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..3" ]
-  echo "$output" | grep "^ok . truth"
-  echo "$output" | grep "^ok . more truth"
-  echo "$output" | grep "^ok . quasi-truth"
+  printf "$output\n" | grep "^ok . truth"
+  printf "$output\n" | grep "^ok . more truth"
+  printf "$output\n" | grep "^ok . quasi-truth"
 }
 
 @test "a failing test in a suite results in an error exit code" {
   FLUNK=1 run bats "$FIXTURE_ROOT/multiple"
   [ $status -eq 1 ]
   [ "${lines[0]}" = "1..3" ]
-  echo "$output" | grep "^not ok . quasi-truth"
+  printf "$output\n" | grep "^not ok . quasi-truth"
 }
 
 @test "running an ad-hoc suite by specifying multiple test files" {
   run bats "$FIXTURE_ROOT/multiple/a.bats" "$FIXTURE_ROOT/multiple/b.bats"
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..3" ]
-  echo "$output" | grep "^ok . truth"
-  echo "$output" | grep "^ok . more truth"
-  echo "$output" | grep "^ok . quasi-truth"
+  printf "$output\n" | grep "^ok . truth"
+  printf "$output\n" | grep "^ok . more truth"
+  printf "$output\n" | grep "^ok . quasi-truth"
 }
 
 @test "extended syntax in suite" {

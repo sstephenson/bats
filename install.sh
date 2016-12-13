@@ -21,8 +21,8 @@ abs_dirname() {
 
 PREFIX="$1"
 if [ -z "$1" ]; then
-  { echo "usage: $0 <prefix>"
-    echo "  e.g. $0 /usr/local"
+  { printf "usage: $0 <prefix>\n"
+    printf "  e.g. $0 /usr/local\n"
   } >&2
   exit 1
 fi
@@ -34,4 +34,4 @@ cp -R "$BATS_ROOT"/libexec/* "$PREFIX"/libexec
 cp "$BATS_ROOT"/man/bats.1 "$PREFIX"/share/man/man1
 cp "$BATS_ROOT"/man/bats.7 "$PREFIX"/share/man/man7
 
-echo "Installed Bats to $PREFIX/bin/bats"
+printf "Installed Bats to $PREFIX/bin/bats\n"

@@ -2,28 +2,28 @@
 set -e
 
 version() {
-  echo "Bats 0.4.0"
+  printf "Bats 0.4.0\n"
 }
 
 usage() {
   version
-  echo "Usage: bats [-c] [-p | -t] <test> [<test> ...]"
+  printf "Usage: bats [-c] [-p | -t] <test> [<test> ...]\n"
 }
 
 help() {
   usage
-  echo
-  echo "  <test> is the path to a Bats test file, or the path to a directory"
-  echo "  containing Bats test files."
-  echo
-  echo "  -c, --count    Count the number of test cases without running any tests"
-  echo "  -h, --help     Display this help message"
-  echo "  -p, --pretty   Show results in pretty format (default for terminals)"
-  echo "  -t, --tap      Show results in TAP format"
-  echo "  -v, --version  Display the version number"
-  echo
-  echo "  For more information, see https://github.com/sstephenson/bats"
-  echo
+  printf "\n"
+  printf "  <test> is the path to a Bats test file, or the path to a directory\n"
+  printf "  containing Bats test files.\n"
+  printf "\n"
+  printf "  -c, --count    Count the number of test cases without running any tests\n"
+  printf "  -h, --help     Display this help message\n"
+  printf "  -p, --pretty   Show results in pretty format (default for terminals)\n"
+  printf "  -t, --tap      Show results in TAP format\n"
+  printf "  -v, --version  Display the version number\n"
+  printf "\n"
+  printf "  For more information, see https://github.com/sstephenson/bats\n"
+  printf "\n"
 }
 
 resolve_link() {
@@ -48,8 +48,8 @@ expand_path() {
   { cd "$(dirname "$1")" 2>/dev/null
     local dirname="$PWD"
     cd "$OLDPWD"
-    echo "$dirname/$(basename "$1")"
-  } || echo "$1"
+    printf "$dirname/$(basename "$1")\n"
+  } || printf "$1\n"
 }
 
 BATS_LIBEXEC="$(abs_dirname "$0")"
