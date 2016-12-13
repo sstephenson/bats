@@ -17,10 +17,10 @@ fi
 
 BATS_TEST_FILENAME="$1"
 if [ -z "$BATS_TEST_FILENAME" ]; then
-  printf "usage: bats-exec <filename>\n" >&2
+  echo "usage: bats-exec <filename>" >&2
   exit 1
 elif [ ! -f "$BATS_TEST_FILENAME" ]; then
-  printf "bats: $BATS_TEST_FILENAME does not exist\n" >&2
+  echo "bats: $BATS_TEST_FILENAME does not exist" >&2
   exit 1
 else
   shift
@@ -40,7 +40,7 @@ load() {
   fi
 
   [ -f "$filename" ] || {
-    printf "bats: $filename does not exist\n" >&2
+    echo "bats: $filename does not exist" >&2
     exit 1
   }
 
@@ -82,7 +82,7 @@ skip() {
 bats_test_begin() {
   BATS_TEST_DESCRIPTION="$1"
   if [ -n "$BATS_EXTENDED_SYNTAX" ]; then
-    printf "begin $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION\n" >&3
+    echo "begin $BATS_TEST_NUMBER $BATS_TEST_DESCRIPTION" >&3
   fi
   setup
 }
@@ -128,14 +128,14 @@ bats_print_stack_trace() {
     local lineno="$(bats_frame_lineno "$frame")"
 
     if [ $index -eq 1 ]; then
-      printf -n "# (\n"
+      printf "# ("
     else
-      printf -n "#  \n"
+      printf "#  "
     fi
 
     local fn="$(bats_frame_function "$frame")"
     if [ "$fn" != "$BATS_TEST_NAME" ]; then
-      printf -n "from function \`$fn' \n"
+      printf "from function \`$fn' "
     fi
 
     if [ $index -eq $count ]; then
@@ -156,7 +156,7 @@ bats_print_failed_command() {
 
   local failed_line="$(bats_extract_line "$filename" "$lineno")"
   local failed_command="$(bats_strip_string "$failed_line")"
-  printf -n "#   \`${failed_command}' \n"
+  printf "#   \`${failed_command}' "
 
   if [ $status -eq 1 ]; then
     printf "failed\n"
@@ -198,7 +198,7 @@ bats_extract_line() {
 
 bats_strip_string() {
   local string="$1"
-  echo "%s" "$string" | sed -e "s/^[ "$'\t'"]*//" -e "s/[ "$'\t'"]*$//"
+  printf "%s" "$string" | sed -e "s/^[ "$'\t'"]*//" -e "s/[ "$'\t'"]*$//"
 }
 
 bats_trim_filename() {
@@ -313,7 +313,7 @@ BATS_OUT="${BATS_TMPNAME}.out"
 
 bats_preprocess_source() {
   BATS_TEST_SOURCE="${BATS_TMPNAME}.src"
-  { tr -d '\r' < "$BATS_TEST_FILENAME"; printf "\n"; } | bats-preprocess > "$BATS_TEST_SOURCE"
+  { tr -d '\r' < "$BATS_TEST_FILENAME"; echo; } | bats-preprocess > "$BATS_TEST_SOURCE"
   trap "bats_cleanup_preprocessed_source" err exit
   trap "bats_cleanup_preprocessed_source; exit 1" int
 }
