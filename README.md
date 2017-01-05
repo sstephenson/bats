@@ -65,8 +65,9 @@ You can force TAP output from a terminal by invoking Bats with the
 
 You can invoke the `bats` interpreter with multiple test file
 arguments, or with a path to a directory containing multiple `.bats`
-files. Bats will run each test file individually and aggregate the
-results. If any test case fails, `bats` exits with a `1` status code.
+and / or `.bats.sh` files. Bats will run each test file individually and
+aggregate the results. If any test case fails, `bats` exits with a `1` 
+status code.
 
 
 ## Writing tests
@@ -79,6 +80,29 @@ process.
 For more details about how Bats evaluates test files, see 
 [Bats Evaluation Process](https://github.com/sstephenson/bats/wiki/Bats-Evaluation-Process)
 on the wiki.
+
+### Bash-compatible convention syntax
+
+If your tools don't have built-in support for `.bats` syntax, you can
+still use Bats with its support for `.bats.sh` convention tests. Each
+function declaration starting with the `funciton` keyword is going to be
+converted to a Bats test. For example, running the following test file:
+
+```bash
+#!/usr/bin/env bats
+
+function test_using_bash_convention_syntax {
+  result="$(echo 2+2 | bc)"
+  [ "$result" -eq 4 ]
+}
+```
+
+will output:
+
+    $ bats bash_addition.bats.sh
+     ✓ test_using_bash_convention_syntax
+
+    1 tests, 0 failures
 
 ### `run`: Test other commands
 

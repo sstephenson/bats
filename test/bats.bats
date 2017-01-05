@@ -262,3 +262,15 @@ fixtures bats
   [ $status -eq 0 ]
   [ "${lines[1]}" = "ok 1 loop_func" ]
 }
+
+@test "runs a single explicitly passed .bats.sh file" {
+  run bats "$FIXTURE_ROOT/bash_tests/bash_test.bats.sh"
+  [ $status -eq 0 ]
+  [ "${lines[1]}" = "ok 1 test_bash_syntax" ]
+}
+
+@test "discovers .bats.sh test files" {
+  run bats "$FIXTURE_ROOT/bash_tests"
+  [ $status -eq 0 ]
+  [ "${lines[1]}" = "ok 1 test_bash_syntax" ]
+}
