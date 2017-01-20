@@ -116,11 +116,11 @@ for filename in "${arguments[@]}"; do
   if [ -d "$filename" ]; then
     shopt -s nullglob
     for suite_filename in "$(expand_path "$filename")"/*.bats; do
-      filenames["${#filenames[@]}"]="$suite_filename"
+      filenames[${#filenames[@]}]="$suite_filename"
     done
     shopt -u nullglob
   else
-    filenames["${#filenames[@]}"]="$(expand_path "$filename")"
+    filenames[${#filenames[@]}]="$(expand_path "$filename")"
   fi
 done
 

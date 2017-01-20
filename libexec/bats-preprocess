@@ -40,7 +40,7 @@ while IFS= read -r line; do
     body="${BASH_REMATCH[2]}"
     name="$(eval echo "$quoted_name")"
     encoded_name="$(encode_name "$name")"
-    tests["${#tests[@]}"]="$encoded_name"
+    tests[${#tests[@]}]="$encoded_name"
     echo "${encoded_name}() { bats_test_begin ${quoted_name} ${index}; ${body}"
   else
     printf "%s\n" "$line"

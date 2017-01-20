@@ -1,5 +1,6 @@
 language: c
-script: bin/bats --tap test
+script:
+  ./test-with-all-bashes.sh
 notifications:
   email:
     on_success: never

@@ -131,8 +131,9 @@ fixtures bats
   PASS=1 run bats "$FIXTURE_ROOT/failing_teardown.bats"
   [ $status -eq 1 ]
   [ "${lines[1]}" = 'not ok 1 truth' ]
-  [ "${lines[2]}" = "# (from function \`teardown' in test file $RELATIVE_FIXTURE_ROOT/failing_teardown.bats, line 2)" ]
-  [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed" ]
+  # some versions of bash 4.0.x format this error slightly differently
+  [ "${lines[2]}" = "# (from function \`teardown' in test file $RELATIVE_FIXTURE_ROOT/failing_teardown.bats, line 1)" ] || [ "${lines[2]}" = "# (from function \`teardown' in test file $RELATIVE_FIXTURE_ROOT/failing_teardown.bats, line 2)" ]
+  [ "${lines[3]}" = "#   \`teardown() {' failed" ] || [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed" ]
 }
 
 @test "failing test with teardown failure" {
@@ -146,7 +147,8 @@ fixtures bats
 @test "teardown failure with significant status" {
   PASS=1 STATUS=2 run bats "$FIXTURE_ROOT/failing_teardown.bats"
   [ $status -eq 1 ]
-  [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed with status 2" ]
+  # some versions of bash 4.0.x format this error slightly differently
+  [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed with status 2" ] || [ "${lines[3]}" = "#   \`teardown() {' failed with status 2" ]
 }
 
 @test "failing test file outside of BATS_CWD" {
