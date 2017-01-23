@@ -35,8 +35,11 @@ load() {
 
   if [ "${name:0:1}" = "/" ]; then
     filename="${name}"
-  else
-    filename="$BATS_TEST_DIRNAME/${name}.bash"
+  else if [ -f "$BATS_TEST_DIRNAME/${name}" ] ; then
+      filename="$BATS_TEST_DIRNAME/${name}"
+      else
+      filename="$BATS_TEST_DIRNAME/${name}.bash"
+    fi
   fi
 
   [ -f "$filename" ] || {
