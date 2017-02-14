@@ -166,28 +166,22 @@ bats_print_failed_command() {
 }
 
 bats_frame_lineno() {
-  local frame="$1"
-  local lineno="${frame%% *}"
-  echo "$lineno"
+  printf '%s\n' "${1%% *}"
 }
 
 bats_frame_function() {
-  local frame="$1"
-  local rest="${frame#* }"
-  local fn="${rest%% *}"
-  echo "$fn"
+  local __bff_function="${1#* }"
+  printf '%s\n' "${__bff_function%% *}"
 }
 
 bats_frame_filename() {
-  local frame="$1"
-  local rest="${frame#* }"
-  local filename="${rest#* }"
+  local __bff_filename="${1#* }"
+  __bff_filename="${__bff_filename#* }"
 
-  if [ "$filename" = "$BATS_TEST_SOURCE" ]; then
-    echo "$BATS_TEST_FILENAME"
-  else
-    echo "$filename"
+  if [ "$__bff_filename" = "$BATS_TEST_SOURCE" ]; then
+    __bff_filename="$BATS_TEST_FILENAME"
   fi
+  printf '%s\n' "$__bff_filename"
 }
 
 bats_extract_line() {
