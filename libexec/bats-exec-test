@@ -289,7 +289,7 @@ bats_perform_tests() {
 
 bats_perform_test() {
   BATS_TEST_NAME="$1"
-  if [ "$(type -t "$BATS_TEST_NAME" || true)" = "function" ]; then
+  if declare -F "$BATS_TEST_NAME" >/dev/null; then
     BATS_TEST_NUMBER="$2"
     if [ -z "$BATS_TEST_NUMBER" ]; then
       echo "1..1"
