@@ -157,13 +157,12 @@ bats_print_failed_command() {
   local status="$2"
   local filename
   local lineno
+  local failed_line
+  local failed_command
 
   bats_frame_filename "$frame" 'filename'
   bats_frame_lineno "$frame" 'lineno'
-
-  local failed_line="$(bats_extract_line "$filename" "$lineno")"
-  local failed_command
-
+  bats_extract_line "$filename" "$lineno" 'failed_line'
   bats_strip_string "$failed_line" 'failed_command'
   printf '%s' "#   \`${failed_command}' "
 
@@ -194,9 +193,15 @@ bats_frame_filename() {
 }
 
 bats_extract_line() {
-  local filename="$1"
-  local lineno="$2"
-  sed -n "${lineno}p" "$filename"
+  local __bats_extract_line_line
+  local __bats_extract_line_index='0'
+
+  while IFS= read -r __bats_extract_line_line; do
+    if [[ "$((++__bats_extract_line_index))" -eq "$2" ]]; then
+      printf -v "$3" '%s' "${__bats_extract_line_line%$'\r'}"
+      break
+    fi
+  done <"$1"
 }
 
 bats_strip_string() {
