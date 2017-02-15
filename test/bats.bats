@@ -262,3 +262,17 @@ fixtures bats
   [ $status -eq 0 ]
   [ "${lines[1]}" = "ok 1 loop_func" ]
 }
+
+@test "expand variables in test name" {
+  SUITE='test/suite' run bats "$FIXTURE_ROOT/expand_var_in_test_name.bats"
+  [ $status -eq 0 ]
+  [ "${lines[1]}" = "ok 1 test/suite: test with variable in name" ]
+}
+
+@test "handle quoted and unquoted test names" {
+  run bats "$FIXTURE_ROOT/quoted_and_unquoted_test_names.bats"
+  [ $status -eq 0 ]
+  [ "${lines[1]}" = "ok 1 single-quoted name" ]
+  [ "${lines[2]}" = "ok 2 double-quoted name" ]
+  [ "${lines[3]}" = "ok 3 unquoted name" ]
+}

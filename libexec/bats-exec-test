@@ -26,7 +26,7 @@ else
   shift
 fi
 
-BATS_TEST_DIRNAME="$(dirname "$BATS_TEST_FILENAME")"
+BATS_TEST_DIRNAME="${BATS_TEST_FILENAME%/*}"
 BATS_TEST_NAMES=()
 
 load() {
@@ -39,10 +39,10 @@ load() {
     filename="$BATS_TEST_DIRNAME/${name}.bash"
   fi
 
-  [ -f "$filename" ] || {
+  if [[ ! -f "$filename" ]]; then
     echo "bats: $filename does not exist" >&2
     exit 1
-  }
+  fi
 
   source "${filename}"
 }
@@ -101,31 +101,33 @@ bats_capture_stack_trace() {
   local teardown_pattern=" teardown $BATS_TEST_SOURCE"
 
   local frame
-  local index=1
+  local i
 
-  while frame="$(caller "$index")"; do
+  for ((i=2; i != ${#FUNCNAME[@]}; ++i)); do
+    frame="${BASH_LINENO[$((i-1))]} ${FUNCNAME[$i]} ${BASH_SOURCE[$i]}"
     BATS_CURRENT_STACK_TRACE["${#BATS_CURRENT_STACK_TRACE[@]}"]="$frame"
     if [[ "$frame" = *"$test_pattern"     || \
           "$frame" = *"$setup_pattern"    || \
           "$frame" = *"$teardown_pattern" ]]; then
       break
-    else
-      let index+=1
     fi
   done
 
-  BATS_SOURCE="$(bats_frame_filename "${BATS_CURRENT_STACK_TRACE[0]}")"
-  BATS_LINENO="$(bats_frame_lineno "${BATS_CURRENT_STACK_TRACE[0]}")"
+  bats_frame_filename "${BATS_CURRENT_STACK_TRACE[0]}" 'BATS_SOURCE'
+  bats_frame_lineno "${BATS_CURRENT_STACK_TRACE[0]}" 'BATS_LINENO'
 }
 
 bats_print_stack_trace() {
   local frame
   local index=1
   local count="${#@}"
+  local filename
+  local lineno
 
   for frame in "$@"; do
-    local filename="$(bats_trim_filename "$(bats_frame_filename "$frame")")"
-    local lineno="$(bats_frame_lineno "$frame")"
+    bats_frame_filename "$frame" 'filename'
+    bats_trim_filename "$filename" 'filename'
+    bats_frame_lineno "$frame" 'lineno'
 
     if [ $index -eq 1 ]; then
       echo -n "# ("
@@ -133,7 +135,8 @@ bats_print_stack_trace() {
       echo -n "#  "
     fi
 
-    local fn="$(bats_frame_function "$frame")"
+    local fn
+    bats_frame_function "$frame" 'fn'
     if [ "$fn" != "$BATS_TEST_NAME" ]; then
       echo -n "from function \`$fn' "
     fi
@@ -151,12 +154,16 @@ bats_print_stack_trace() {
 bats_print_failed_command() {
   local frame="$1"
   local status="$2"
-  local filename="$(bats_frame_filename "$frame")"
-  local lineno="$(bats_frame_lineno "$frame")"
+  local filename
+  local lineno
+  local failed_line
+  local failed_command
 
-  local failed_line="$(bats_extract_line "$filename" "$lineno")"
-  local failed_command="$(bats_strip_string "$failed_line")"
-  echo -n "#   \`${failed_command}' "
+  bats_frame_filename "$frame" 'filename'
+  bats_frame_lineno "$frame" 'lineno'
+  bats_extract_line "$filename" "$lineno" 'failed_line'
+  bats_strip_string "$failed_line" 'failed_command'
+  printf '%s' "#   \`${failed_command}' "
 
   if [ $status -eq 1 ]; then
     echo "failed"
@@ -166,49 +173,46 @@ bats_print_failed_command() {
 }
 
 bats_frame_lineno() {
-  local frame="$1"
-  local lineno="${frame%% *}"
-  echo "$lineno"
+  printf -v "$2" '%s' "${1%% *}"
 }
 
 bats_frame_function() {
-  local frame="$1"
-  local rest="${frame#* }"
-  local fn="${rest%% *}"
-  echo "$fn"
+  local __bff_function="${1#* }"
+  printf -v "$2" '%s' "${__bff_function%% *}"
 }
 
 bats_frame_filename() {
-  local frame="$1"
-  local rest="${frame#* }"
-  local filename="${rest#* }"
+  local __bff_filename="${1#* }"
+  __bff_filename="${__bff_filename#* }"
 
-  if [ "$filename" = "$BATS_TEST_SOURCE" ]; then
-    echo "$BATS_TEST_FILENAME"
-  else
-    echo "$filename"
+  if [ "$__bff_filename" = "$BATS_TEST_SOURCE" ]; then
+    __bff_filename="$BATS_TEST_FILENAME"
   fi
+  printf -v "$2" '%s' "$__bff_filename"
 }
 
 bats_extract_line() {
-  local filename="$1"
-  local lineno="$2"
-  sed -n "${lineno}p" "$filename"
+  local __bats_extract_line_line
+  local __bats_extract_line_index='0'
+
+  while IFS= read -r __bats_extract_line_line; do
+    if [[ "$((++__bats_extract_line_index))" -eq "$2" ]]; then
+      printf -v "$3" '%s' "${__bats_extract_line_line%$'\r'}"
+      break
+    fi
+  done <"$1"
 }
 
 bats_strip_string() {
-  local string="$1"
-  printf "%s" "$string" | sed -e "s/^[ "$'\t'"]*//" -e "s/[ "$'\t'"]*$//"
+  [[ "$1" =~ ^[[:space:]]*(.*)[[:space:]]*$ ]]
+  printf -v "$2" '%s' "${BASH_REMATCH[1]}"
 }
 
 bats_trim_filename() {
-  local filename="$1"
-  local length="${#BATS_CWD}"
-
-  if [ "${filename:0:length+1}" = "${BATS_CWD}/" ]; then
-    echo "${filename:length+1}"
+  if [[ "$1" =~ ^${BATS_CWD}/ ]]; then
+    printf -v "$2" '%s' "${1#$BATS_CWD/}"
   else
-    echo "$filename"
+    printf -v "$2" '%s' "$1"
   fi
 }
 
@@ -218,13 +222,22 @@ bats_debug_trap() {
   fi
 }
 
+# When running under Bash 3.2.57(1)-release on macOS, the `ERR` trap may not
+# always fire, but the `EXIT` trap will. For this reason we call it at the very
+# beginning of `bats_teardown_trap` (the `DEBUG` trap for the call will move
+# `BATS_CURRENT_STACK_TRACE` to `BATS_PREVIOUS_STACK_TRACE`) and check the value
+# of `$?` before taking other actions.
 bats_error_trap() {
-  BATS_ERROR_STATUS="$?"
-  BATS_ERROR_STACK_TRACE=( "${BATS_PREVIOUS_STACK_TRACE[@]}" )
-  trap - debug
+  local status="$?"
+  if [[ "$status" -ne '0' ]]; then
+    BATS_ERROR_STATUS="$status"
+    BATS_ERROR_STACK_TRACE=( "${BATS_PREVIOUS_STACK_TRACE[@]}" )
+    trap - debug
+  fi
 }
 
 bats_teardown_trap() {
+  bats_error_trap
   trap "bats_exit_trap" exit
   local status=0
   teardown >>"$BATS_OUT" 2>&1 || status="$?"
@@ -280,7 +293,7 @@ bats_perform_tests() {
 
 bats_perform_test() {
   BATS_TEST_NAME="$1"
-  if [ "$(type -t "$BATS_TEST_NAME" || true)" = "function" ]; then
+  if declare -F "$BATS_TEST_NAME" >/dev/null; then
     BATS_TEST_NUMBER="$2"
     if [ -z "$BATS_TEST_NUMBER" ]; then
       echo "1..1"
@@ -313,7 +326,7 @@ BATS_OUT="${BATS_TMPNAME}.out"
 
 bats_preprocess_source() {
   BATS_TEST_SOURCE="${BATS_TMPNAME}.src"
-  { tr -d '\r' < "$BATS_TEST_FILENAME"; echo; } | bats-preprocess > "$BATS_TEST_SOURCE"
+  . bats-preprocess <<< "$(< "$BATS_TEST_FILENAME")"$'\n' > "$BATS_TEST_SOURCE"
   trap "bats_cleanup_preprocessed_source" err exit
   trap "bats_cleanup_preprocessed_source; exit 1" int
 }
