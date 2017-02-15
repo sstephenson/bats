@@ -6,6 +6,6 @@
   true
 }
 
-@test unquoted {
+@test unquoted name {
   true
 }
