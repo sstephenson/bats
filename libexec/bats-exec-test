@@ -218,13 +218,22 @@ bats_debug_trap() {
   fi
 }
 
+# When running under Bash 3.2.57(1)-release on macOS, the `ERR` trap may not
+# always fire, but the `EXIT` trap will. For this reason we call it at the very
+# beginning of `bats_teardown_trap` (the `DEBUG` trap for the call will move
+# `BATS_CURRENT_STACK_TRACE` to `BATS_PREVIOUS_STACK_TRACE`) and check the value
+# of `$?` before taking other actions.
 bats_error_trap() {
-  BATS_ERROR_STATUS="$?"
-  BATS_ERROR_STACK_TRACE=( "${BATS_PREVIOUS_STACK_TRACE[@]}" )
-  trap - debug
+  local status="$?"
+  if [[ "$status" -ne '0' ]]; then
+    BATS_ERROR_STATUS="$status"
+    BATS_ERROR_STACK_TRACE=( "${BATS_PREVIOUS_STACK_TRACE[@]}" )
+    trap - debug
+  fi
 }
 
 bats_teardown_trap() {
+  bats_error_trap
   trap "bats_exit_trap" exit
   local status=0
   teardown >>"$BATS_OUT" 2>&1 || status="$?"
