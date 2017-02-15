@@ -39,10 +39,10 @@ load() {
     filename="$BATS_TEST_DIRNAME/${name}.bash"
   fi
 
-  [ -f "$filename" ] || {
+  if [[ ! -f "$filename" ]]; then
     echo "bats: $filename does not exist" >&2
     exit 1
-  }
+  fi
 
   source "${filename}"
 }
