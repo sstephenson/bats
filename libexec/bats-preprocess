@@ -33,18 +33,18 @@ encode_name() {
 
 tests=()
 index=0
-pattern='^ *@test  *([^ ].*)  *\{ *(.*)$'
+pattern='^ *@test +(.+) +\{ *(.*)$'
 
 while IFS= read -r line; do
   line="${line//$'\r'}"
   let index+=1
   if [[ "$line" =~ $pattern ]]; then
-    quoted_name="${BASH_REMATCH[1]}"
+    name="${BASH_REMATCH[1]#[\'\"]}"
+    name="${name%[\'\"]}"
     body="${BASH_REMATCH[2]}"
-    name="$(eval echo "$quoted_name")"
     encode_name "$name" 'encoded_name'
     tests["${#tests[@]}"]="$encoded_name"
-    echo "${encoded_name}() { bats_test_begin ${quoted_name} ${index}; ${body}"
+    echo "${encoded_name}() { bats_test_begin \"${name}\" ${index}; ${body}"
   else
     printf "%s\n" "$line"
   fi

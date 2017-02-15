@@ -274,5 +274,5 @@ fixtures bats
   [ $status -eq 0 ]
   [ "${lines[1]}" = "ok 1 single-quoted name" ]
   [ "${lines[2]}" = "ok 2 double-quoted name" ]
-  [ "${lines[3]}" = "ok 3 unquoted" ]
+  [ "${lines[3]}" = "ok 3 unquoted name" ]
 }
