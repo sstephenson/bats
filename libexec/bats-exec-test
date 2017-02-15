@@ -162,8 +162,10 @@ bats_print_failed_command() {
   bats_frame_lineno "$frame" 'lineno'
 
   local failed_line="$(bats_extract_line "$filename" "$lineno")"
-  local failed_command="$(bats_strip_string "$failed_line")"
-  echo -n "#   \`${failed_command}' "
+  local failed_command
+
+  bats_strip_string "$failed_line" 'failed_command'
+  printf '%s' "#   \`${failed_command}' "
 
   if [ $status -eq 1 ]; then
     echo "failed"
@@ -198,8 +200,8 @@ bats_extract_line() {
 }
 
 bats_strip_string() {
-  local string="$1"
-  printf "%s" "$string" | sed -e "s/^[ "$'\t'"]*//" -e "s/[ "$'\t'"]*$//"
+  [[ "$1" =~ ^[[:space:]]*(.*)[[:space:]]*$ ]]
+  printf -v "$2" '%s' "${BASH_REMATCH[1]}"
 }
 
 bats_trim_filename() {
