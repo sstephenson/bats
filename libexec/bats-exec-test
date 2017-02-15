@@ -127,7 +127,7 @@ bats_print_stack_trace() {
 
   for frame in "$@"; do
     bats_frame_filename "$frame" 'filename'
-    filename="$(bats_trim_filename "$filename")"
+    bats_trim_filename "$filename" 'filename'
     bats_frame_lineno "$frame" 'lineno'
 
     if [ $index -eq 1 ]; then
@@ -203,13 +203,10 @@ bats_strip_string() {
 }
 
 bats_trim_filename() {
-  local filename="$1"
-  local length="${#BATS_CWD}"
-
-  if [ "${filename:0:length+1}" = "${BATS_CWD}/" ]; then
-    echo "${filename:length+1}"
+  if [[ "$1" =~ ^${BATS_CWD}/ ]]; then
+    printf -v "$2" '%s' "${1#$BATS_CWD/}"
   else
-    echo "$filename"
+    printf -v "$2" '%s' "$1"
   fi
 }
 
