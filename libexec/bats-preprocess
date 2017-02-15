@@ -34,6 +34,7 @@ index=0
 pattern='^ *@test  *([^ ].*)  *\{ *(.*)$'
 
 while IFS= read -r line; do
+  line="${line//$'\r'}"
   let index+=1
   if [[ "$line" =~ $pattern ]]; then
     quoted_name="${BASH_REMATCH[1]}"
