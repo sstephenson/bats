@@ -30,6 +30,7 @@ Bash's `errexit` (`set -e`) option when running test cases. If every
 command in the test case exits with a `0` status code (success), the
 test passes. In this way, each line is an assertion of truth.
 
+Bats supports Bash version 3.1 and later.
 
 ## Running tests
 

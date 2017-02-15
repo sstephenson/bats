@@ -89,7 +89,7 @@ bats_test_begin() {
 
 bats_test_function() {
   local test_name="$1"
-  BATS_TEST_NAMES["${#BATS_TEST_NAMES[@]}"]="$test_name"
+  BATS_TEST_NAMES[${#BATS_TEST_NAMES[@]}]="$test_name"
 }
 
 bats_capture_stack_trace() {
@@ -104,7 +104,7 @@ bats_capture_stack_trace() {
   local index=1
 
   while frame="$(caller "$index")"; do
-    BATS_CURRENT_STACK_TRACE["${#BATS_CURRENT_STACK_TRACE[@]}"]="$frame"
+    BATS_CURRENT_STACK_TRACE[${#BATS_CURRENT_STACK_TRACE[@]}]="$frame"
     if [[ "$frame" = *"$test_pattern"     || \
           "$frame" = *"$setup_pattern"    || \
           "$frame" = *"$teardown_pattern" ]]; then
