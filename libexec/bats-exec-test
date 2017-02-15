@@ -101,16 +101,15 @@ bats_capture_stack_trace() {
   local teardown_pattern=" teardown $BATS_TEST_SOURCE"
 
   local frame
-  local index=1
+  local i
 
-  while frame="$(caller "$index")"; do
+  for ((i=2; i != ${#FUNCNAME[@]}; ++i)); do
+    frame="${BASH_LINENO[$((i-1))]} ${FUNCNAME[$i]} ${BASH_SOURCE[$i]}"
     BATS_CURRENT_STACK_TRACE["${#BATS_CURRENT_STACK_TRACE[@]}"]="$frame"
     if [[ "$frame" = *"$test_pattern"     || \
           "$frame" = *"$setup_pattern"    || \
           "$frame" = *"$teardown_pattern" ]]; then
       break
-    else
-      let index+=1
     fi
   done
 
