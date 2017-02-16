@@ -1,5 +1,15 @@
 language: c
+
+matrix:
+    include:
+        - os: linux
+          dist: trusty
+          sudo: required
+        - os: linux
+        - os: osx
+
 script: bin/bats --tap test
+
 notifications:
   email:
     on_success: never
