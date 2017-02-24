@@ -1,1 +1,1 @@
-../libexec/bats
+../libexec/bats $@
