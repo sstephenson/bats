@@ -65,9 +65,15 @@ log() {
 }
 
 summary() {
-  printf "\n%d test%s" "$count" "$(plural "$count")"
+  printf "\n%d test" "$count"
+  if [[ "$count" -ne '1' ]]; then
+    printf 's'
+  fi
 
-  printf ", %d failure%s" "$failures" "$(plural "$failures")"
+  printf ", %d failure" "$failures"
+  if [[ "$failures" -ne '1' ]]; then
+    printf 's'
+  fi
 
   if [ "$skipped" -gt 0 ]; then
     printf ", %d skipped" "$skipped"
@@ -79,7 +85,9 @@ summary() {
 printf_with_truncation() {
   local width="$1"
   shift
-  local string="$(printf "$@")"
+  local string
+
+  printf -v 'string' -- "$@"
 
   if [ "${#string}" -gt "$width" ]; then
     printf "%s..." "${string:0:$(( $width - 4 ))}"
@@ -105,16 +113,16 @@ advance() {
 
 set_color() {
   local color="$1"
-  local weight="$2"
-  printf "\x1B[%d;%dm" $(( 30 + $color )) "$( [ "$weight" = "bold" ] && echo 1 || echo 22 )"
+  local weight='22'
+
+  if [[ "$2" == 'bold' ]]; then
+    weight='1'
+  fi
+  printf "\x1B[%d;%dm" $(( 30 + $color )) "$weight"
 }
 
 clear_color() {
   printf "\x1B[0m"
-}
-
-plural() {
-  [ "$1" -eq 1 ] || echo "s"
 }
 
 _buffer=""
