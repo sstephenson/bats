@@ -154,13 +154,11 @@ else
   command="bats-exec-suite"
 fi
 
-if [ -n "$pretty" ]; then
+set -o pipefail execfail
+if [ -z "$pretty" ]; then
+  exec "$command" $count_flag "${filenames[@]}"
+else
   extended_syntax_flag="-x"
   formatter="bats-format-tap-stream"
-else
-  extended_syntax_flag=""
-  formatter="cat"
+  exec "$command" $count_flag $extended_syntax_flag "${filenames[@]}" | "$formatter"
 fi
-
-set -o pipefail execfail
-exec "$command" $count_flag $extended_syntax_flag "${filenames[@]}" | "$formatter"
