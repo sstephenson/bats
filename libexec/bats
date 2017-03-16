@@ -51,7 +51,7 @@ abs_dirname() {
     path="$(resolve_link "$name")"
   done
 
-  pwd
+  printf -v "$2" -- '%s' "$PWD"
   cd "$cwd"
 }
 
@@ -63,9 +63,12 @@ expand_path() {
   } || echo "$1"
 }
 
-BATS_LIBEXEC="$(abs_dirname "$0")"
-export BATS_PREFIX="$(abs_dirname "$BATS_LIBEXEC")"
-export BATS_CWD="$(abs_dirname .)"
+abs_dirname "$0" 'BATS_LIBEXEC'
+abs_dirname "$BATS_LIBEXEC" 'BATS_PREFIX'
+abs_dirname '.' 'BATS_CWD'
+
+export BATS_PREFIX
+export BATS_CWD
 export PATH="$BATS_LIBEXEC:$PATH"
 
 options=()
