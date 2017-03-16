@@ -26,18 +26,29 @@ help() {
   echo
 }
 
+BATS_READLINK=
+
 resolve_link() {
-  $(type -p greadlink readlink | head -1) "$1"
+  if [[ -z "$BATS_READLINK" ]]; then
+    if command -v 'greadlink' >/dev/null; then
+      BATS_READLINK='greadlink'
+    elif command -v 'readlink' >/dev/null; then
+      BATS_READLINK='readlink'
+    else
+      BATS_READLINK='true'
+    fi
+  fi
+  "$BATS_READLINK" "$1" || return 0
 }
 
 abs_dirname() {
-  local cwd="$(pwd)"
+  local cwd="$PWD"
   local path="$1"
 
   while [ -n "$path" ]; do
     cd "${path%/*}"
     local name="${path##*/}"
-    path="$(resolve_link "$name" || true)"
+    path="$(resolve_link "$name")"
   done
 
   pwd
