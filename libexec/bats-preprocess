@@ -33,12 +33,11 @@ encode_name() {
 
 tests=()
 index=0
-pattern='^ *@test +(.+) +\{ *(.*)$'
 
 while IFS= read -r line; do
   line="${line//$'\r'}"
   let index+=1
-  if [[ "$line" =~ $pattern ]]; then
+  if [[ "$line" =~ $BATS_TEST_PATTERN ]]; then
     name="${BASH_REMATCH[1]#[\'\"]}"
     name="${name%[\'\"]}"
     body="${BASH_REMATCH[2]}"

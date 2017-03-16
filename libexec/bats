@@ -77,6 +77,7 @@ abs_dirname '.' 'BATS_CWD'
 
 export BATS_PREFIX
 export BATS_CWD
+export BATS_TEST_PATTERN='^ *@test +(.+) +\{ *(.*)$'
 export PATH="$BATS_LIBEXEC:$PATH"
 
 options=()
