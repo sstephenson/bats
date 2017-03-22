@@ -33,18 +33,38 @@ load() {
   local name="$1"
   local filename
 
-  if [ "${name:0:1}" = "/" ]; then
-    filename="${name}"
-  else
-    filename="$BATS_TEST_DIRNAME/${name}.bash"
+  # Argument is absolute, verify that the path exists and return after
+  # sourcing
+  if [[ "${name:0:1}" == "/" ]]; then
+    filename=$name
+
+    if [[ ! -f "$filename" ]]; then
+      echo "bats: $filename does not exist" >&2
+      exit 1
+    fi
+
+    source "$filename"
+    return
   fi
 
-  if [[ ! -f "$filename" ]]; then
-    echo "bats: $filename does not exist" >&2
-    exit 1
-  fi
+  # Set libpath with directory of current test file
+  # Defaults to BATS_LIB_PATH e.g. for testing
+  local libpath="${BATS_LIB_PATH:-$HOME/.bats/lib:/usr/lib/bats}"
+  libpath="$BATS_TEST_DIRNAME:$libpath"
 
-  source "${filename}"
+  # Test for library file in each libpath, source and return if it
+  # exists
+  for part in ${libpath//:/ }; do
+    filename="$part/$name.bash"
+
+    if [[ -f "$filename" ]]; then
+      source "$filename"
+      return
+    fi
+  done
+
+  echo "bats: No file $name in BATS_LIB_PATH found" >&2
+  exit 1
 }
 
 run() {
