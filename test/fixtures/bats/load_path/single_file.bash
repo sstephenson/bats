@@ -1,0 +1,3 @@
+lib_func() {
+    true
+}
