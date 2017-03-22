@@ -52,14 +52,23 @@ load() {
   local libpath="${BATS_LIB_PATH:-$HOME/.bats/lib:/usr/lib/bats}"
   libpath="$BATS_TEST_DIRNAME:$libpath"
 
-  # Test for library file in each libpath, source and return if it
-  # exists
-  for part in ${libpath//:/ }; do
-    filename="$part/$name.bash"
+  # Test for library in each libpath
+  for libdir in ${libpath//:/ }; do
+    dirname="$libdir/$name"
+    filename="$dirname.bash"
 
+    # Test for loading file of library
     if [[ -f "$filename" ]]; then
       source "$filename"
       return
+    fi
+
+    # Test for library and source all files within
+    if [[ -d "$dirname" ]]; then
+        for libfile in $dirname/*.bash; do
+            source $libfile
+        done
+        return
     fi
   done
 
