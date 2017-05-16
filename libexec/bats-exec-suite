@@ -17,7 +17,7 @@ trap "kill 0; exit 1" int
 
 count=0
 for filename in "$@"; do
-  let count+="$(bats-exec-test -c "$filename")"
+  let count+="$(bats-exec-test -c "$filename")" 1
 done
 
 if [ -n "$count_only_flag" ]; then
