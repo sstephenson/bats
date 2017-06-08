@@ -150,7 +150,7 @@ fixtures bats
 }
 
 @test "failing test file outside of BATS_CWD" {
-  cd "$TMP"
+  cd "$TMP" >/dev/null
   run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]
   [ "${lines[2]}" = "# (in test file $FIXTURE_ROOT/failing.bats, line 4)" ]
