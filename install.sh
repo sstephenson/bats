@@ -6,17 +6,22 @@ resolve_link() {
 }
 
 abs_dirname() {
-  local cwd="$(pwd)"
   local path="$1"
+  local save_cwd="$PWD"
+  local dir name
 
-  while [ -n "$path" ]; do
-    cd "${path%/*}"
-    local name="${path##*/}"
+  while [[ -n "$path" ]]; do
+    dir="${path%/*}"
+    if [[ "$dir" != "$path" ]]; then
+      cd "$dir"
+      name="${path##*/}"
+    else
+      name="$path"
+    fi
     path="$(resolve_link "$name" || true)"
   done
-
-  pwd
-  cd "$cwd"
+  echo "$PWD"
+  cd "$save_cwd"
 }
 
 PREFIX="$1"
