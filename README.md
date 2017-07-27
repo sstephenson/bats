@@ -13,12 +13,12 @@ description.
 
 @test "addition using bc" {
   result="$(echo 2+2 | bc)"
-  [ "$result" -eq 4 ]
+  [[ "$result" == '4' ]]
 }
 
 @test "addition using dc" {
   result="$(echo 2 2+p | dc)"
-  [ "$result" -eq 4 ]
+  [[ "$result" == '4' ]]
 }
 ```
 
@@ -29,7 +29,6 @@ Test cases consist of standard shell commands. Bats makes use of
 Bash's `errexit` (`set -e`) option when running test cases. If every
 command in the test case exits with a `0` status code (success), the
 test passes. In this way, each line is an assertion of truth.
-
 
 ## Running tests
 
@@ -95,8 +94,8 @@ an error message.
 ```bash
 @test "invoking foo with a nonexistent file prints an error" {
   run foo nonexistent_filename
-  [ "$status" -eq 1 ]
-  [ "$output" = "foo: no such file 'nonexistent_filename'" ]
+  (( status == 1 ))
+  [[ "$output" == "foo: no such file 'nonexistent_filename'" ]]
 }
 ```
 
@@ -112,8 +111,9 @@ the first line:
 ```bash
 @test "invoking foo without arguments prints usage" {
   run foo
-  [ "$status" -eq 1 ]
-  [ "${lines[0]}" = "usage: foo <filename>" ]
+  (( status == 1 ))
+  (( "${#lines[@]}" == 1 ))
+  [[ "${lines[0]}" == "usage: foo <filename>" ]]
 }
 ```
 
@@ -151,7 +151,7 @@ Optionally, you may include a reason for skipping:
 @test "A test I don't want to execute for now" {
   skip "This command will return zero soon, but not now"
   run foo
-  [ "$status" -eq 0 ]
+  (( status == 0 ))
 }
 ```
 
@@ -159,12 +159,12 @@ Or you can skip conditionally:
 
 ```bash
 @test "A test which should run" {
-  if [ foo != bar ]; then
+  if [[ foo != bar ]]; then
     skip "foo isn't bar"
   fi
 
   run foo
-  [ "$status" -eq 0 ]
+  (( status == 0 ))
 }
 ```
 
