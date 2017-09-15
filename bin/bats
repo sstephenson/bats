@@ -1,1 +1,1 @@
-../libexec/bats
+$(dirname $0)/../libexec/bats "$@"
