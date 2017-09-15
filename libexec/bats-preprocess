@@ -9,7 +9,7 @@ encode_name() {
     name="${name//_/-5f}"
     name="${name//-/-2d}"
     name="${name// /_}"
-    result+="$name"
+    result="$result$name"
   else
     local length="${#name}"
     local char i
@@ -17,11 +17,11 @@ encode_name() {
     for ((i=0; i<length; i++)); do
       char="${name:$i:1}"
       if [ "$char" = " " ]; then
-        result+="_"
+        result="$result_"
       elif [[ "$char" =~ [[:alnum:]] ]]; then
-        result+="$char"
+        result="$result$char"
       else
-        result+="$(printf -- "-%02x" \'"$char")"
+        result="$result$(printf -- "-%02x" \'"$char")"
       fi
     done
   fi
