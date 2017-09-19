@@ -1,3 +1,31 @@
+## BATS: Bash Automated Testing System (2017)
+
+### What is this repo?
+**Tuesday, September 19, 2017:** This is a mirrored fork of [bats](https://github.com/sstephenson/bats), at [0360811](https://github.com/sstephenson/bats/commit/03608115df2071fff4eaaff1605768c275e5f81f). It was created via `git clone --bare` and `git push --mirror`.
+
+#### Why was it created?
+The original bats repository needed new maintainers, and has not been actively maintained since 2013. While there were volunteers for maintainers, attempts to organize issues, and outstanding PRs, the lack of write-access to the repo hindered progress severely.
+
+## What's the plan and why?
+The rough plan, originally [outlined here](https://github.com/sstephenson/bats/issues/150#issuecomment-323845404) is to create a new, mirrored mainline (this repo!). An excerpt:
+
+> **1. Roadmap 1.0:**
+> There are already existing high-quality PRs, and often-requested features and issues, especially here at [#196](https://github.com/sstephenson/bats/issues/196). Leverage these and **consolidate into a single roadmap**.
+>
+>**2. Create or choose a fork or *mirror* of this repo to use as the new mainline:**
+>Repoint existing PRs (whichever ones are possible) to the new mainline, get that repo to a stable 1.0. IMO we should create an organization and grant 2-3 people admin and write access.
+>
+
+Doing it this way accomplishes two things:
+1. Removes the dependency on the original maintainer 
+2. Enables collaboration and contribution flow again
+3. Allows the possibility of merging back to original, or merging from original if or when the need arises
+4. Prevents lock-out by giving administrative access to more than one person, increases transferability
+
+
+---
+Original README is below:
+---
 # Bats: Bash Automated Testing System
 
 Bats is a [TAP](http://testanything.org)-compliant testing framework
