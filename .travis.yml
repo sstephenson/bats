@@ -1,5 +1,10 @@
 language: c
-script: bin/bats --tap test
+install:
+  - wget https://ftp.gnu.org/gnu/bash/bash-3.0.16.tar.gz
+  - tar -xzvf bash-3.0.16.tar.gz
+  - pushd bash-3.0.16 && ./configure --prefix=/opt/bash-3.0.16 && make && sudo make install && popd
+  - export PATH=/opt/bash-3.0.16/bin:$PATH
+script: bash --version && bin/bats --tap test
 notifications:
   email:
     on_success: never
