@@ -1,5 +1,6 @@
-## BATS: Bash Automated Testing System (2017)
+## BATS-core: Bash Automated Testing System (2017)
 
+### Background:
 ### What is this repo?
 **Tuesday, September 19, 2017:** This is a mirrored fork of [bats](https://github.com/sstephenson/bats), at [0360811](https://github.com/sstephenson/bats/commit/03608115df2071fff4eaaff1605768c275e5f81f). It was created via `git clone --bare` and `git push --mirror`.
 
@@ -23,8 +24,6 @@ Doing it this way accomplishes two things:
 4. Prevents lock-out by giving administrative access to more than one person, increases transferability
 
 
----
-Original README is below:
 ---
 # Bats: Bash Automated Testing System
 
