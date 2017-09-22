@@ -6,7 +6,7 @@ check_bash_version() {
     echo "Bats has known issues with old versions of Bash"
     echo "and doesn't work as expected, see issue #49 and #140"
     echo "in https://github.com/sstephenson/bats/issues/"
-    echo "Please use Bash versions greater or equal to 4.1"
+    echo "Please use Bash versions greater or equal than 4.1"
     exit 1
   fi
 }
