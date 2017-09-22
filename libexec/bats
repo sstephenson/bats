@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 set -e
 
+check_bash_version() {
+  if [ ${BASH_VERSINFO[0]} -lt 4 ] ; then
+    echo "Bats has known issues with old versions of Bash"
+    echo "and doesn't work as expected, see issue #49 and #140"
+    echo "in https://github.com/sstephenson/bats/issues/"
+    echo "Please use Bash versions greater or equal to 4.1"
+    exit 1
+  fi
+}
+
 version() {
   echo "Bats 0.4.0"
 }
@@ -52,6 +62,7 @@ expand_path() {
   } || echo "$1"
 }
 
+check_bash_version
 BATS_LIBEXEC="$(abs_dirname "$0")"
 export BATS_PREFIX="$(abs_dirname "$BATS_LIBEXEC")"
 export BATS_CWD="$(abs_dirname .)"
