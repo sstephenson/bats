@@ -1,5 +1,7 @@
 ## BATS-core: Bash Automated Testing System (2017)
 
+[![Build Status](https://travis-ci.org/bats-core/bats-core.svg?branch=master)](https://travis-ci.org/bats-core/bats-core)
+
 ### Background:
 ### What is this repo?
 **Tuesday, September 19, 2017:** This is a mirrored fork of [bats](https://github.com/sstephenson/bats), at [0360811](https://github.com/sstephenson/bats/commit/03608115df2071fff4eaaff1605768c275e5f81f). It was created via `git clone --bare` and `git push --mirror`.
