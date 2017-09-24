@@ -22,7 +22,7 @@ help() {
   echo "  -t, --tap      Show results in TAP format"
   echo "  -v, --version  Display the version number"
   echo
-  echo "  For more information, see https://github.com/sstephenson/bats"
+  echo "  For more information, see https://github.com/bats-core/bats-core"
   echo
 }
 

@@ -106,7 +106,7 @@ then iterates over the test cases and executes each one in its own
 process.
 
 For more details about how Bats evaluates test files, see 
-[Bats Evaluation Process](https://github.com/sstephenson/bats/wiki/Bats-Evaluation-Process)
+[Bats Evaluation Process](https://github.com/bats-core/bats-core/wiki/Bats-Evaluation-Process)
 on the wiki.
 
 ### `run`: Test other commands
@@ -239,7 +239,7 @@ Check out a copy of the Bats repository. Then, either add the Bats
 command with the location to the prefix in which you want to install
 Bats. For example, to install Bats into `/usr/local`,
 
-    $ git clone https://github.com/sstephenson/bats.git
+    $ git clone https://github.com/bats-core/bats-core.git
     $ cd bats
     $ ./install.sh /usr/local
 
@@ -250,15 +250,15 @@ have permission to write to the installation prefix.
 ## Support
 
 The Bats source code repository is [hosted on
-GitHub](https://github.com/sstephenson/bats). There you can file bugs
+GitHub](https://github.com/bats-core/bats-core). There you can file bugs
 on the issue tracker or submit tested pull requests for review.
 
 For real-world examples from open-source projects using Bats, see
-[Projects Using Bats](https://github.com/sstephenson/bats/wiki/Projects-Using-Bats)
+[Projects Using Bats](https://github.com/bats-core/bats-core/wiki/Projects-Using-Bats)
 on the wiki.
 
 To learn how to set up your editor for Bats syntax highlighting, see
-[Syntax Highlighting](https://github.com/sstephenson/bats/wiki/Syntax-Highlighting)
+[Syntax Highlighting](https://github.com/bats-core/bats-core/wiki/Syntax-Highlighting)
 on the wiki.
 
 
@@ -318,5 +318,9 @@ on the wiki.
 
 ---
 
-© 2014 Sam Stephenson. Bats is released under an MIT-style license;
+© 2017 Bianca Tamayo (bats-core organization)
+
+© 2014 Sam Stephenson
+
+Bats is released under an MIT-style license;
 see `LICENSE` for details.
