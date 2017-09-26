@@ -242,7 +242,7 @@ command with the location to the prefix in which you want to install
 Bats. For example, to install Bats into `/usr/local`,
 
     $ git clone https://github.com/bats-core/bats-core.git
-    $ cd bats
+    $ cd bats-core
     $ ./install.sh /usr/local
 
 Note that you may need to run `install.sh` with `sudo` if you do not
