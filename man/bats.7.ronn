@@ -110,6 +110,41 @@ Or you can skip conditionally:
     }
 
 
+THE TODO COMMAND
+----------------
+
+Tests can be marked as TODO by using the `todo` command at the point in a test before it completes.
+
+A passing test marked with TODO should be considered a "bonus", but both pass and fail are considered successful.
+
+See [the TAP specification](http://testanything.org/tap-specification.html) for more details on this feature.
+
+    @test "A test that may fail" {
+      todo
+      run foo
+      [ "$status" -eq 0 ]
+    }
+
+Optionally, you may include a reason for marking TODO:
+
+    @test "A test that may fail" {
+      todo "This command will return zero soon, but not now"
+      run foo
+      [ "$status" -eq 0 ]
+    }
+
+Or you can mark todo conditionally:
+
+    @test "A test which usually fails on a mac" {
+      if [ $(uname -s) == Darwin ]; then
+        todo "Get this working on a Mac"
+      fi
+
+      run foo
+      [ "$status" -eq 0 ]
+    }
+
+
 SETUP AND TEARDOWN FUNCTIONS
 ----------------------------
 

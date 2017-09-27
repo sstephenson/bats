@@ -64,6 +64,14 @@ log() {
   clear_color
 }
 
+todone() {
+  local reason="$1"
+  [ -z "$reason" ] || reason=": $reason"
+  go_to_column 0
+  printf " ✓ %s ✭ DONE%s" "$name" "$reason"
+  advance
+}
+
 summary() {
   printf "\n%d test%s" "$count" "$(plural "$count")"
 
@@ -145,16 +153,24 @@ while IFS= read -r line; do
     ;;
   "ok "* )
     skip_expr="ok $index # skip (\(([^)]*)\))?"
+    todo_expr="ok $index .*# todo([[:space:]]+(.+))?"
     if [[ "$line" =~ $skip_expr ]]; then
       let skipped+=1
       buffer skip "${BASH_REMATCH[2]}"
+    elif [[ "$line" =~ $todo_expr ]]; then
+      buffer todone "${BASH_REMATCH[2]}"
     else
       buffer pass
     fi
     ;;
   "not ok "* )
-    let failures+=1
-    buffer fail
+    todo_expr="ok $index .*# todo([[:space:]]+(.+))?"
+    if [[ "$line" =~ $todo_expr ]]; then
+      buffer pass
+    else
+      let failures+=1
+      buffer fail
+    fi
     ;;
   "# "* )
     buffer log "${line:2}"

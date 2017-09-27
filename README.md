@@ -235,6 +235,10 @@ on the wiki.
 
 ## Version history
 
+*0.5.0* (September, 2017)
+
+* Added todo directive as an alternative to skip to let tests run, but pass regardless of their status. 
+
 *0.4.0* (August 13, 2014)
 
 * Improved the display of failing test cases. Bats now shows the
