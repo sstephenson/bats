@@ -262,3 +262,29 @@ fixtures bats
   [ $status -eq 0 ]
   [ "${lines[1]}" = "ok 1 loop_func" ]
 }
+
+@test "empty passing todo" {
+  run bats -p "$FIXTURE_ROOT/todo_empty_passing.bats"
+  [ $status -eq 0 ]
+  [[ "${lines[0]}" =~ "✭ DONE" ]]
+  [ "${lines[2]}" = "1 test, 0 failures" ]
+}
+
+@test "empty failing todo" {
+  run bats -p "$FIXTURE_ROOT/todo_empty_failing.bats"
+  [ $status -eq 0 ]
+  [ "${lines[4]}" = "1 test, 0 failures" ]
+}
+
+@test "passing todo with reason" {
+  run bats -p "$FIXTURE_ROOT/todo_reason_passing.bats"
+  [ $status -eq 0 ]
+  [[ "${lines[0]}" =~ "✭ DONE" ]]
+  [ "${lines[2]}" = "1 test, 0 failures" ]
+}
+
+@test "failing todo with reason" {
+  run bats -p "$FIXTURE_ROOT/todo_reason_failing.bats"
+  [ $status -eq 0 ]
+  [ "${lines[4]}" = "1 test, 0 failures" ]
+}
