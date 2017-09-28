@@ -41,25 +41,25 @@ fixtures bats
 }
 
 @test "summary passing tests" {
-  run filter_control_sequences bats -p $FIXTURE_ROOT/passing.bats
+  run filter_control_sequences bats -p "$FIXTURE_ROOT/passing.bats"
   [ $status -eq 0 ]
   [ "${lines[1]}" = "1 test, 0 failures" ]
 }
 
 @test "summary passing and skipping tests" {
-  run filter_control_sequences bats -p $FIXTURE_ROOT/passing_and_skipping.bats
+  run filter_control_sequences bats -p "$FIXTURE_ROOT/passing_and_skipping.bats"
   [ $status -eq 0 ]
   [ "${lines[2]}" = "2 tests, 0 failures, 1 skipped" ]
 }
 
 @test "summary passing and failing tests" {
-  run filter_control_sequences bats -p $FIXTURE_ROOT/failing_and_passing.bats
+  run filter_control_sequences bats -p "$FIXTURE_ROOT/failing_and_passing.bats"
   [ $status -eq 0 ]
   [ "${lines[4]}" = "2 tests, 1 failure" ]
 }
 
 @test "summary passing, failing and skipping tests" {
-  run filter_control_sequences bats -p $FIXTURE_ROOT/passing_failing_and_skipping.bats
+  run filter_control_sequences bats -p "$FIXTURE_ROOT/passing_failing_and_skipping.bats"
   [ $status -eq 0 ]
   [ "${lines[5]}" = "3 tests, 1 failure, 1 skipped" ]
 }
