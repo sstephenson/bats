@@ -12,4 +12,4 @@ build: off
 test_script:
   - where bash
   - bash --version
-  - bash libexec/bats test
+  - bash -c 'time libexec/bats test'
