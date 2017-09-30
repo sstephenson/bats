@@ -1,5 +1,5 @@
 language: c
-script: bin/bats --tap test
+script: bash -c 'time bin/bats --tap test'
 notifications:
   email:
     on_success: never
