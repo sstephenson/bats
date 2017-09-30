@@ -1,0 +1,15 @@
+version: 'v0.4.0.{build}'
+
+build: off
+
+# This presumes that Git bash is installed at `C:\Program Files\Git` and the
+# bash we're using is `C:\Program Files\Git\bin\bash.exe`.
+#
+# If instead it finds the Windows Subsystem for Linux bash at
+# `C:\Windows\System32\bash.exe`, it will fail with an error like:
+#   /mnt/c/.../bats-core/test/test_helper.bash: line 1:
+#     syntax error near unexpected token `$'{\r''
+test_script:
+  - where bash
+  - bash --version
+  - bash -c 'time libexec/bats test'

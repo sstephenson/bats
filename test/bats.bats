@@ -67,6 +67,8 @@ fixtures bats
 @test "one failing test" {
   run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]
+  printf 'lines:\n' >&2
+  printf '%s\n' "${lines[@]}" >&2
   [ "${lines[0]}" = '1..1' ]
   [ "${lines[1]}" = 'not ok 1 a failing test' ]
   [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing.bats, line 4)" ]
@@ -86,6 +88,8 @@ fixtures bats
 @test "failing test with significant status" {
   STATUS=2 run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]
+  printf 'lines:\n' >&2
+  printf '%s\n' "${lines[@]}" >&2
   [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed with status 2" ]
 }
 
@@ -153,6 +157,8 @@ fixtures bats
   cd "$TMP"
   run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]
+  printf 'lines:\n' >&2
+  printf '%s\n' "${lines[@]}" >&2
   [ "${lines[2]}" = "# (in test file $FIXTURE_ROOT/failing.bats, line 4)" ]
 }
 
