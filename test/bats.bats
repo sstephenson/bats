@@ -57,8 +57,8 @@ fixtures bats
   [ $status -eq 0 ]
   [ "${lines[0]}" = "1..3" ]
   [ "${lines[1]}" = "ok 1 a passing test" ]
-  [ "${lines[2]}" = "ok 2 a skipping test # skip" ]
-  [ "${lines[3]}" = "ok 3 skip test with a reason # skip for a really good reason" ]
+  [ "${lines[2]}" = "ok 2 a skipped test with no reason # skip" ]
+  [ "${lines[3]}" = "ok 3 a skipped test with a reason # skip for a really good reason" ]
 }
 
 @test "summary passing and failing tests" {
