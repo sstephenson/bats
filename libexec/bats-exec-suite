@@ -17,7 +17,11 @@ trap "kill 0; exit 1" int
 
 count=0
 for filename in "$@"; do
-  let count+="$(bats-exec-test -c "$filename")"
+  while IFS= read -r line; do
+    if [[ "$line" =~ $BATS_TEST_PATTERN ]]; then
+      let count+=1
+    fi
+  done <"$filename"
 done
 
 if [ -n "$count_only_flag" ]; then

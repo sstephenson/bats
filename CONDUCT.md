@@ -67,6 +67,11 @@ members of the project's leadership.
 
 ## Project Maintainers
 
+### bats-core organization:
+* Bianca Tamayo <<hi@biancatamayo.me>>
+
+
+## Project Original Author(s)
 * Sam Stephenson <<sstephenson@gmail.com>>
 
 ## Attribution

@@ -41,25 +41,25 @@ fixtures bats
 }
 
 @test "summary passing tests" {
-  run filter_control_sequences bats -p $FIXTURE_ROOT/passing.bats
+  run filter_control_sequences bats -p "$FIXTURE_ROOT/passing.bats"
   [ $status -eq 0 ]
   [ "${lines[1]}" = "1 test, 0 failures" ]
 }
 
 @test "summary passing and skipping tests" {
-  run filter_control_sequences bats -p $FIXTURE_ROOT/passing_and_skipping.bats
+  run filter_control_sequences bats -p "$FIXTURE_ROOT/passing_and_skipping.bats"
   [ $status -eq 0 ]
   [ "${lines[2]}" = "2 tests, 0 failures, 1 skipped" ]
 }
 
 @test "summary passing and failing tests" {
-  run filter_control_sequences bats -p $FIXTURE_ROOT/failing_and_passing.bats
+  run filter_control_sequences bats -p "$FIXTURE_ROOT/failing_and_passing.bats"
   [ $status -eq 0 ]
   [ "${lines[4]}" = "2 tests, 1 failure" ]
 }
 
 @test "summary passing, failing and skipping tests" {
-  run filter_control_sequences bats -p $FIXTURE_ROOT/passing_failing_and_skipping.bats
+  run filter_control_sequences bats -p "$FIXTURE_ROOT/passing_failing_and_skipping.bats"
   [ $status -eq 0 ]
   [ "${lines[5]}" = "3 tests, 1 failure, 1 skipped" ]
 }
@@ -67,6 +67,8 @@ fixtures bats
 @test "one failing test" {
   run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]
+  printf 'lines:\n' >&2
+  printf '%s\n' "${lines[@]}" >&2
   [ "${lines[0]}" = '1..1' ]
   [ "${lines[1]}" = 'not ok 1 a failing test' ]
   [ "${lines[2]}" = "# (in test file $RELATIVE_FIXTURE_ROOT/failing.bats, line 4)" ]
@@ -86,6 +88,8 @@ fixtures bats
 @test "failing test with significant status" {
   STATUS=2 run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]
+  printf 'lines:\n' >&2
+  printf '%s\n' "${lines[@]}" >&2
   [ "${lines[3]}" = "#   \`eval \"( exit \${STATUS:-1} )\"' failed with status 2" ]
 }
 
@@ -153,6 +157,8 @@ fixtures bats
   cd "$TMP"
   run bats "$FIXTURE_ROOT/failing.bats"
   [ $status -eq 1 ]
+  printf 'lines:\n' >&2
+  printf '%s\n' "${lines[@]}" >&2
   [ "${lines[2]}" = "# (in test file $FIXTURE_ROOT/failing.bats, line 4)" ]
 }
 
@@ -261,4 +267,18 @@ fixtures bats
   run bats "$FIXTURE_ROOT/loop_keep_IFS.bats"
   [ $status -eq 0 ]
   [ "${lines[1]}" = "ok 1 loop_func" ]
+}
+
+@test "expand variables in test name" {
+  SUITE='test/suite' run bats "$FIXTURE_ROOT/expand_var_in_test_name.bats"
+  [ $status -eq 0 ]
+  [ "${lines[1]}" = "ok 1 test/suite: test with variable in name" ]
+}
+
+@test "handle quoted and unquoted test names" {
+  run bats "$FIXTURE_ROOT/quoted_and_unquoted_test_names.bats"
+  [ $status -eq 0 ]
+  [ "${lines[1]}" = "ok 1 single-quoted name" ]
+  [ "${lines[2]}" = "ok 2 double-quoted name" ]
+  [ "${lines[3]}" = "ok 3 unquoted name" ]
 }
