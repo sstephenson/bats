@@ -244,8 +244,6 @@ bats_exit_trap() {
   local skipped
   trap - err exit
 
-
-  skipped=""
   if [ -n "$BATS_TEST_SKIPPED" ]; then
     skipped=" # skip"
     if [ "1" != "$BATS_TEST_SKIPPED" ]; then
