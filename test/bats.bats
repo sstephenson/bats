@@ -49,7 +49,16 @@ fixtures bats
 @test "summary passing and skipping tests" {
   run filter_control_sequences bats -p "$FIXTURE_ROOT/passing_and_skipping.bats"
   [ $status -eq 0 ]
-  [ "${lines[2]}" = "2 tests, 0 failures, 1 skipped" ]
+  [ "${lines[3]}" = "3 tests, 0 failures, 2 skipped" ]
+}
+
+@test "tap passing and skipping tests" {
+  run filter_control_sequences bats --tap "$FIXTURE_ROOT/passing_and_skipping.bats"
+  [ $status -eq 0 ]
+  [ "${lines[0]}" = "1..3" ]
+  [ "${lines[1]}" = "ok 1 a passing test" ]
+  [ "${lines[2]}" = "ok 2 a skipped test with no reason # skip" ]
+  [ "${lines[3]}" = "ok 3 a skipped test with a reason # skip for a really good reason" ]
 }
 
 @test "summary passing and failing tests" {
@@ -62,6 +71,15 @@ fixtures bats
   run filter_control_sequences bats -p "$FIXTURE_ROOT/passing_failing_and_skipping.bats"
   [ $status -eq 0 ]
   [ "${lines[5]}" = "3 tests, 1 failure, 1 skipped" ]
+}
+
+@test "tap passing, failing and skipping tests" {
+  run filter_control_sequences bats --tap $FIXTURE_ROOT/passing_failing_and_skipping.bats
+  [ $status -eq 0 ]
+  [ "${lines[0]}" = "1..3" ]
+  [ "${lines[1]}" = "ok 1 a passing test" ]
+  [ "${lines[2]}" = "ok 2 a skipping test # skip" ]
+  [ "${lines[3]}" = "not ok 3 a failing test" ]
 }
 
 @test "one failing test" {
@@ -220,8 +238,8 @@ fixtures bats
 @test "skipped tests" {
   run bats "$FIXTURE_ROOT/skipped.bats"
   [ $status -eq 0 ]
-  [ "${lines[1]}" = "ok 1 # skip a skipped test" ]
-  [ "${lines[2]}" = "ok 2 # skip (a reason) a skipped test with a reason" ]
+  [ "${lines[1]}" = "ok 1 a skipped test # skip" ]
+  [ "${lines[2]}" = "ok 2 a skipped test with a reason # skip a reason" ]
 }
 
 @test "extended syntax" {

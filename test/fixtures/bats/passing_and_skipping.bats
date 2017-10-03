@@ -2,6 +2,10 @@
   true
 }
 
-@test "a skipping test" {
+@test "a skipped test with no reason" {
   skip
+}
+
+@test "a skipped test with a reason" {
+  skip "for a really good reason"
 }
