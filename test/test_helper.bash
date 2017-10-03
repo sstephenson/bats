@@ -11,6 +11,13 @@ filter_control_sequences() {
   "$@" | sed $'s,\x1b\\[[0-9;]*[a-zA-Z],,g'
 }
 
+if ! command -v tput >/dev/null; then
+  tput() {
+    printf '1000\n'
+  }
+  export -f tput
+fi
+
 teardown() {
   [ -d "$TMP" ] && rm -f "$TMP"/*
 }
