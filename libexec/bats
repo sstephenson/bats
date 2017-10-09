@@ -22,39 +22,62 @@ help() {
   echo "  -t, --tap      Show results in TAP format"
   echo "  -v, --version  Display the version number"
   echo
-  echo "  For more information, see https://github.com/sstephenson/bats"
+  echo "  For more information, see https://github.com/bats-core/bats-core"
   echo
 }
 
+BATS_READLINK=
+
 resolve_link() {
-  $(type -p greadlink readlink | head -1) "$1"
+  if [[ -z "$BATS_READLINK" ]]; then
+    if command -v 'greadlink' >/dev/null; then
+      BATS_READLINK='greadlink'
+    elif command -v 'readlink' >/dev/null; then
+      BATS_READLINK='readlink'
+    else
+      BATS_READLINK='true'
+    fi
+  fi
+  "$BATS_READLINK" "$1" || return 0
 }
 
 abs_dirname() {
-  local cwd="$(pwd)"
+  local cwd="$PWD"
   local path="$1"
 
   while [ -n "$path" ]; do
     cd "${path%/*}"
     local name="${path##*/}"
-    path="$(resolve_link "$name" || true)"
+    path="$(resolve_link "$name")"
   done
 
-  pwd
+  printf -v "$2" -- '%s' "$PWD"
   cd "$cwd"
 }
 
 expand_path() {
-  { cd "$(dirname "$1")" 2>/dev/null
-    local dirname="$PWD"
+  local path="${1%/}"
+  local dirname="${path%/*}"
+
+  if [[ "$dirname" == "$path" ]]; then
+    dirname="$PWD"
+  elif cd "$dirname" 2>/dev/null; then
+    dirname="$PWD"
     cd "$OLDPWD"
-    echo "$dirname/$(basename "$1")"
-  } || echo "$1"
+  else
+    printf '%s' "$path"
+    return
+  fi
+  printf -v "$2" '%s/%s' "$dirname" "${path##*/}"
 }
 
-BATS_LIBEXEC="$(abs_dirname "$0")"
-export BATS_PREFIX="$(abs_dirname "$BATS_LIBEXEC")"
-export BATS_CWD="$(abs_dirname .)"
+abs_dirname "$0" 'BATS_LIBEXEC'
+abs_dirname "$BATS_LIBEXEC" 'BATS_PREFIX'
+abs_dirname '.' 'BATS_CWD'
+
+export BATS_PREFIX
+export BATS_CWD
+export BATS_TEST_PATTERN='^ *@test +(.+) +\{ *(.*)$'
 export PATH="$BATS_LIBEXEC:$PATH"
 
 options=()
@@ -113,14 +136,16 @@ fi
 
 filenames=()
 for filename in "${arguments[@]}"; do
+  expand_path "$filename" 'filename'
+
   if [ -d "$filename" ]; then
     shopt -s nullglob
-    for suite_filename in "$(expand_path "$filename")"/*.bats; do
+    for suite_filename in "$filename"/*.bats; do
       filenames["${#filenames[@]}"]="$suite_filename"
     done
     shopt -u nullglob
   else
-    filenames["${#filenames[@]}"]="$(expand_path "$filename")"
+    filenames["${#filenames[@]}"]="$filename"
   fi
 done
 
@@ -130,13 +155,11 @@ else
   command="bats-exec-suite"
 fi
 
-if [ -n "$pretty" ]; then
+set -o pipefail execfail
+if [ -z "$pretty" ]; then
+  exec "$command" $count_flag "${filenames[@]}"
+else
   extended_syntax_flag="-x"
   formatter="bats-format-tap-stream"
-else
-  extended_syntax_flag=""
-  formatter="cat"
+  exec "$command" $count_flag $extended_syntax_flag "${filenames[@]}" | "$formatter"
 fi
-
-set -o pipefail execfail
-exec "$command" $count_flag $extended_syntax_flag "${filenames[@]}" | "$formatter"
