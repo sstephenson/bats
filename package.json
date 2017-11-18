@@ -1,5 +1,8 @@
 {
   "name": "bats",
+  "bin": {
+    "bats": "bin/bats"
+  },
   "version": "v0.4.0",
   "description": "Bash Automated Testing System",
   "install": "./install.sh ${PREFIX:-/usr/local}",
