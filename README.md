@@ -202,6 +202,13 @@ in the test file.
 * `$BATS_TMPDIR` is the location to a directory that may be used to
 store temporary files.
 
+## Installing Bats
+
+Bats is available as an NPM package. Install NPM (bundled with Node.js), then install Bats with
+
+```bash
+npm install -g bats
+```
 
 ## Installing Bats from source
 
