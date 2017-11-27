@@ -6,7 +6,9 @@ version() {
 }
 
 usage() {
+  local errmsg="$1"
   version
+  [ -n "$errmsg" ] && echo "Error: $errmsg"
   echo "Usage: bats [-c] [-p | -t] <test> [<test> ...]"
 }
 
@@ -100,14 +102,14 @@ for option in "${options[@]}"; do
     pretty="1"
     ;;
   * )
-    usage >&2
+    usage "Bad command line option '-$option'" >&2
     exit 1
     ;;
   esac
 done
 
 if [ "${#arguments[@]}" -eq 0 ]; then
-  usage >&2
+  usage "Must specify at least one <test>" >&2
   exit 1
 fi
 

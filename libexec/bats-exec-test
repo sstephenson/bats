@@ -17,7 +17,7 @@ fi
 
 BATS_TEST_FILENAME="$1"
 if [ -z "$BATS_TEST_FILENAME" ]; then
-  echo "usage: bats-exec <filename>" >&2
+  echo "usage: bats-exec-test <filename>" >&2
   exit 1
 elif [ ! -f "$BATS_TEST_FILENAME" ]; then
   echo "bats: $BATS_TEST_FILENAME does not exist" >&2
