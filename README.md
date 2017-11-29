@@ -1,5 +1,17 @@
 # Bats: Bash Automated Testing System
 
+--------------------------------------------------------------------------------
+
+## :warning: Not Maintained
+
+This git repository is no longer maintained. The [Call for Maintainers](https://github.com/sstephenson/bats/issues/150)
+ resulted in an [Announcement](https://github.com/sstephenson/bats/issues/236)
+ that there was created a mirrored fork of Bats: https://github.com/bats-core/bats-core/ .
+
+  While this repository is not going to be deleted, pull requests and issues may be not handled anymore.
+
+--------------------------------------------------------------------------------
+
 Bats is a [TAP](http://testanything.org)-compliant testing framework
 for Bash. It provides a simple way to verify that the UNIX programs
 you write behave as expected.
