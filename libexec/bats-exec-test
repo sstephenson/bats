@@ -241,7 +241,7 @@ bats_teardown_trap() {
 }
 
 bats_exit_trap() {
-  local status
+  local status    # Exit code: 0=OK, 1=error, 2=skipped
   local skipped
   trap - err exit
 
@@ -262,6 +262,7 @@ bats_exit_trap() {
   else
     echo "ok ${BATS_TEST_NUMBER}${skipped} ${BATS_TEST_DESCRIPTION}" >&3
     status=0
+    [ -n "$BATS_TEST_SKIPPED" ] && status=2
   fi
 
   rm -f "$BATS_OUT"
@@ -290,7 +291,7 @@ bats_test_succeeds() {
       if [ -z $status ] ; then
         echo "Warning: $name: Cannot check status as test didn't run yet" >&2
       else
-        let ret+=$status
+        [ $status = 0 ] && ret=1
       fi
     fi
   done
@@ -299,15 +300,19 @@ bats_test_succeeds() {
 }
 
 bats_perform_tests() {
+  local ret status test_number test_name
+
+  ret=0
   echo "1..$#"
   test_number=1
   status=0
   for test_name in "$@"; do
-    "$0" $BATS_EXTENDED_SYNTAX "$BATS_TEST_FILENAME" "$test_name" "$test_number" || status=1
+    "$0" $BATS_EXTENDED_SYNTAX "$BATS_TEST_FILENAME" "$test_name" "$test_number" || status=$?
+    [ $status = 1 ] && ret=1 # Skip -> OK
     BATS_TEST_RESULTS[$test_number]=$status
     let test_number+=1
   done
-  exit "$status"
+  exit "$ret"
 }
 
 bats_perform_test() {

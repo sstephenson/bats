@@ -195,14 +195,14 @@ same name to different tests,
 ### Test dependencies
 
 Some tests may have one or more tests as pre-requisites, meaning that tests
-are irrelevant if the pre-requisites fail. A common case is test A checking that a
-given service is running, while test B and C use this service to retrieve more
-information. If service is not running, we know for sure that test B and C will
-fail. In order to avoid a bunch of errors when such dependency exists, you can
-instruct bash to skip test B and C if A fails.
+are irrelevant if the pre-requisites fail. A common case is test A checking that
+service 'foo' is running, while test B and C use this service to retrieve more
+information. If service 'foo' is not running, we know for sure that tests B and C will
+fail. In such cases, readability is much better if we display test A as failed
+and tests B and C as skipped.
 
 In order to implement such a dependency, you will use the 'bats_test_succeeds()'
-function. This function returns true (0) if all its argument every test names
+function. This function returns true (0) if all the test names given as arguments
 succeeded, and false if any of them failed.
 
 Example:
@@ -227,12 +227,14 @@ Example:
 
 Notes:
 
-* You cannot define cross-file dependencies. The test(s) you refer too must
+* You cannot define cross-file dependencies. The test(s) you refer to must
 be located in the same test file.
 * As tests are executed in the order they appear in the file, you can only depend
 on tests that appear in the test file BEFORE/ABOVE the current test. If this is
 not the case, a warning message is issued on stderr and the parent test is
 supposed to be successful (depending test will run).
+* Dependencies are transitive/inherited. If a test depends on a test skipped for any reason,
+it will be skipped too, along with its descendants.
 * You need to set explicit names for the tests you want to create dependencies on.
 
 ### `setup` and `teardown`: Pre- and post-test hooks
