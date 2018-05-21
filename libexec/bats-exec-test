@@ -288,7 +288,7 @@ bats_test_succeeds() {
     else
       status=${BATS_TEST_RESULTS[$index]}
       if [ -z $status ] ; then
-        echo "Warning: $name: Cannot check status as test didn't run yet"
+        echo "Warning: $name: Cannot check status as test didn't run yet" >&2
       else
         let ret+=$status
       fi
