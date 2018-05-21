@@ -28,6 +28,7 @@ fi
 
 BATS_TEST_DIRNAME="$(dirname "$BATS_TEST_FILENAME")"
 BATS_TEST_NAMES=()
+BATS_TEST_RESULTS=()
 
 load() {
   local name="$1"
@@ -267,12 +268,43 @@ bats_exit_trap() {
   exit "$status"
 }
 
+bats_test_succeeds() {
+  local name status index i ret
+
+  ret=0
+
+  for name in $@
+    do
+    index=''
+    i=0
+    while [ $i -lt ${#BATS_TEST_NAMES[@]} ; do
+      if [ "${BATS_TEST_NAMES[$i]}" = "test_$name" ] ; then
+        index=$i
+        break
+      fi
+    done
+    if [ -z $index ] ; then
+      echo "Error: $name: this test name does not exist" >&2
+    else
+      status=${BATS_TEST_RESULTS[$index]}
+      if [ -z $status ] ; then
+        echo "Warning: $name: Cannot check status as test didn't run yet"
+      else
+        let ret+=$status
+      fi
+    fi
+  done
+
+  return $ret
+}
+
 bats_perform_tests() {
   echo "1..$#"
   test_number=1
   status=0
   for test_name in "$@"; do
     "$0" $BATS_EXTENDED_SYNTAX "$BATS_TEST_FILENAME" "$test_name" "$test_number" || status=1
+    BATS_TEST_RESULTS[$test_number]=$status
     let test_number+=1
   done
   exit "$status"
