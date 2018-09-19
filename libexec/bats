@@ -33,18 +33,17 @@ resolve_link() {
 abs_dirname() {
   local path="$1"
   local save_cwd="$PWD"
-  local dir name
+  local cd_path name
 
-  while [[ -n "$path" ]]; do
-    dir="${path%/*}"
-    if [[ "$dir" != "$path" ]]; then
-      cd "$dir"
-      name="${path##*/}"
-    else
-      name="$path"
+  while [ -n "$path" ]; do
+    cd_path="${path%/*}"
+    if [[ "$cd_path" != "$path" ]]; then
+      cd "$cd_path"
     fi
+    name="${path##*/}"
     path="$(resolve_link "$name" || true)"
   done
+
   echo "$PWD"
   cd "$save_cwd"
 }
