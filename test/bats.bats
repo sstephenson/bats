@@ -262,3 +262,13 @@ fixtures bats
   [ $status -eq 0 ]
   [ "${lines[1]}" = "ok 1 loop_func" ]
 }
+
+@test "abs_dirname with symlink to same current directory" {
+  cd "$TMP"
+  ln -s $(which bats) bats
+  ln -s bats bats-linked
+  run ./bats-linked "$FIXTURE_ROOT/loop_keep_IFS.bats"
+  [ $status -eq 0 ]
+  expected_lines=("1..1" "ok 1 loop_func")
+  [ "${lines}" = "${expected_lines}" ]
+}
