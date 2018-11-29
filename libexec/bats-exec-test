@@ -48,17 +48,25 @@ load() {
 }
 
 run() {
-  local e E T oldIFS
+  local e E T oldIFS 
   [[ ! "$-" =~ e ]] || e=1
   [[ ! "$-" =~ E ]] || E=1
   [[ ! "$-" =~ T ]] || T=1
   set +e
   set +E
   set +T
-  output="$("$@" 2>&1)"
-  status="$?"
+
+  eval "$({ t_sdterr=$({ t_stdout=$("$@"); t_ret=$?; } 2>&1; declare -p t_stdout  >&2; declare -pi t_ret >&2); declare -p t_sdterr; } 2>&1)"
+  
+  status=$t_ret
+  output="${t_stdout}${t_sdterr}"
+  stdout=$t_stdout
+  stderr=$t_sdterr
+
   oldIFS=$IFS
   IFS=$'\n' lines=($output)
+  IFS=$'\n' stdlines=($t_stdout)
+  IFS=$'\n' errlines=($t_sdterr)
   [ -z "$e" ] || set -e
   [ -z "$E" ] || set -E
   [ -z "$T" ] || set -T
