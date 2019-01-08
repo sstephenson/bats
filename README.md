@@ -168,6 +168,75 @@ Or you can skip conditionally:
 }
 ```
 
+### Explicit test names
+
+In most cases, tests don't need to be assigned an explicit name, but some features,
+like dependencies described below, reference tests by their names. In such cases,
+the test(s) you reference must be assigned an explicit name.
+
+An explicit name is defined using an extension to the base
+syntax: replace '@test' by '@test[<explicit_name>]'.
+
+Example:
+
+```bash
+@test[mytest1] "Test description..." {
+...
+```
+
+Notes:
+
+* Every test may define an explicit name, even if it not referenced anywhere,
+* In a given test file, each explicit name must be unique. You cannot assign the
+same name to different tests,
+* Explicit names must be composed from alphanumeric characters + underscore
+('_') only.
+
+### Test dependencies
+
+Some tests may have one or more tests as pre-requisites, meaning that tests
+are irrelevant if the pre-requisites fail. A common case is test A checking that
+service 'foo' is running, while test B and C use this service to retrieve more
+information. If service 'foo' is not running, we know for sure that tests B and C will
+fail. In such cases, readability is much better if we display test A as failed
+and tests B and C as skipped.
+
+In order to implement such a dependency, you will use the 'bats_test_succeeds()'
+function. This function returns true (0) if all the test names given as arguments
+succeeded, and false if any of them failed.
+
+Example:
+
+```bash
+@test[testA] "A pre-requisite check" {
+  service foo status
+}
+
+@test[testAbis] "Oh, I need this too!" {
+  service bar status
+}
+
+# I don't want to run this if pre-requisites are unavailable
+
+@test "Let's check this more in depth..." {
+  bats_test_succeeds testA testAbis || skip "Pre-requisites are unavailable"
+  # In-depth check starts here
+  ...
+}
+```
+
+Notes:
+
+* You cannot define cross-file dependencies. The test(s) you refer to must
+be located in the same test file.
+* As tests are executed in the order they appear in the file, you can only depend
+on tests that appear in the test file BEFORE/ABOVE the current test. If this is
+not the case, a warning message is issued on stderr and the parent test is
+supposed to be successful (depending test will run).
+* Dependencies are transitive/inherited. If a test depends on a test skipped for any reason,
+it will be skipped too, along with its descendants.
+* You need to set explicit names for the tests you want to create dependencies on.
+
 ### `setup` and `teardown`: Pre- and post-test hooks
 
 You can define special `setup` and `teardown` functions, which run
@@ -199,9 +268,11 @@ test case.
 case.
 * `$BATS_TEST_NUMBER` is the (1-based) index of the current test case
 in the test file.
+* `BATS_TEST_RESULTS` is an array of results for tests that ran so far.
+Only elements from 1 to $BATS_TEST_NUMBER (excluded) are set. Values are
+0 if test succeeded, and different from 0 if test failed.
 * `$BATS_TMPDIR` is the location to a directory that may be used to
 store temporary files.
-
 
 ## Installing Bats from source
 
