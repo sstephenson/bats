@@ -37,7 +37,7 @@ while IFS= read -r line; do
   let index+=1
   if [[ "$line" =~ $pattern ]]; then
     quoted_name="${BASH_REMATCH[3]}"
-    if [ -n "${BASH_REMATCH[2]}" ; then
+    if [ -n "${BASH_REMATCH[2]}" ] ; then
       encoded_name="test_${BASH_REMATCH[2]}"
     else
       name="$(eval echo "$quoted_name")"
