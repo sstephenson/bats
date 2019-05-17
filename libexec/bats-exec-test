@@ -15,6 +15,12 @@ if [ "$1" = "-x" ]; then
   shift
 fi
 
+BATS_NO_SKIP=""
+if [ "$1" = "-n" ]; then
+  BATS_NO_SKIP="$1"
+  shift
+fi
+
 BATS_TEST_FILENAME="$1"
 if [ -z "$BATS_TEST_FILENAME" ]; then
   echo "usage: bats-exec <filename>" >&2
@@ -74,6 +80,8 @@ teardown() {
 }
 
 skip() {
+  [ -n "$BATS_NO_SKIP" ] && return
+
   BATS_TEST_SKIPPED=${1:-1}
   BATS_TEST_COMPLETED=1
   exit 0

@@ -13,6 +13,12 @@ if [ "$1" = "-x" ]; then
   shift
 fi
 
+no_skip_flag=""
+if [ "$1" = "-n" ]; then
+  no_skip_flag="-n"
+  shift
+fi
+
 trap "kill 0; exit 1" int
 
 count=0
@@ -48,7 +54,7 @@ for filename in "$@"; do
         ;;
       esac
     done
-  } < <( bats-exec-test $extended_syntax_flag "$filename" )
+  } < <( bats-exec-test $extended_syntax_flag $no_skip_flag "$filename" )
   offset=$(($offset + $index))
 done
 

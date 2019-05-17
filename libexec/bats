@@ -19,6 +19,7 @@ help() {
   echo "  -c, --count    Count the number of test cases without running any tests"
   echo "  -h, --help     Display this help message"
   echo "  -p, --pretty   Show results in pretty format (default for terminals)"
+  echo "  -n, --no-skip  Run all tests, including those marked with skip"
   echo "  -t, --tap      Show results in TAP format"
   echo "  -v, --version  Display the version number"
   echo
@@ -76,7 +77,7 @@ for arg in "$@"; do
   fi
 done
 
-unset count_flag pretty
+unset count_flag pretty noskip
 [ -t 0 ] && [ -t 1 ] && pretty="1"
 [ -n "$CI" ] && pretty=""
 
@@ -98,6 +99,9 @@ for option in "${options[@]}"; do
     ;;
   "p" | "pretty" )
     pretty="1"
+    ;;
+  "n" | "no-skip" )
+    noskip="1"
     ;;
   * )
     usage >&2
@@ -138,5 +142,11 @@ else
   formatter="cat"
 fi
 
+if [ -n "$noskip" ]; then
+    no_skip_flag="-n"
+else
+    no_skip_flag=""
+fi
+
 set -o pipefail execfail
-exec "$command" $count_flag $extended_syntax_flag "${filenames[@]}" | "$formatter"
+exec "$command" $count_flag $extended_syntax_flag $no_skip_flag "${filenames[@]}" | "$formatter"

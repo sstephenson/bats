@@ -52,6 +52,8 @@ OPTIONS
     Display help message
   * `-p`, `--pretty`:
     Show results in pretty format (default for terminals)
+  * `-n`, `--no-skip`:
+    Run all tests, including ones marked with `skip`.
   * `-t`, `--tap`:
     Show results in TAP format
   * `-v`, `--version`:
