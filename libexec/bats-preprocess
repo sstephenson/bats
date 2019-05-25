@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -e
 
+BATS_NO_SKIP=""
+if [ "$1" = "-n" ]; then
+  BATS_NO_SKIP="$1"
+  shift
+fi
+
 encode_name() {
   local name="$1"
   local result="test_"
@@ -28,6 +34,10 @@ encode_name() {
 
   echo "$result"
 }
+
+if [ -n "$BATS_NO_SKIP" ]; then
+  echo -n "skip() { :; }; "
+fi
 
 tests=()
 index=0

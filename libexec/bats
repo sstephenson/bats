@@ -143,9 +143,9 @@ else
 fi
 
 if [ -n "$noskip" ]; then
-    no_skip_flag="-n"
+  no_skip_flag="-n"
 else
-    no_skip_flag=""
+  no_skip_flag=""
 fi
 
 set -o pipefail execfail

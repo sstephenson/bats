@@ -80,8 +80,6 @@ teardown() {
 }
 
 skip() {
-  [ -n "$BATS_NO_SKIP" ] && return
-
   BATS_TEST_SKIPPED=${1:-1}
   BATS_TEST_COMPLETED=1
   exit 0
@@ -321,7 +319,7 @@ BATS_OUT="${BATS_TMPNAME}.out"
 
 bats_preprocess_source() {
   BATS_TEST_SOURCE="${BATS_TMPNAME}.src"
-  { tr -d '\r' < "$BATS_TEST_FILENAME"; echo; } | bats-preprocess > "$BATS_TEST_SOURCE"
+  { tr -d '\r' < "$BATS_TEST_FILENAME"; echo; } | bats-preprocess "$BATS_NO_SKIP" > "$BATS_TEST_SOURCE"
   trap "bats_cleanup_preprocessed_source" err exit
   trap "bats_cleanup_preprocessed_source; exit 1" int
 }
