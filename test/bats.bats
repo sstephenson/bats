@@ -262,3 +262,8 @@ fixtures bats
   [ $status -eq 0 ]
   [ "${lines[1]}" = "ok 1 loop_func" ]
 }
+
+@test "testing stdout and stderr are separated" {
+  run bats "$FIXTURE_ROOT/stdout_stderr_separate.bats"
+  [ $status -eq 0 ]
+}

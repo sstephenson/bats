@@ -39,7 +39,7 @@ begin() {
 
 pass() {
   go_to_column 0
-  printf " ✓ %s" "$name"
+  printf " $(set_color 2)✓$(clear_color) %s" "$name"
   advance
 }
 
