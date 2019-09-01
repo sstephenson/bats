@@ -58,7 +58,7 @@ run() {
   output="$("$@" 2>&1)"
   status="$?"
   oldIFS=$IFS
-  IFS=$'\n' lines=($output)
+  readarray -t lines <<< "$output"
   [ -z "$e" ] || set -e
   [ -z "$E" ] || set -E
   [ -z "$T" ] || set -T
