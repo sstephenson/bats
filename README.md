@@ -1,3 +1,11 @@
+# DEPRECATED Use Bats-Core instead
+
+Bats development continues as [bats-core](https://github.com/bats-core/bats-core) at <https://github.com/bats-core/bats-core>.
+
+This repository is here only for historical purposes.
+
+---
+
 # Bats: Bash Automated Testing System
 
 Bats is a [TAP](http://testanything.org)-compliant testing framework
